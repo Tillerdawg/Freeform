@@ -54,7 +54,7 @@
         "leaderId": "e", "followerIds": ["d", "c", "b", "a"],
         "offsetUnits": {"e": 0, "d": 7200, "c": 14400, "b": 21600, "a": 28800},
         "distanceUnits": 28800,
-        "path": [{"x": 144000, "y": 51200}, {"x": 86400, "y": 51200}],
+        "path": [{"x": 144000, "y": 51200}, {"x": 57600, "y": 51200}],
         "expectedEndPositions": {
           "a": {"x": 86400, "y": 51200}, "b": {"x": 93600, "y": 51200},
           "c": {"x": 100800, "y": 51200}, "d": {"x": 108000, "y": 51200},
@@ -64,11 +64,44 @@
       "notes": "Every performer moves ten yards in sixteen counts; E ends on A's original dot."
     }
   ],
+  "symbols": [
+    {
+      "id": "star-glyph",
+      "name": "Star Marker",
+      "glyph": "M0 -10 L3 -3 L10 0 L3 3 L0 10 L-3 3 L-10 0 L-3 -3 Z"
+    }
+  ],
   "layers": [
-    {"id": "director-notes", "name": "Director Notes", "visible": true, "print": true}
+    {"id": "director-notes", "name": "Director Notes", "visible": true, "print": true, "locked": false},
+    {"id": "choreo-sketch", "name": "Choreo Sketch", "visible": true, "print": false, "locked": true}
   ],
   "annotations": [
-    {"id": "note-1", "kind": "label", "layerId": "director-notes", "visibility": "print", "text": "16-count FTL", "anchor": {"x": 151200, "y": 64000}},
-    {"id": "arrow-1", "kind": "arrow", "layerId": "director-notes", "visibility": "editor", "text": "Leader path"}
+    {
+      "id": "note-1", "kind": "label", "layerId": "director-notes",
+      "visibility": {"editor": true, "print": true, "performerPacket": false},
+      "text": "16-count FTL", "anchor": {"x": 151200, "y": 64000}
+    },
+    {
+      "id": "arrow-1", "kind": "arrow", "layerId": "director-notes",
+      "visibility": {"editor": true, "print": false, "performerPacket": false},
+      "points": [{"x": 144000, "y": 51200}, {"x": 57600, "y": 51200}]
+    },
+    {
+      "id": "freehand-1", "kind": "freehand", "layerId": "choreo-sketch",
+      "visibility": {"editor": true, "print": false, "performerPacket": false},
+      "strokes": [[{"x": 100000, "y": 60000}, {"x": 105000, "y": 62000}, {"x": 110000, "y": 60000}]]
+    },
+    {
+      "id": "symbol-1", "kind": "symbol", "layerId": "director-notes",
+      "visibility": {"editor": true, "print": true, "performerPacket": false},
+      "symbolId": "star-glyph", "anchor": {"x": 150000, "y": 70000},
+      "rotationDegrees": 45, "scale": 1.5
+    },
+    {
+      "id": "note-e", "kind": "performerNote", "layerId": "choreo-sketch",
+      "visibility": {"editor": true, "print": false, "performerPacket": true},
+      "performerId": "e", "anchor": {"x": 144000, "y": 51200},
+      "text": "Leader: hold energy through count 16."
+    }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "name": "freeform-docs-validation",
+  "private": true,
+  "description": "Dependency-free-in-Python documentation-test tooling for docs/validate_fixture.py. Not application code; provides a genuine Draft 2020-12 JSON Schema validator (Ajv) invoked as a subprocess so the schema/fixture contract test never fakes validation.",
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  }
+}
