@@ -372,6 +372,7 @@ NEGATIVE_CASES = [
     ("duplicate-transition-id.freeform", "semantic", "duplicate transition IDs"),
     ("insufficient-ftl-path.freeform", "semantic", "INSUFFICIENT_FTL_PATH"),
     ("ftl-end-mismatch.freeform", "semantic", "FTL_END_MISMATCH"),
+    ("ftl-offset-order.freeform", "semantic", "FTL_OFFSET_ORDER"),
 ]
 
 
