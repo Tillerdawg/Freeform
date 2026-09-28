@@ -65,13 +65,17 @@ Note on the 68′4″ / 23′4″ / 68′4″ top dimension: this is the diagram
 the end-line width, decomposed as [distance from sideline to near goal post upright] + [goal post
 inside width] + [distance from far goal post upright to opposite sideline]. The 23′4″ segment is the
 **goal post width** (uprights, inside-to-inside), matching Rule references elsewhere; it is not a
-separate field-length dimension. Total end-line width (68′4″×2 + 23′4″) = 160′4″... this does not
-reconcile exactly to the stated 160′ sideline width, which is expected: goal posts sit centered on
-the end line but their base/upright placement is a superimposed annotation on the same drawing axis,
-not a strict subdivision of the 160′ playing width. Treat the goal-post-width figure (23′4″) as
-independent of the sideline-width figure (160′); do not sum them for field geometry. This is exactly
-the kind of overlapping-annotation trap a technical spec must avoid — flagging explicitly per
-acceptance criterion 2.
+separate field-length dimension. Total end-line width (68′4″×2 + 23′4″) = 160′0″ = 160′ exactly
+(corrected 2026-09-28: the original draft of this note miscomputed this sum as 160′4″; it is 160′0″).
+This *does* reconcile exactly to the stated 160′ sideline width — expected once corrected, because
+goal posts are centered on the end line, so each 68′4″ figure is simply (160′ − 23′4″) / 2, the
+distance from a sideline to the nearer upright. That reconciliation does **not** mean goal posts
+subdivide the field the same way the hash marks do: the hash marks split the 160′ width into three
+equal 53′4″ thirds (§3 above), while the goal-post decomposition splits it into two unequal 68′4″
+outer segments plus one 23′4″ middle segment. Treat the two schemes as answering different questions
+(hash placement vs. goal-post placement) even though both sum to 160′; do not conflate a hash-mark
+third with a goal-post-derived segment. This is exactly the kind of overlapping-annotation trap a
+technical spec must avoid — flagging explicitly per acceptance criterion 2.
 
 Hash marks (inbounds lines)
 - Distance from each sideline to the near edge of the hash mark: **53 ft 4 in (53′4″)**.
@@ -208,7 +212,8 @@ Length axis (goal line to goal line, the 100-yard/300-ft playing field):
 
 Width axis (sideline to sideline, 53⅓ yd / 160 ft):
 - Total width = 160 ft = 1920 in = 85.33 steps (85⅓ steps exactly).
-- Sideline → front hash = 53′4″ = 640 in = 28.44 steps (28⅘ steps exactly, since 640/22.5 = 28.4444…).
+- Sideline → front hash = 53′4″ = 640 in = 28.44 steps (28 4/9 steps exactly, since 640/22.5 = 28.4444…;
+  corrected 2026-09-28 — the original draft of this note misstated the exact fraction as 28⅘).
 - Front hash → back hash = 53′4″ = 640 in = 28.44 steps (identical to above — the field's width is
   divided into three exactly equal thirds by the NFHS hash marks, confirmed arithmetically:
   3 × 53′4″ = 160′0″ exactly).

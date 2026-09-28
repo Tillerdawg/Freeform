@@ -16,12 +16,15 @@ MVP MUST provide:
 - Float (the default): straight-line, constant-speed interpolation. Curves, arrival timing, facing, step style, and body orientation are note text, not animated semantics.
 - FTL: shared ordered path with continuous equal-distance/equal-step movement for every selected member.
 - Timeline playback/scrubbing at every integer count; arbitrary contiguous inclusive set ranges; no music timing.
-- Advisory step-size status, collision warnings, pair-distance-in-steps utility, and documented override state.
+- Advisory step-size status, collision warnings, and documented override state.
+- Quick line and circular-arc arrangement tools (see §4.3) that redistribute a selected group of performers' dots within one set at equal spacing; curvilinear/free arrangement is satisfied by direct manual dot placement, already MUST above.
 - Freehand, structured labels, arrows, reusable symbols, layers, performer-specific notes, and print-only annotations.
 - US-Letter director-perspective full-field PDFs and individual performer coordinate/count packets.
 - Undo/redo, keyboard access, accessibility, local autosave/history/backup/recovery, save/open `.freeform`, and static offline-capable operation after loading.
 
 MVP SHOULD provide a setup wizard collecting performer count, labels/rank-code prefixes, and show/piece count length. It must be skippable and must not discard a partially authored show.
+
+MVP SHOULD provide a pair-distance-in-steps utility for two selected dots, displaying raw decimal steps (minimum 3 decimals), raw yards, and quarter-step display; it never alters dot positions.
 
 Deferred, not hidden “partial support”: native offline iOS 18+/Android 11+ performer apps; custom/basketball surfaces; music synchronization/MP3/MIDI; accounts/collaboration/cloud sync; automatic PDF note placement; NCAA/NFL presets; Pyware/UDB import/export; and proprietary file-format reverse engineering. No product-enforced performer/set/count cap exists; the performance target defines only the supported baseline.
 
@@ -61,7 +64,7 @@ A dot is valid iff `0 <= x <= 288000` and `0 <= y <= 153600`. All math uses inte
 
 ### 3.2 Deriving a user-facing coordinate
 
-For a canonical `x,y`, derive the first component using five-yard lines `L={0,5,...,100}` in FU. For each line, its side-relative label is `Side 1 n` for `x <= 50 yd` and `Side 2 (100-n)` for `x >= 50 yd`; the 50 is simply `50`. Select the nearest line. If `x` is exactly halfway between adjacent five-yard lines, output `Splitting <lower-side label> & <higher-side label>` and no inside/outside offset. Otherwise convert `abs(x-line)/1800` to steps. Label it `Inside` if movement from that line is toward the 50, `Outside` if away; output the step value rounded to a quarter step, half away from zero. A 50-yard-line dot uses `On 50` plus its front-to-back component.
+For a canonical `x,y`, derive the first component using five-yard lines `L={0,5,...,100}` in FU. For each line, its side-relative label is `Side 1 n` for `x <= 50 yd` and `Side 2 (100-n)` for `x >= 50 yd`; the 50 is simply `50`. Select the nearest line. If `x` is exactly halfway between adjacent five-yard lines, output `Splitting <lower-side label> & <higher-side label>` and no inside/outside offset. If `x` exactly equals a five-yard line's FU coordinate (`d=0`), output `On <label(line)>` with no step suffix and no Inside/Outside direction -- this applies to every line, not only the 50 (`On 50` is simply this rule's instance at `x=144000`), and removes the otherwise-undefined Inside/Outside choice at zero offset. The dot still receives its normal front-to-back (vertical) component regardless of which horizontal case applies. Otherwise convert `abs(x-line)/1800` to steps. Label it `Inside` if movement from that line is toward the 50, `Outside` if away; output the step value rounded to a quarter step, half away from zero.
 
 For the second component choose the nearest landmark among `front sideline=0`, `front hash=51200`, `back hash=102400`, and `back sideline=153600`. If equidistant, choose the smaller y (frontward) landmark. Convert absolute difference to steps and format with quarter-step rounding. Use `In Front Of` if the dot y is smaller than the landmark and `Behind` if larger. Exact landmark is `On <landmark>`.
 
@@ -79,8 +82,10 @@ coordinate(dot):
   if two adjacent lines tie: horizontal = "Splitting " + labels(neighbors)
   else:
     line = nearestX
-    d = roundQuarter(abs(dot.x-line)/FU_PER_STEP)
-    horizontal = side(line) + ", " + d + (toward50(dot.x,line) ? " Steps Inside " : " Steps Outside ") + label(line)
+    if dot.x == line: horizontal = "On " + label(line)
+    else:
+      d = roundQuarter(abs(dot.x-line)/FU_PER_STEP)
+      horizontal = side(line) + ", " + d + (toward50(dot.x,line) ? " Steps Inside " : " Steps Outside ") + label(line)
   ref = landmark minimizing (abs(dot.y-landmark.y), landmark.y) # front tie-break
   d = roundQuarter(abs(dot.y-ref.y)/FU_PER_STEP)
   vertical = d == 0 ? "On "+ref.name : d+" Steps "+(dot.y < ref.y ? "In Front Of " : "Behind ")+ref.name
@@ -98,12 +103,17 @@ Float for performer `p` is:
 ```
 Pp(t) = A_p + t * (B_p - A_p), 0 <= t <= 1
 D_p_FU = hypot(Bx-Ax, By-Ay)
-stepSize_p = (D_p_FU / 2880 yards) * 8 / counts    # steps per five yards
+distanceYards_p = D_p_FU / 2880
+stepSize_p = counts * 5 / distanceYards_p    # required steps per five yards of travel; undefined at distanceYards_p=0, see stationary rule below
 ```
 
-Classify using the unrounded `stepSize_p`: zero => `No movement` green; >= 6.1 green; 4.1 through 6.0 yellow; <= 4.0 red. This is advisory only. Example: a 10-yard, 16-count move has `10*8/16 = 5.0-to-5`, yellow. A 10-yard, 12-count move is `6.666…-to-5`, green under J's specified bands even though it is physically demanding; color conveys the agreed convention rather than a safety guarantee.
+Stationary performers are classified separately from the formula above: if `D_p_FU == 0` (`A_p == B_p`), the performer is `No movement` green regardless of `counts`, and `stepSize_p` is not computed (the division above is undefined at zero distance). Only when `D_p_FU > 0` is the unrounded `stepSize_p` formula evaluated and classified.
 
-Pair-distance utility for selected dots `A,B`: `distanceFU=hypot(B.x-A.x,B.y-A.y)` and `distanceSteps=distanceFU/1800`. It displays raw decimal steps (minimum 3 decimals), raw yards, and quarter-step display; it does not alter dots.
+Classify a moving performer's unrounded `stepSize_p` into exactly one band: green if `stepSize_p >= 6.1`; red if `stepSize_p <= 4.0`; yellow otherwise (this includes the full open interval `(4.0, 6.1)`, which subsumes and closes the two gaps -- `(4.0, 4.1)` and `(6.0, 6.1)` -- left open by an informal "4.1 through 6.0" description of the yellow band; the two fixed numeric cutoffs J set, `6.1` for green and `4.0` for red, are unchanged and exactly preserved. See `decisions/2026-09-28-mvp-specification-decisions.md` for the recorded Wheeljack decision closing this gap). This is advisory only and never blocks authoring.
+
+Worked examples using the corrected formula: a 10-yard, 16-count move has `stepSize = 16*5/10 = 8.0`-to-5, green (`>= 6.1`). A 10-yard, 12-count move has `stepSize = 12*5/10 = 6.0`-to-5, yellow (`4.0 < 6.0 < 6.1`) even though it is physically less demanding than the 16-count move; color conveys the agreed convention rather than a monotonic physical-effort scale.
+
+Pair-distance utility (SHOULD) for selected dots `A,B`: `distanceFU=hypot(B.x-A.x,B.y-A.y)` and `distanceSteps=distanceFU/1800`. It displays raw decimal steps (minimum 3 decimals), raw yards, and quarter-step display; it does not alter dots.
 
 ### 4.1 FTL semantics
 
@@ -111,18 +121,31 @@ An FTL transition stores leader ID, ordered followers, a polyline `C(s)` paramet
 
 ```
 P_i(t) = C(o_i + t*D),    0 <= t <= 1
-D = counts * commonStepSize * 5/8 yard
+D_yards = counts * 5 / commonStepSize
+D_FU = counts * 14400 / commonStepSize    # 5 yd = 14400 FU; commonStepSize uses the corrected §4 required-steps-per-five-yards definition
 ```
 
-The authoring UI derives `o_i` by projecting each selected start dot onto the path; it must expose offsets and let the writer set order. Starts must agree with `C(o_i)` within 1 FU (or be rejected as invalid). The path coverage must include `[min(o_i), max(o_i)+D]`; otherwise it is an `INSUFFICIENT_FTL_PATH` error. All `P_i(t)` must be defined for every sample. The end dots are derived as `C(o_i+D)`. An independently placed target end set may be saved only as `expectedEndPositions`; each target must match the derived dot within 1 FU, otherwise `FTL_END_MISMATCH` blocks export and playback of that transition until fixed, converted to float, or removed. No member may stop, mark time, or take a different distance.
+The authoring UI derives `o_i` by projecting each selected start dot onto the path; it must expose offsets and let the writer set order. Projection tie-breaking: if a start dot is equidistant (within 1 FU) from two or more points on the polyline -- i.e., the polyline self-intersects, doubles back, or the dot sits at a vertex shared by two segments of equal nearest distance -- the UI selects the candidate arc-length `s` closest to the previously assigned member's offset in formation order (the leader, offset 0, breaks the very first tie by choosing the smallest valid `s`); if still tied, the smallest `s` wins. This keeps offsets a deterministic function of path geometry and stated order, never of click position alone.
 
-Worked FTL fixture: `docs/fixtures/freeform-1.0-example.freeform` has A..E on the front hash from Side 1 40 to the 50, 2.5 yd (7,200 FU) apart. E is leader at 50, with offsets E=0, D=7,200, C=14,400, B=21,600, A=28,800. The common horizontal path is from `x=144000` to `x=86400`; `D=28800 FU=10 yd`, over 16 counts => 5.0-to-5. At count 16 E is at `115200` (A's original Side 1 40), while every member has moved 10 yd continuously. This is intentional and fixes the earlier stopped-follower contradiction.
+Offsets must be monotonic in follower order: for the leader-then-followers sequence as authored, `o_leader=0 <= o_{follower_1} <= o_{follower_2} <= ... <= o_{follower_n}` (equal offsets are permitted only for performers sharing one dot). The UI MUST reject an offset assignment that violates this order with `FTL_OFFSET_ORDER` rather than silently reordering the follower list, because follower order also drives the tie-break rule above and the display of formation order to the writer.
+
+Starts must agree with `C(o_i)` within 1 FU (or be rejected as invalid). The path coverage must include `[min(o_i), max(o_i)+D_FU]`; otherwise it is an `INSUFFICIENT_FTL_PATH` error. All `P_i(t)` must be defined for every sample. The end dots are derived as `C(o_i+D_FU)`. An independently placed target end set may be saved only as `expectedEndPositions`; each target must match the derived dot within 1 FU, otherwise `FTL_END_MISMATCH` blocks export and playback of that transition until fixed, converted to float, or removed. No member may stop, mark time, or take a different distance.
+
+Worked FTL fixture: `docs/fixtures/freeform-1.0-example.freeform` has A..E on the front hash from Side 1 40 to the 50, 2.5 yd (7,200 FU) apart. E is leader at 50, with offsets E=0, D=7,200, C=14,400, B=21,600, A=28,800 (monotonic in follower order D,C,B,A as required above). The common horizontal path is from `x=144000` to `x=86400`; `D_FU=28800 FU=10 yd`, over 16 counts => `commonStepSize = 16*5/10 = 8.0`-to-5. At count 16 E is at `115200` (A's original Side 1 40), while every member has moved 10 yd continuously. This is intentional and fixes the earlier stopped-follower contradiction.
 
 ### 4.2 Collision warnings
 
 For each transition, evaluate all unordered performer pairs at t=0, 1 and at least `t=k/(4*counts)` for every integer `k=0..4*counts`; adaptively subdivide any interval in which either member travels more than 720 FU (0.25 yd) between samples. Warn when Euclidean center distance is `<= threshold`; default threshold is 2880 FU (one yard). Store threshold with document settings and store an override as user, timestamp, reason, transition/pair, and warning signature. Overrides never delete the warning computation. The UI labels results “warning”, not “collision prevented.”
 
-## 5. Annotation, playback, PDFs, accessibility, and interaction
+### 4.3 Formation arrangement tools
+
+IDEA.md line 7 requires that drill-writers be able to place performers "into lines, arcs, curvilinear, free, and other shapes easily." This is a within-set formation-placement requirement, distinct from the between-set motion semantics of §4's float/FTL transitions. MVP MUST satisfy it as follows:
+
+- Line arrangement: the writer selects two or more performers already having (or being assigned) dots in the active set, picks two endpoint coordinates (typed, or two placed anchor dots), and an assignment order. The tool overwrites each selected performer's dot with a point at equal FU spacing along the straight segment from the first to the second endpoint, inclusive of the endpoints for the first and last performer in order.
+- Circular-arc arrangement: the writer selects three or more performers, and specifies either (a) a center point, radius in steps, start angle, and end angle, or (b) two anchor dots plus a bulge/sagitta control point defining a circular arc through them. The tool overwrites each selected performer's dot with a point at equal arc-length spacing along the resulting arc, in assignment order.
+- Curvilinear and free arrangement: satisfied by the base dot editor's direct manual placement/drag of individual dots (§1), optionally checked with the §4 pair-distance utility for spacing; no additional programmatic tool is required for arbitrary/free curves in MVP.
+
+Arrangement tools place dots within one set only; they never define or alter a transition's motion path, and every resulting dot MUST remain valid per §3.1 and MUST preserve the set's complete, non-duplicate performer coverage per §4.
 
 Annotations have type, layer, anchor/geometry, visibility (`editor`, `print`, `performerPacket`), and optional performer association. MVP types are freehand strokes, structured labels, arrows, reusable symbols, and performer notes. Layers are named, ordered, visible/locked, and independently print-enabled. Print-only annotations exist in the model and do not appear in ordinary playback.
 
@@ -155,7 +178,7 @@ Compatibility/migration policy: 1.x readers load 1.0.0 and additive 1.x files on
 
 Supported current and previous stable browser families: Chromium, Firefox, Safari on desktop-class macOS/Windows/Linux where the browser supports IndexedDB, ES modules, Web Workers, and local PDF generation. Feature-detect File System Access API and use download fallback. No browser-specific storage behavior may be called a durable backup.
 
-Performance reference test hardware: Apple MacBook Air M2, 16 GB RAM, macOS 27.0; Chromium current stable, hardware acceleration enabled. Baseline fixture: 500 performers, 250 ordered sets, 10,000 total counts, 499 float transitions, 20 visible annotations per set, all warning analysis enabled. Measure five runs after warm cache: open, select/move 50 dots, undo/redo, scrub 1,000 counts, and playback of 1,000 counts. Passing is median editor input-to-render <=100 ms, p95 <=250 ms for selected move/undo, scrub frame response <=100 ms, and >=30 rendered fps playback with no main-thread task >100 ms for more than 1% of sampled frames. Record browser/version, OS, hardware, fixture SHA, run data, and any degraded behavior. Firefox and Safari must pass functional smoke tests; performance is reported separately, not assumed identical.
+Performance reference test hardware: Apple MacBook Air M2, 16 GB RAM, macOS 27.0; Chromium current stable, hardware acceleration enabled. Baseline fixture: 500 performers, 250 ordered sets, 10,000 total counts, 249 float transitions (an adjacent chain over 250 ordered sets has exactly 249 transitions), 20 visible annotations per set, all warning analysis enabled. Measure five runs after warm cache: open, select/move 50 dots, undo/redo, scrub 1,000 counts, and playback of 1,000 counts. Passing is median editor input-to-render <=100 ms, p95 <=250 ms for selected move/undo, scrub frame response <=100 ms, and >=30 rendered fps playback with no main-thread task >100 ms for more than 1% of sampled frames. Record browser/version, OS, hardware, fixture SHA, run data, and any degraded behavior. Firefox and Safari must pass functional smoke tests; performance is reported separately, not assumed identical.
 
 Release acceptance is measurable:
 
@@ -177,28 +200,33 @@ Release acceptance is measurable:
 | M4 | FTL path/order editor and derived-end validation | M3 | fixture replay, equal-distance, insufficient-path and mismatch tests |
 | M5 | Collision analyzer and documented override | M3, M4 | sampled/adaptive proximity tests, persisted override audit |
 | M6 | Annotation/layer/notes editor | M2 | layer visibility/print/performer-note tests |
-| M7 | Local persistence, save/open, autosave/history/backup/recovery, migration | M1, M4 | quota/permission/malformed/migration recovery integration tests |
+| M7 | Local persistence, save/open, autosave/history/backup/recovery, migration | M1, M4, M5, M6 | quota/permission/malformed/migration recovery integration tests |
 | M8 | PDF layouts and export validation | M2, M4, M6 | visual/text PDF regression and note-overlap warning test |
-| M9 | Setup wizard, accessibility, browser/performance hardening | M1-M8 | WCAG audit, three-browser E2E, documented reference-hardware results |
+| M9 | Setup wizard | M1 | wizard completion/skip and no-discard-of-partial-show tests |
+| M10 | Accessibility hardening | M1-M8 | WCAG 2.2 AA audit with manual keyboard/screen-reader smoke findings |
+| M11 | Cross-browser functional hardening | M1-M8 | Chromium/Firefox/Safari functional smoke E2E matrix |
+| M12 | Performance benchmark validation | M1-M8 | documented §7 reference-hardware baseline-fixture results against stated thresholds |
 
-M1-M9 are implementation cards, not work performed by this specification card. Each must preserve scope and receive independent verification before release.
+M1-M12 are implementation cards, not work performed by this specification card. Each must preserve scope and receive independent verification before release. M9-M12 are split from a single milestone because each carries a distinct, independently gatable evidence artifact (wizard tests, WCAG audit, cross-browser matrix, performance run); none depends on another except the shared M1-M8 functional baseline, so they may proceed in parallel once M1-M8 are accepted.
 
 ## 9. Traceability
 
 | Requirement/source | Spec location | Disposition |
 |---|---|---|
 | IDEA.md lines 1-3: browser drill authoring, dots, sets, scrub/play | §§1, 4, 5 | MUST |
-| IDEA.md line 7: 8-to-5, float, FTL, step feedback | §§3-4 | MUST |
+| IDEA.md line 7: placement into lines, arcs, curvilinear, free, and other shapes | §1, §4.3 | MUST (line/arc arrangement tools); curvilinear/free satisfied by direct manual dot placement, already MUST |
+| IDEA.md line 7: 8-to-5 step notification, float, FTL | §4, §4.1 | MUST |
 | IDEA.md line 9: count-by-count pause | §5 | MUST |
 | IDEA.md line 13: decisions/version control | decision record; §6 | MUST for project/file discipline |
 | J clarification: solo author, static/no backend, browsers | §§1-2, 7 | MUST |
 | J clarification: coordinate prose | §3 | MUST |
 | J clarification: exact step bands/advisory status | §4 | MUST |
 | J clarification: uninterrupted equal-distance FTL | §4.1 | MUST |
-| J clarification: 1-yard configurable collision and pair distance | §4.2 | MUST / pair utility MUST |
+| J clarification: 1-yard configurable collision override | §4.2 | MUST |
+| J clarification: pair-distance-in-steps utility | §1, §4 | SHOULD (per J's fixed decision; not promoted to MUST) |
 | J clarification: markup/packets/US Letter/manual overlap | §5 | MUST |
 | J clarification: undo, accessibility, autosave, history, backup | §§5-6 | MUST |
-| J clarification: setup wizard | §1 | SHOULD |
+| J clarification: setup wizard | §1, M9 | SHOULD |
 | J clarification: 500/250/10,000 and 30 fps | §7 | release benchmark |
 | Field research §§3,7: NFHS dimensions/hashes | §3.1 | MUST |
 | Deferred decisions: native apps, custom surface, music, collaboration, interoperability | §1 | Deferred |
