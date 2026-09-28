@@ -1,0 +1,33 @@
+# Freeform MVP specification decisions
+
+Status: accepted technical/product decisions for Kanban task `t_dcda77f3`.
+
+The records below preserve J's fixed decisions from task `t_932c8cf7` and record only the additional implementation-level choices needed to make the MVP specification testable. They do not authorize product implementation.
+
+DECISION | J | MVP boundary | Desktop-browser authoring on one NFHS 11-player football field includes dots, stable rank codes, sets/pages, count-based straight-line/constant-speed float transitions, FTL, per-count playback/scrubbing and contiguous range isolation, advisory step-size status, collision warnings, markup/annotations, full-field and performer-coordinate PDFs, undo/redo, autosave/version history, keyboard access, accessibility, and backup/recovery | Recorded clarification decisions in task t_932c8cf7 and its child t_dcda77f3 | Native performer apps, custom surfaces, music sync, collaboration, automatic note placement, and proprietary interchange are deferred.
+
+DECISION | J | Runtime and interchange | MVP is a static local-first/self-hostable browser app with local files and browser storage, no required backend; supported interchange is a new versioned Freeform format and PDF | J's recorded clarification | The app must remain usable offline after assets load; no server/account/sync design is implied.
+
+DECISION | J | User coordinate semantics | Coordinates are Side 1/2 plus inside/outside/splitting yard-line relationship in 8-to-5 steps and a nearest front-sideline/front-hash/back-hash/back-sideline relationship | J's recorded clarification | Internal geometry may differ, but every displayed/exported coordinate must be deterministically derivable.
+
+DECISION | J | Motion safety semantics | Float is straight-line constant-speed interpolation; step-size status is advisory using unrounded steps-per-five; collision sampling warns at a configurable default one-yard center distance and may be overridden | J's recorded clarification | Curves, arrival timing, facing, step style, and body orientation remain notes in MVP.
+
+DECISION | J | FTL semantics | All selected FTL members move continuously for the entire transition, cover equal distance at equal step size, and follow one path with formation-order offsets; nobody stops or marks time | J's corrected clarification | FTL requires a leader/path, ordered followers, count sampling, derived end dots, and an insufficient-path validation rule.
+
+DECISION | J | Field preset | The only MVP surface is NFHS 11-player geometry; NCAA and NFL hash geometries are deferred presets | Field research `decisions/2026-09-28-football-field-dimensions.md` and J's one-surface boundary | The MVP uses 100 yd goal-line-to-goal-line length, 160 ft sideline width, and hash lines one-third of the width from each sideline.
+
+DECISION | Wheeljack | Canonical geometry axes and unit | Store all field positions as integer field units, where 2,880 units = one yard; origin is the Side 1 goal-line/front-sideline intersection, +x runs from Side 1 toward Side 2, and +y runs from the front sideline toward the back sideline | This exactly represents the 8-to-5 step (1,800 units), quarter step (450 units), 100-yard length (288,000 units), 160-foot width (153,600 units), and NFHS hash inset (51,200 units), avoiding binary floating-point and one-third-yard rounding | Rendering transforms canonical coordinates to pixels; field orientation is not persisted as a different coordinate system. "Front" means the sideline nearest a director viewing the field; Side 1 is director-left.
+
+DECISION | Wheeljack | Coordinate display tie-breaking | Derive labels from canonical coordinates, use exact midpoint detection for `Splitting`, choose the frontward reference when two front-to-back landmarks are exactly equidistant, and round only displayed step offsets to the nearest quarter step (half away from zero) | A reproducible label must not depend on display zoom or JavaScript floating-point behavior | Raw geometry remains authoritative; labels are derived output, not editable storage.
+
+DECISION | Wheeljack | FTL end-set authority | An FTL transition's ordered shared path and formation offsets derive its end dots. A writer may place proposed end dots only as an expected-end validation target; a mismatch is an error, not an alternate motion rule | This is the only interpretation that simultaneously preserves equal uninterrupted travel and a common path | Editing an FTL changes derived end dots; convert to float or edit path/order to use independently positioned end dots.
+
+DECISION | Wheeljack | Collision sampling floor | Collision analysis samples transition time at least every quarter count plus both endpoints, and may adaptively subdivide until no sampled performer travels more than one quarter yard between samples | J required sampled interpolated movement; this floor catches between-count proximity more reliably than endpoint-only checks while staying bounded | Warnings are advisory and can be documented as overridden; no claim of body-volume or exact continuous collision proof is made for arbitrary FTL polylines.
+
+DECISION | Wheeljack | Local recovery layers | Working state is browser IndexedDB; an explicit `.freeform` file is user-selected/exported durable state; autosave snapshots, version history, and rotating backup files are separate, named layers | Browser storage can be evicted and a static app has no server-side recovery | Recovery UI must make source and timestamp visible and never silently overwrite a user-selected explicit file.
+
+DECISION | Wheeljack | Compatibility policy | Readers accept the same major format version and ignore only explicitly extension-namespaced optional fields; a higher major version opens read-only with export/backup allowed, and older readers never overwrite newer files | Preventing silent data loss is more important than best-effort editing | Additive changes require minor versions; destructive/schema-semantic changes require a new major plus a deterministic migration.
+
+DECISION | Wheeljack | PDF overlap behavior | PDF export warns on note-box/performer overlap and requires manual note repositioning for MVP | J explicitly selected warning plus manual correction | Automatic note placement is deferred; exports retain user-authored note positions.
+
+DECISION | J | IP boundary | Use original implementation and branding; public factual field/drill conventions only; no proprietary code/assets or access-control bypass; proprietary format reverse engineering requires separate technical/legal review | J approved the safe planning rule | Pyware/UDB import/export is not MVP work.

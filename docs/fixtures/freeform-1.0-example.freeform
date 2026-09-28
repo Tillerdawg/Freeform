@@ -1,0 +1,74 @@
+{
+  "$schema": "https://github.com/Tillerdawg/Freeform/schema/freeform-1.0.schema.json",
+  "format": "freeform",
+  "formatVersion": "1.0.0",
+  "show": {
+    "id": "five-person-ftl",
+    "title": "Five Person FTL Fixture",
+    "totalCounts": 16,
+    "createdAt": "2026-09-28T19:30:00Z",
+    "updatedAt": "2026-09-28T19:30:00Z"
+  },
+  "field": {
+    "preset": "NFHS_11_PLAYER",
+    "unitsPerYard": 2880,
+    "lengthUnits": 288000,
+    "widthUnits": 153600,
+    "frontHashY": 51200,
+    "backHashY": 102400
+  },
+  "settings": {"collisionThresholdUnits": 2880},
+  "performers": [
+    {"id": "a", "rankCode": "T1", "displayName": "A", "section": "Trumpet"},
+    {"id": "b", "rankCode": "T2", "displayName": "B", "section": "Trumpet"},
+    {"id": "c", "rankCode": "T3", "displayName": "C", "section": "Trumpet"},
+    {"id": "d", "rankCode": "T4", "displayName": "D", "section": "Trumpet"},
+    {"id": "e", "rankCode": "T5", "displayName": "E", "section": "Trumpet", "notes": "FTL leader"}
+  ],
+  "sets": [
+    {
+      "id": "set-1", "name": "Set 1", "startCount": 0,
+      "positions": {
+        "a": {"x": 115200, "y": 51200},
+        "b": {"x": 122400, "y": 51200},
+        "c": {"x": 129600, "y": 51200},
+        "d": {"x": 136800, "y": 51200},
+        "e": {"x": 144000, "y": 51200}
+      }
+    },
+    {
+      "id": "set-2", "name": "Set 2 (FTL derived)", "startCount": 16,
+      "positions": {
+        "a": {"x": 86400, "y": 51200},
+        "b": {"x": 93600, "y": 51200},
+        "c": {"x": 100800, "y": 51200},
+        "d": {"x": 108000, "y": 51200},
+        "e": {"x": 115200, "y": 51200}
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "id": "ftl-1", "fromSetId": "set-1", "toSetId": "set-2", "counts": 16, "mode": "ftl",
+      "ftl": {
+        "leaderId": "e", "followerIds": ["d", "c", "b", "a"],
+        "offsetUnits": {"e": 0, "d": 7200, "c": 14400, "b": 21600, "a": 28800},
+        "distanceUnits": 28800,
+        "path": [{"x": 144000, "y": 51200}, {"x": 86400, "y": 51200}],
+        "expectedEndPositions": {
+          "a": {"x": 86400, "y": 51200}, "b": {"x": 93600, "y": 51200},
+          "c": {"x": 100800, "y": 51200}, "d": {"x": 108000, "y": 51200},
+          "e": {"x": 115200, "y": 51200}
+        }
+      },
+      "notes": "Every performer moves ten yards in sixteen counts; E ends on A's original dot."
+    }
+  ],
+  "layers": [
+    {"id": "director-notes", "name": "Director Notes", "visible": true, "print": true}
+  ],
+  "annotations": [
+    {"id": "note-1", "kind": "label", "layerId": "director-notes", "visibility": "print", "text": "16-count FTL", "anchor": {"x": 151200, "y": 64000}},
+    {"id": "arrow-1", "kind": "arrow", "layerId": "director-notes", "visibility": "editor", "text": "Leader path"}
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Tillerdawg/Freeform/schema/freeform-1.0.schema.json",
+  "title": "Freeform 1.0 show file",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "formatVersion", "show", "field", "settings", "performers", "sets", "transitions", "annotations"],
+  "properties": {
+    "$schema": {"type": "string", "format": "uri"},
+    "format": {"const": "freeform"},
+    "formatVersion": {"const": "1.0.0"},
+    "show": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "title", "totalCounts"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "totalCounts": {"type": "integer", "minimum": 0},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "updatedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "field": {
+      "type": "object", "additionalProperties": false,
+      "required": ["preset", "unitsPerYard", "lengthUnits", "widthUnits", "frontHashY", "backHashY"],
+      "properties": {
+        "preset": {"const": "NFHS_11_PLAYER"},
+        "unitsPerYard": {"const": 2880},
+        "lengthUnits": {"const": 288000},
+        "widthUnits": {"const": 153600},
+        "frontHashY": {"const": 51200},
+        "backHashY": {"const": 102400}
+      }
+    },
+    "settings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["collisionThresholdUnits"],
+      "properties": {
+        "collisionThresholdUnits": {"type": "integer", "minimum": 1, "maximum": 28800, "default": 2880}
+      }
+    },
+    "performers": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "rankCode", "displayName"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "rankCode": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$"},
+          "displayName": {"type": "string", "minLength": 1, "maxLength": 120},
+          "section": {"type": "string", "maxLength": 80},
+          "notes": {"type": "string", "maxLength": 10000}
+        }
+      }
+    },
+    "sets": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "name", "startCount", "positions"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"type": "string", "minLength": 1, "maxLength": 120},
+          "startCount": {"type": "integer", "minimum": 0},
+          "positions": {
+            "type": "object", "minProperties": 1,
+            "additionalProperties": {"$ref": "#/$defs/dot"}
+          }
+        }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "fromSetId", "toSetId", "counts", "mode"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "fromSetId": {"$ref": "#/$defs/id"},
+          "toSetId": {"$ref": "#/$defs/id"},
+          "counts": {"type": "integer", "minimum": 1},
+          "mode": {"enum": ["float", "ftl"]},
+          "ftl": {"$ref": "#/$defs/ftl"},
+          "notes": {"type": "string", "maxLength": 10000},
+          "collisionOverrides": {
+            "type": "array", "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["performerIds", "warningSignature", "reason", "overriddenAt"],
+              "properties": {
+                "performerIds": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+                "warningSignature": {"type": "string", "minLength": 1, "maxLength": 128},
+                "reason": {"type": "string", "minLength": 1, "maxLength": 1000},
+                "overriddenAt": {"type": "string", "format": "date-time"},
+                "authorLabel": {"type": "string", "maxLength": 120}
+              }
+            }
+          }
+        },
+        "allOf": [
+          {"if": {"properties": {"mode": {"const": "ftl"}}}, "then": {"required": ["ftl"]}},
+          {"if": {"properties": {"mode": {"const": "float"}}}, "then": {"not": {"required": ["ftl"]}}}
+        ]
+      }
+    },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "kind", "layerId", "visibility"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "kind": {"enum": ["freehand", "label", "arrow", "symbol", "performerNote"]},
+          "layerId": {"$ref": "#/$defs/id"},
+          "visibility": {"enum": ["editor", "print", "performerPacket"]},
+          "text": {"type": "string", "maxLength": 10000},
+          "anchor": {"$ref": "#/$defs/dot"}
+        }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "name", "visible", "print"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"type": "string", "minLength": 1, "maxLength": 120},
+          "visible": {"type": "boolean"},
+          "print": {"type": "boolean"}
+        }
+      }
+    },
+    "extensions": {"type": "object", "additionalProperties": true}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$"},
+    "dot": {
+      "type": "object", "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": {"type": "integer", "minimum": 0, "maximum": 288000},
+        "y": {"type": "integer", "minimum": 0, "maximum": 153600}
+      }
+    },
+    "ftl": {
+      "type": "object", "additionalProperties": false,
+      "required": ["leaderId", "followerIds", "path", "offsetUnits", "distanceUnits"],
+      "properties": {
+        "leaderId": {"$ref": "#/$defs/id"},
+        "followerIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "offsetUnits": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "distanceUnits": {"type": "integer", "minimum": 1},
+        "path": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/dot"}},
+        "expectedEndPositions": {"type": "object", "additionalProperties": {"$ref": "#/$defs/dot"}}
+      }
+    }
+  }
+}
