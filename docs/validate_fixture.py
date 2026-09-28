@@ -55,7 +55,20 @@ def dot(value, where):
 
 
 def polyline_at_x(path, distance):
-    # Fixture path is collinear horizontal; this confirms a known test vector.
+    # This validator only evaluates the worked 2-point horizontal FTL vector defined
+    # in freeform-mvp-spec-v1.md section 4.1's fixture example. The schema's ftl.path
+    # is a general polyline (spec 4.1 defines a general arc-length-parameterized C(s)),
+    # so a schema-valid document MAY carry a 3+ point path; this documentation-test
+    # tool does not implement general polyline arc-length evaluation (that is
+    # application-engine work, out of this card's scope) and must reject such a
+    # document with a clean, structured error rather than crash on the tuple unpack.
+    if len(path) != 2:
+        fail(
+            "FTL path has "
+            f"{len(path)} points; this validator only evaluates the worked 2-point "
+            "horizontal FTL vector (general polyline arc-length evaluation is "
+            "out of scope for this documentation-test tool)"
+        )
     (a, b) = path
     if a["y"] != b["y"] or a["x"] <= b["x"]:
         fail("fixture FTL path must be leftward horizontal for this worked example")
@@ -373,6 +386,7 @@ NEGATIVE_CASES = [
     ("insufficient-ftl-path.freeform", "semantic", "INSUFFICIENT_FTL_PATH"),
     ("ftl-end-mismatch.freeform", "semantic", "FTL_END_MISMATCH"),
     ("ftl-offset-order.freeform", "semantic", "FTL_OFFSET_ORDER"),
+    ("ftl-path-multi-point.freeform", "semantic", "FTL path has"),
 ]
 
 
