@@ -90,3 +90,11 @@ Both scripts print `PASS:` lines for successful test groups. Most failures raise
 - The specification's ordered implementation milestones (M1 through M12) are listed in `docs/freeform-mvp-spec-v1.md` §8; no implementation of those milestones is present in this repository.
 - The MVP specification governs one field preset only (NFHS 11-player); other surfaces, music sync, and native performer apps are explicitly deferred, not partially built.
 - Dated product and technical decision records are kept in `decisions/`; consult those records and the MVP specification before treating an open question in `IDEA.md` as unresolved.
+
+## License
+
+Freeform is licensed under the MIT License. See [LICENSE](LICENSE).
+
+## Contributing
+
+This is currently a solo-writer project. No formal contribution process has been defined yet.
