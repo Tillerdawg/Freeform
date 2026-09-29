@@ -189,6 +189,10 @@ def validate_semantics(schema, doc):
     annotation_ids = [a["id"] for a in annotations]
     if len(annotation_ids) != len(set(annotation_ids)):
         fail("annotation IDs are not unique")
+    transitions_for_scope = doc.get("transitions", [])
+    if not isinstance(transitions_for_scope, list) or not all(isinstance(t, dict) and "id" in t for t in transitions_for_scope):
+        fail("transitions: every entry must be an object with id")
+    transition_ids_for_scope = {t["id"] for t in transitions_for_scope}
     for annotation in annotations:
         aid = annotation["id"]
         if "layerId" not in annotation:
@@ -205,6 +209,22 @@ def validate_semantics(schema, doc):
         vis = annotation.get("visibility")
         if isinstance(vis, dict) and vis.get("performerPacket") and "performerId" not in annotation:
             fail(f"annotation {aid}: performerPacket visibility requires performerId")
+        scope = annotation.get("scope")
+        if not isinstance(scope, dict):
+            fail(f"annotation {aid}: missing or invalid scope object")
+        scope_kind = scope.get("kind")
+        if scope_kind == "set":
+            keys(scope, {"kind", "setId"}, {"kind", "setId"}, f"annotation {aid}.scope")
+            if scope["setId"] not in sets:
+                fail(f"annotation {aid}: UNKNOWN_ANNOTATION_SET_SCOPE {scope['setId']!r}")
+        elif scope_kind == "transition":
+            keys(scope, {"kind", "transitionId"}, {"kind", "transitionId"}, f"annotation {aid}.scope")
+            if scope["transitionId"] not in transition_ids_for_scope:
+                fail(f"annotation {aid}: UNKNOWN_ANNOTATION_TRANSITION_SCOPE {scope['transitionId']!r}")
+        elif scope_kind == "show":
+            keys(scope, {"kind"}, {"kind"}, f"annotation {aid}.scope")
+        else:
+            fail(f"annotation {aid}: invalid scope kind {scope_kind!r}")
 
     transitions = doc.get("transitions", [])
     if not isinstance(transitions, list) or not all(isinstance(t, dict) and "id" in t for t in transitions):
@@ -492,6 +512,9 @@ NEGATIVE_CASES = [
     ("ftl-offset-order.freeform", "semantic", "FTL_OFFSET_ORDER"),
     ("ftl-path-multi-point.freeform", "semantic", "INSUFFICIENT_FTL_PATH"),
     ("ftl-path-non-horizontal-insufficient-coverage.freeform", "semantic", "INSUFFICIENT_FTL_PATH"),
+    ("annotation-unknown-set-scope.freeform", "semantic", "UNKNOWN_ANNOTATION_SET_SCOPE"),
+    ("annotation-unknown-transition-scope.freeform", "semantic", "UNKNOWN_ANNOTATION_TRANSITION_SCOPE"),
+    ("annotation-invalid-scope.freeform", "schema", None),
 ]
 
 
@@ -539,6 +562,17 @@ def run_negative_case_table(schema):
         fail("one or more negative fixtures were not correctly rejected (see table above)")
 
 
+def test_positive_annotation_scopes(doc):
+    """Ensure the published fixture exercises all persisted annotation contexts."""
+    scopes = {annotation.get("scope", {}).get("kind") for annotation in doc["annotations"]}
+    required = {"set", "transition", "show"}
+    if not required <= scopes:
+        fail(f"positive fixture must exercise {sorted(required)} annotation scopes, got {sorted(scopes)}")
+    set_ids = {annotation["scope"]["setId"] for annotation in doc["annotations"] if annotation["scope"]["kind"] == "set"}
+    if len(set_ids) < 2:
+        fail(f"positive fixture must exercise annotations on at least two distinct sets, got {sorted(set_ids)}")
+
+
 if __name__ == "__main__":
     schema_doc = load(SCHEMA)
     fixture_doc = load(FIXTURE)
@@ -548,6 +582,8 @@ if __name__ == "__main__":
     print("PASS: schema contract + semantic fixture validation")
     print("PASS: 5 performers, 2 sets, 1 16-count FTL; each moves 28800 FU (10 yd, 8.0-to-5)")
     print("PASS: canonical NFHS constants and derived FTL endpoints match fixture")
+    test_positive_annotation_scopes(fixture_doc)
+    print("PASS: annotation fixture covers set-1/set-2, transition, and show scopes")
     test_step_size_bands()
     print("PASS: step-size band classification (worked vectors, boundaries, stationary, regression)")
     test_coordinate_edge_cases()

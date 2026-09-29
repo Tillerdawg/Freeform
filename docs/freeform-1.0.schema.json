@@ -157,15 +157,43 @@
         "performerPacket": {"type": "boolean", "description": "Included on applicable individual performer packet PDFs (see performerId)."}
       }
     },
+    "annotationScope": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "setId"],
+          "properties": {
+            "kind": {"const": "set"},
+            "setId": {"$ref": "#/$defs/id"}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "transitionId"],
+          "properties": {
+            "kind": {"const": "transition"},
+            "transitionId": {"$ref": "#/$defs/id"}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {"const": "show"}
+          }
+        }
+      ]
+    },
     "annotationShape": {
       "oneOf": [
         {
           "type": "object", "additionalProperties": false,
-          "required": ["id", "kind", "layerId", "visibility", "strokes"],
+          "required": ["id", "kind", "layerId", "scope", "visibility", "strokes"],
           "properties": {
             "id": {"$ref": "#/$defs/id"},
             "kind": {"const": "freehand"},
             "layerId": {"$ref": "#/$defs/id"},
+            "scope": {"$ref": "#/$defs/annotationScope"},
             "visibility": {"$ref": "#/$defs/visibilityFlags"},
             "performerId": {"$ref": "#/$defs/id"},
             "strokes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/polyline"}}
@@ -173,11 +201,12 @@
         },
         {
           "type": "object", "additionalProperties": false,
-          "required": ["id", "kind", "layerId", "visibility", "points"],
+          "required": ["id", "kind", "layerId", "scope", "visibility", "points"],
           "properties": {
             "id": {"$ref": "#/$defs/id"},
             "kind": {"const": "arrow"},
             "layerId": {"$ref": "#/$defs/id"},
+            "scope": {"$ref": "#/$defs/annotationScope"},
             "visibility": {"$ref": "#/$defs/visibilityFlags"},
             "performerId": {"$ref": "#/$defs/id"},
             "points": {"$ref": "#/$defs/polyline", "description": "Tail-to-head path; the arrowhead renders at the last point."}
@@ -185,11 +214,12 @@
         },
         {
           "type": "object", "additionalProperties": false,
-          "required": ["id", "kind", "layerId", "visibility", "symbolId", "anchor"],
+          "required": ["id", "kind", "layerId", "scope", "visibility", "symbolId", "anchor"],
           "properties": {
             "id": {"$ref": "#/$defs/id"},
             "kind": {"const": "symbol"},
             "layerId": {"$ref": "#/$defs/id"},
+            "scope": {"$ref": "#/$defs/annotationScope"},
             "visibility": {"$ref": "#/$defs/visibilityFlags"},
             "performerId": {"$ref": "#/$defs/id"},
             "symbolId": {"$ref": "#/$defs/id"},
@@ -200,11 +230,12 @@
         },
         {
           "type": "object", "additionalProperties": false,
-          "required": ["id", "kind", "layerId", "visibility", "text", "anchor"],
+          "required": ["id", "kind", "layerId", "scope", "visibility", "text", "anchor"],
           "properties": {
             "id": {"$ref": "#/$defs/id"},
             "kind": {"const": "label"},
             "layerId": {"$ref": "#/$defs/id"},
+            "scope": {"$ref": "#/$defs/annotationScope"},
             "visibility": {"$ref": "#/$defs/visibilityFlags"},
             "performerId": {"$ref": "#/$defs/id"},
             "text": {"type": "string", "minLength": 1, "maxLength": 10000},
@@ -213,11 +244,12 @@
         },
         {
           "type": "object", "additionalProperties": false,
-          "required": ["id", "kind", "layerId", "visibility", "performerId", "anchor", "text"],
+          "required": ["id", "kind", "layerId", "scope", "visibility", "performerId", "anchor", "text"],
           "properties": {
             "id": {"$ref": "#/$defs/id"},
             "kind": {"const": "performerNote"},
             "layerId": {"$ref": "#/$defs/id"},
+            "scope": {"$ref": "#/$defs/annotationScope"},
             "visibility": {"$ref": "#/$defs/visibilityFlags"},
             "performerId": {"$ref": "#/$defs/id"},
             "anchor": {"$ref": "#/$defs/dot"},

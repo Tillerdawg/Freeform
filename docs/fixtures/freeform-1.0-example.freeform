@@ -78,27 +78,32 @@
   "annotations": [
     {
       "id": "note-1", "kind": "label", "layerId": "director-notes",
+      "scope": {"kind": "set", "setId": "set-1"},
       "visibility": {"editor": true, "print": true, "performerPacket": false},
       "text": "16-count FTL", "anchor": {"x": 151200, "y": 64000}
     },
     {
       "id": "arrow-1", "kind": "arrow", "layerId": "director-notes",
+      "scope": {"kind": "transition", "transitionId": "ftl-1"},
       "visibility": {"editor": true, "print": false, "performerPacket": false},
       "points": [{"x": 144000, "y": 51200}, {"x": 57600, "y": 51200}]
     },
     {
       "id": "freehand-1", "kind": "freehand", "layerId": "choreo-sketch",
+      "scope": {"kind": "set", "setId": "set-2"},
       "visibility": {"editor": true, "print": false, "performerPacket": false},
       "strokes": [[{"x": 100000, "y": 60000}, {"x": 105000, "y": 62000}, {"x": 110000, "y": 60000}]]
     },
     {
       "id": "symbol-1", "kind": "symbol", "layerId": "director-notes",
+      "scope": {"kind": "show"},
       "visibility": {"editor": true, "print": true, "performerPacket": false},
       "symbolId": "star-glyph", "anchor": {"x": 150000, "y": 70000},
       "rotationDegrees": 45, "scale": 1.5
     },
     {
       "id": "note-e", "kind": "performerNote", "layerId": "choreo-sketch",
+      "scope": {"kind": "transition", "transitionId": "ftl-1"},
       "visibility": {"editor": true, "print": false, "performerPacket": true},
       "performerId": "e", "anchor": {"x": 144000, "y": 51200},
       "text": "Leader: hold energy through count 16."

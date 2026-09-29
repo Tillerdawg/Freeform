@@ -1,0 +1,17 @@
+{
+  "format": "freeform",
+  "formatVersion": "1.0.0",
+  "show": {"id": "scope-negative", "title": "Unknown annotation set scope", "totalCounts": 0},
+  "field": {"preset": "NFHS_11_PLAYER", "unitsPerYard": 2880, "lengthUnits": 288000, "widthUnits": 153600, "frontHashY": 51200, "backHashY": 102400},
+  "settings": {"collisionThresholdUnits": 2880},
+  "performers": [{"id": "a", "rankCode": "A1", "displayName": "A"}],
+  "sets": [{"id": "set-1", "name": "Set 1", "startCount": 0, "positions": {"a": {"x": 144000, "y": 51200}}}],
+  "transitions": [],
+  "layers": [{"id": "notes", "name": "Notes", "visible": true, "print": true, "locked": false}],
+  "annotations": [{
+    "id": "bad-set-scope", "kind": "label", "layerId": "notes",
+    "scope": {"kind": "set", "setId": "set-404"},
+    "visibility": {"editor": true, "print": true, "performerPacket": false},
+    "text": "Unknown set", "anchor": {"x": 144000, "y": 51200}
+  }]
+}
