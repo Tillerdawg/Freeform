@@ -62,10 +62,10 @@ From the repository root, install both the app dependencies and the documentatio
 
 ```
 npm ci
-cd docs && npm ci && cd ..
+npm --prefix docs ci
 ```
 
-`npm ci` is identical on Windows (PowerShell or cmd.exe) and macOS; there is no shell-specific syntax in either install step. If you don't have a lockfile-exact install available (for example, working from a fork with edited dependencies), use `npm install` instead of `npm ci` in each of the two directories.
+These commands work unchanged in **cmd.exe**, **Windows PowerShell 5.1 or later** (including PowerShell 7), and macOS shells. `npm --prefix docs ci` runs the second install in `docs` without using shell command chaining or changing the current directory. In particular, do not replace it with `cd docs && npm ci && cd ..` when documenting Windows PowerShell 5.1: Microsoft documents `&&` pipeline-chain operators as beginning in PowerShell 7. If you don't have a lockfile-exact install available (for example, working from a fork with edited dependencies), use `npm install` instead of `npm ci` in each of the two locations (`npm install` and `npm --prefix docs install`).
 
 **Troubleshooting: unrelated packages or unexpected vulnerability warnings.** `npm ci`/`npm install` only work correctly when your shell's current directory contains `package.json`. If you run it from the wrong directory, npm can silently resolve a `package.json` in a parent folder outside the repository and install unrelated dependencies there. Before running any command below, confirm `pwd` (macOS) or `cd` with no arguments (Windows) shows the `freeform` checkout, and that `package.json` exists in that directory.
 
@@ -119,10 +119,10 @@ py -3 validate_fixture.py         # Windows
 ## Full workflow, clean checkout to running app
 
 ```
-git clone https://github.com/Tillerdawg/Freeform.git
+git clone https://github.com/Tillerdawg/Freeform.git freeform
 cd freeform
 npm ci
-cd docs && npm ci && cd ..
+npm --prefix docs ci
 npm test
 npm run test:docs
 npm run build
