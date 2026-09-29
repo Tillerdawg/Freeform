@@ -18,6 +18,7 @@ SCHEMA = ROOT / "freeform-1.0.schema.json"
 FIXTURE = ROOT / "fixtures" / "freeform-1.0-example.freeform"
 AJV_SCRIPT = ROOT / "ajv_validate.mjs"
 NEGATIVE_DIR = ROOT / "fixtures" / "negative"
+POSITIVE_DIR = ROOT / "fixtures" / "positive"
 
 
 class ValidationError(ValueError):
@@ -54,25 +55,48 @@ def dot(value, where):
         fail(f"{where}: dot outside NFHS playing field")
 
 
-def polyline_at_x(path, distance):
-    # This validator only evaluates the worked 2-point horizontal FTL vector defined
-    # in freeform-mvp-spec-v1.md section 4.1's fixture example. The schema's ftl.path
-    # is a general polyline (spec 4.1 defines a general arc-length-parameterized C(s)),
-    # so a schema-valid document MAY carry a 3+ point path; this documentation-test
-    # tool does not implement general polyline arc-length evaluation (that is
-    # application-engine work, out of this card's scope) and must reject such a
-    # document with a clean, structured error rather than crash on the tuple unpack.
-    if len(path) != 2:
+FTL_COMPARISON_TOLERANCE_FU = 1
+
+
+def polyline_length(path):
+    """Return the Euclidean arc length of an ordered piecewise-linear path in FU."""
+    return sum(
+        math.hypot(b["x"] - a["x"], b["y"] - a["y"])
+        for a, b in zip(path, path[1:])
+    )
+
+
+def polyline_at_arc_length(path, distance):
+    """Evaluate C(s) without extrapolation, where s is distance along the polyline in FU."""
+    if distance < 0:
+        fail(f"FTL path arc-length evaluation cannot use negative distance {distance}")
+    total_length = polyline_length(path)
+    if distance > total_length + 1e-9:
         fail(
-            "FTL path has "
-            f"{len(path)} points; this validator only evaluates the worked 2-point "
-            "horizontal FTL vector (general polyline arc-length evaluation is "
-            "out of scope for this documentation-test tool)"
+            "INSUFFICIENT_FTL_PATH -- arc-length evaluation requires "
+            f"{distance} FU but path length is {total_length:g} FU"
         )
-    (a, b) = path
-    if a["y"] != b["y"] or a["x"] <= b["x"]:
-        fail("fixture FTL path must be leftward horizontal for this worked example")
-    return {"x": a["x"] - distance, "y": a["y"]}
+    # Clamping only absorbs floating point roundoff at an exactly-covered terminal point;
+    # it never permits extrapolation beyond the independently checked coverage interval.
+    remaining = min(distance, total_length)
+    for a, b in zip(path, path[1:]):
+        segment_length = math.hypot(b["x"] - a["x"], b["y"] - a["y"])
+        if segment_length == 0:
+            continue
+        if remaining <= segment_length + 1e-9:
+            fraction = min(1.0, remaining / segment_length)
+            return {
+                "x": a["x"] + (b["x"] - a["x"]) * fraction,
+                "y": a["y"] + (b["y"] - a["y"]) * fraction,
+            }
+        remaining -= segment_length
+    # A path containing only repeated points has no usable arc-length parameterization.
+    fail("INSUFFICIENT_FTL_PATH -- path has zero total arc length")
+
+
+def dots_within_tolerance(actual, expected, tolerance=FTL_COMPARISON_TOLERANCE_FU):
+    """Compare dots in Euclidean FU, matching the spec's 'within 1 FU' language."""
+    return math.hypot(actual["x"] - expected["x"], actual["y"] - expected["y"]) <= tolerance
 
 
 def run_ajv_schema_validation(schema_path, doc_path):
@@ -225,31 +249,25 @@ def validate_semantics(schema, doc):
             fail(f"{tid}: distanceUnits must be a positive integer FU")
 
         # Path coverage: spec section 4.1 requires [min(o_i), max(o_i)+D_FU] to lie within
-        # the path's own parametrization, i.e. within [0, path_length] measured from path[0].
-        path_length = abs(path[0]["x"] - path[-1]["x"])
+        # the path's own arc-length parametrization, i.e. [0, total polyline length].
+        path_length = polyline_length(path)
         min_offset = min(offsets.values())
         max_reach = max(offsets.values()) + distance
-        if min_offset < 0 or max_reach > path_length:
-            fail(f"{tid}: INSUFFICIENT_FTL_PATH -- path covers [0,{path_length}] FU but "
+        if min_offset < 0 or max_reach > path_length + 1e-9:
+            fail(f"{tid}: INSUFFICIENT_FTL_PATH -- path covers [0,{path_length:g}] FU but "
                  f"offsets+distance require [{min_offset},{max_reach}] FU")
 
         start = sets[transition["fromSetId"]]["positions"]
         end = sets[transition["toSetId"]]["positions"]
         for pid in ordered:
-            if start[pid] != polyline_at_x(path, offsets[pid]):
-                fail(f"{tid}: {pid} start is not C(offset)")
-            derived = polyline_at_x(path, offsets[pid] + distance)
+            if not dots_within_tolerance(start[pid], polyline_at_arc_length(path, offsets[pid])):
+                fail(f"{tid}: {pid} start is not within 1 FU of C(offset)")
+            derived = polyline_at_arc_length(path, offsets[pid] + distance)
             expected = ftl.get("expectedEndPositions", {}).get(pid)
-            if end[pid] != derived:
-                fail(f"{tid}: {pid} derived end mismatch")
-            if expected is not None and expected != derived:
-                fail(f"{tid}: FTL_END_MISMATCH -- {pid} expectedEndPositions disagrees with derived end")
-        if end[ftl["leaderId"]] != start["a"]:
-            fail("worked FTL vector must place E at A's original dot")
-        distance_yards = distance / 2880
-        common_step_size = transition["counts"] * 5 / distance_yards
-        if not math.isclose(common_step_size, 8.0):
-            fail("worked FTL vector is not 8.0-to-5")
+            if not dots_within_tolerance(end[pid], derived):
+                fail(f"{tid}: {pid} derived end differs from C(offset + distance) by more than 1 FU")
+            if expected is not None and not dots_within_tolerance(expected, derived):
+                fail(f"{tid}: FTL_END_MISMATCH -- {pid} expectedEndPositions disagrees with derived end by more than 1 FU")
 
 
 def validate(schema, doc):
@@ -373,6 +391,92 @@ def test_coordinate_edge_cases():
         fail("x=115201 (1 FU off Side 1 40) must not classify as On a line")
 
 
+def require_semantic_rejection(schema, doc, must_mention):
+    """Assert a semantic failure is structured and names the intended contract breach."""
+    try:
+        validate_semantics(schema, doc)
+    except ValidationError as e:
+        if must_mention in str(e):
+            return
+        fail(f"expected semantic rejection mentioning {must_mention!r}, got {e!s}")
+    fail(f"expected semantic rejection mentioning {must_mention!r}, but document was accepted")
+
+
+def test_general_ftl_polyline_and_tolerance(schema):
+    """Exercise arc-length evaluation and the explicit 1-FU section 4.1 allowance."""
+    path = [{"x": 0, "y": 0}, {"x": 3, "y": 4}, {"x": 3, "y": 8}]
+    if not math.isclose(polyline_length(path), 9.0):
+        fail(f"3-4-5 plus vertical test path must have length 9 FU, got {polyline_length(path)}")
+    for distance, expected in ((0, {"x": 0, "y": 0}), (5, {"x": 3, "y": 4}), (7, {"x": 3, "y": 6}), (9, {"x": 3, "y": 8})):
+        actual = polyline_at_arc_length(path, distance)
+        if not dots_within_tolerance(actual, expected, tolerance=0):
+            fail(f"C({distance}) must equal {expected}, got {actual}")
+    try:
+        polyline_at_arc_length(path, 10)
+    except ValidationError as e:
+        if "INSUFFICIENT_FTL_PATH" not in str(e):
+            fail(f"out-of-range arc-length evaluation produced wrong error: {e!s}")
+    else:
+        fail("out-of-range arc-length evaluation extrapolated instead of rejecting")
+
+    within_one = loads(json.dumps(load(FIXTURE)))
+    ftl = within_one["transitions"][0]["ftl"]
+    within_one["sets"][0]["positions"]["d"]["x"] += 1
+    within_one["sets"][1]["positions"]["e"]["x"] += 1
+    ftl["expectedEndPositions"]["e"]["x"] -= 1
+    validate_semantics(schema, within_one)
+
+    start_beyond_one = loads(json.dumps(load(FIXTURE)))
+    start_beyond_one["sets"][0]["positions"]["d"]["x"] += 2
+    require_semantic_rejection(schema, start_beyond_one, "start is not within 1 FU")
+
+    derived_end_beyond_one = loads(json.dumps(load(FIXTURE)))
+    derived_end_beyond_one["sets"][1]["positions"]["e"]["x"] += 2
+    require_semantic_rejection(schema, derived_end_beyond_one, "derived end differs")
+
+    expected_end_beyond_one = loads(json.dumps(load(FIXTURE)))
+    expected_end_beyond_one["transitions"][0]["ftl"]["expectedEndPositions"]["e"]["x"] += 2
+    require_semantic_rejection(schema, expected_end_beyond_one, "FTL_END_MISMATCH")
+
+
+# --- Additional valid FTL fixtures. Each must pass the genuine schema engine and semantic
+# checks; together they prove the schema's general polyline contract is honored. ---
+
+POSITIVE_CASES = [
+    "ftl-path-multi-point.freeform",
+    "ftl-path-non-horizontal.freeform",
+]
+
+
+def run_positive_case_table(schema):
+    rows = []
+    all_ok = True
+    for filename in POSITIVE_CASES:
+        path = POSITIVE_DIR / filename
+        if not path.exists():
+            rows.append((filename, "MISSING FIXTURE", False))
+            all_ok = False
+            continue
+        try:
+            validate_schema_or_fail(SCHEMA, path)
+            validate_semantics(schema, load(path))
+        except ValidationError as e:
+            rows.append((filename, str(e)[:100], False))
+            all_ok = False
+        else:
+            rows.append((filename, "ACCEPTED", True))
+
+    print()
+    print(f"{'fixture':<52} {'result'}")
+    print("-" * 100)
+    for filename, msg, ok in rows:
+        status = "ACCEPTED OK" if ok else "FAIL"
+        print(f"{filename:<52} [{status}] {msg}")
+    print()
+    if not all_ok:
+        fail("one or more positive FTL fixtures were not accepted (see table above)")
+
+
 # --- Negative fixtures: docs/fixtures/negative/*.freeform must each be REJECTED, either
 # by the genuine Ajv schema pass or by the semantic validator, for the reason named. ---
 
@@ -386,7 +490,8 @@ NEGATIVE_CASES = [
     ("insufficient-ftl-path.freeform", "semantic", "INSUFFICIENT_FTL_PATH"),
     ("ftl-end-mismatch.freeform", "semantic", "FTL_END_MISMATCH"),
     ("ftl-offset-order.freeform", "semantic", "FTL_OFFSET_ORDER"),
-    ("ftl-path-multi-point.freeform", "semantic", "FTL path has"),
+    ("ftl-path-multi-point.freeform", "semantic", "INSUFFICIENT_FTL_PATH"),
+    ("ftl-path-non-horizontal-insufficient-coverage.freeform", "semantic", "INSUFFICIENT_FTL_PATH"),
 ]
 
 
@@ -447,5 +552,9 @@ if __name__ == "__main__":
     print("PASS: step-size band classification (worked vectors, boundaries, stationary, regression)")
     test_coordinate_edge_cases()
     print("PASS: coordinate horizontal-component edge cases (on-line, splitting, near-miss)")
+    test_general_ftl_polyline_and_tolerance(schema_doc)
+    print("PASS: general FTL arc-length evaluation, coverage rejection, and 1-FU tolerance")
+    run_positive_case_table(schema_doc)
+    print("PASS: all named positive FTL fixtures correctly accepted")
     run_negative_case_table(schema_doc)
     print("PASS: all named negative fixtures correctly rejected")
