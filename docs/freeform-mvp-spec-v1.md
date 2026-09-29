@@ -200,7 +200,7 @@ Release acceptance is measurable:
 | M4 | FTL path/order editor and derived-end validation | M3 | fixture replay, equal-distance, insufficient-path and mismatch tests |
 | M5 | Collision analyzer and documented override | M3, M4 | sampled/adaptive proximity tests, persisted override audit |
 | M6 | Annotation/layer/notes editor | M2 | layer visibility/print/performer-note tests |
-| M7 | Local persistence, save/open, autosave/history/backup/recovery, migration | M1, M4, M5, M6 | quota/permission/malformed/migration recovery integration tests |
+| M7 | Local persistence, save/open, autosave/history/backup/recovery, migration | M1, M4, M5, M6 | quota/permission/malformed/migration recovery plus collision-override and annotation/layer persistence integration tests |
 | M8 | PDF layouts and export validation | M2, M4, M6 | visual/text PDF regression and note-overlap warning test |
 | M9 | Setup wizard | M1 | wizard completion/skip and no-discard-of-partial-show tests |
 | M10 | Accessibility hardening | M1-M8 | WCAG 2.2 AA audit with manual keyboard/screen-reader smoke findings |
