@@ -6,12 +6,20 @@ genuine Draft 2020-12 validator (Ajv, via docs/ajv_validate.mjs as a Node subpro
 additionally checks the non-expressible semantic invariants specified in
 freeform-mvp-spec-v1.md. It never claims schema validation happened unless the subprocess
 actually executed; a missing/broken Node/Ajv toolchain is a hard failure, not a skip.
+
+Running this file's __main__ (`cd docs && python3 validate_fixture.py`) is the single
+release-gate command: it also imports and executes docs/algorithm_edge_tests.py's suite
+(coordinate grammar, FTL projection tie-break, collision sampling, spec/grammar agreement)
+so no release step needs to remember to invoke that script separately. Both files remain
+independently runnable (`python3 docs/algorithm_edge_tests.py` still works standalone).
 """
 import json
 import math
 import subprocess
 from pathlib import Path
 from typing import NoReturn
+
+import algorithm_edge_tests
 
 ROOT = Path(__file__).resolve().parent
 SCHEMA = ROOT / "freeform-1.0.schema.json"
@@ -594,3 +602,6 @@ if __name__ == "__main__":
     print("PASS: all named positive FTL fixtures correctly accepted")
     run_negative_case_table(schema_doc)
     print("PASS: all named negative fixtures correctly rejected")
+    algorithm_edge_tests.main()
+    print("PASS: algorithm_edge_tests.py suite (coordinate grammar, FTL projection "
+          "tie-break, collision sampling, spec/grammar agreement) executed via import")
