@@ -4,7 +4,7 @@ Freeform is an open-source, browser-based drill-design project for marching band
 
 ## Status
 
-This repository contains the product specification, the file-format schema and fixtures, documentation-test tooling, and implemented application milestones M1 through M4: an app shell and immutable document command store; canonical NFHS geometry and a DOM dot editor with coordinate inspection; set and float-transition playback tools; and FTL path/order authoring with derived-end validation. It does not yet contain the later planned collision analyzer, annotation editor, persistence, PDF export, setup wizard, accessibility hardening, cross-browser hardening, or performance validation. Anyone starting implementation work should read `docs/freeform-mvp-spec-v1.md`, the implementation-ready MVP specification, and the decision records in `decisions/`, which capture the accepted product and technical choices behind it.
+This repository contains the product specification, the file-format schema and fixtures, documentation-test tooling, and implemented application milestones M1 through M4 plus M9: an app shell and immutable document command store; canonical NFHS geometry and a DOM dot editor with coordinate inspection; set and float-transition playback tools; FTL path/order authoring with derived-end validation; and a first-run setup wizard paired with a post-wizard roster editor. The setup wizard collects the drill file name and a section roster (with rank-code prefix suggestions per instrument/equipment) and generates the first laid-out set in one atomic command sequence. The roster editor then lets the writer add a late arrival to an existing numeric rank-code prefix, remove a departed performer (with an FTL-impact disclosure when the removal would block an existing follow-the-leader transition), and assign display names to the whole roster as one atomic command. It does not yet contain the later planned collision analyzer, annotation editor, persistence, PDF export, accessibility hardening, cross-browser hardening, or performance validation. Anyone starting implementation work should read `docs/freeform-mvp-spec-v1.md`, the implementation-ready MVP specification, and the decision records in `decisions/`, which capture the accepted product and technical choices behind it.
 
 ## What the MVP specifies
 
@@ -30,11 +30,14 @@ decisions/                           Dated decision records (product and technic
 package.json                         Root app: build, dev server, unit tests, and the docs-test launcher.
 src/                                 Application source (TypeScript).
   document/                          Immutable command store, document types, and set/transition validation.
-  editor/                            DOM dot editor, performer/dot forms, and coordinate inspection table.
+  editor/                            DOM dot editor, performer/dot forms, coordinate inspection table,
+                                      the interactive SVG field renderer, the first-run setup wizard
+                                      (setup-wizard.ts), and the post-wizard roster editor (roster-editor.ts).
   geometry/                          Canonical NFHS 11-player field geometry and coordinate derivation.
   platform/                          Browser feature detection.
   timeline/                          Set and float/FTL transition authoring, sampling, playback, and status tools.
-  main.ts                            Application entry point that initializes the document and dot editor.
+  main.ts                            Application entry point: renders the setup wizard on a fresh document,
+                                      then hands off to the dot editor (which includes the roster editor).
   styles.css                         Application styles.
 scripts/run-docs-validation.mjs      Cross-platform launcher that runs docs/validate_fixture.py,
                                       selecting the right Python command per OS (see Testing below).
@@ -143,7 +146,7 @@ Open `http://127.0.0.1:5173/` to confirm the app loads, then stop the dev server
 - **Windows:** GitHub Actions CI has run the full automated workflow natively on `windows-latest`. The latest successful CI run for the current `main` commit (`ce5d083a261a88ececa12f6d31dac75412a47cbb`) is [run 36722149551](https://github.com/Tillerdawg/Freeform/actions/runs/36722149551); its `windows-latest / Node 22.x / Python 3.13` job installed both dependency sets, ran `npm test`, built the application, and ran `npm run test:docs`. This verifies those automated install, test, build, and documentation-validation commands on a native Windows runner. It does not by itself demonstrate manual interactive or visual behavior on a physical end-user Windows machine.
 - Intel (x86_64) Macs have not been separately verified; no architecture-specific code exists in this repository, so the same commands are expected to work, but this has not been tested on Intel hardware.
 - No packaged desktop build or installer exists; "running the app" means the Vite dev server (development) or serving the static `dist/` bundle from any static file host (production-equivalent), not a native executable.
-- The specification's ordered implementation milestones (M1 through M12) are listed in `docs/freeform-mvp-spec-v1.md` §8. M1-M4 are implemented and covered by the commands above: M1 provides the app shell, feature detection, and immutable command store; M2 provides canonical NFHS geometry, the dot editor, and coordinate derivation; M3 provides ordered sets, float transitions, step-size status, pair-distance calculation, and keyboard playback; M4 provides FTL path/order authoring and derived-end validation. M5-M12 remain future work; in particular, collision analysis, annotations, persistence, PDF export, the setup wizard, accessibility hardening, cross-browser hardening, and performance validation are not implemented.
+- The specification's ordered implementation milestones (M1 through M12) are listed in `docs/freeform-mvp-spec-v1.md` §8. M1-M4 and M9 are implemented and covered by the commands above: M1 provides the app shell, feature detection, and immutable command store; M2 provides canonical NFHS geometry, the dot editor, and coordinate derivation; M3 provides ordered sets, float transitions, step-size status, pair-distance calculation, and keyboard playback; M4 provides FTL path/order authoring and derived-end validation; M9 provides the first-run setup wizard and the post-wizard roster editor. M5-M8 and M10-M12 remain future work; in particular, collision analysis, annotations, persistence, PDF export, accessibility hardening, cross-browser hardening, and performance validation are not implemented.
 
 ## License
 
