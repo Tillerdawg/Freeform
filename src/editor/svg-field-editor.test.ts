@@ -99,6 +99,32 @@ describe('SVG field editor', () => {
     expect(svg.getAttribute('viewBox')).toBe(transform.viewBox);
   });
 
+  it('renders the 50-yard line and both hash marks at their exact expected SVG pixel positions', () => {
+    const field = store.getState().document.field;
+    const transform = createFieldTransform(field);
+
+    const fiftyLine = svg.querySelector('.field-editor__yard-line--fifty')!;
+    const expectedFifty = transform.toPixel({ x: field.lengthUnits / 2, y: 0 });
+    expect(Number(fiftyLine.getAttribute('x1'))).toBe(expectedFifty.x);
+    expect(Number(fiftyLine.getAttribute('y1'))).toBe(expectedFifty.y);
+    expect(Number(fiftyLine.getAttribute('x2'))).toBe(transform.toPixel({ x: field.lengthUnits / 2, y: field.widthUnits }).x);
+
+    const hashTicks = [...svg.querySelectorAll<SVGLineElement>('.field-editor__hash-tick')];
+    const frontHashPixelY = transform.toPixel({ x: 0, y: field.frontHashY }).y;
+    const backHashPixelY = transform.toPixel({ x: 0, y: field.backHashY }).y;
+    const frontTicks = hashTicks.filter((tick) => Number(tick.getAttribute('y1')) === frontHashPixelY);
+    const backTicks = hashTicks.filter((tick) => Number(tick.getAttribute('y1')) === backHashPixelY);
+    expect(frontTicks.length).toBeGreaterThan(0);
+    expect(backTicks.length).toBeGreaterThan(0);
+    // Every hash tick sits exactly on its landmark's exact pixel row (no
+    // rounding drift), confirming the rendered marks land at the same exact
+    // pixel the transform function computes independently.
+    expect(hashTicks.every((tick) => {
+      const y = Number(tick.getAttribute('y1'));
+      return y === frontHashPixelY || y === backHashPixelY;
+    })).toBe(true);
+  });
+
   it('renders a dot for each performer with a canonical dot in the active set, labeled by rank code', () => {
     const dot1 = svg.querySelector('[data-performer-id="performer-1"]');
     const dot2 = svg.querySelector('[data-performer-id="performer-2"]');
