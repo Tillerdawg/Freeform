@@ -79,4 +79,61 @@ describe('document command store', () => {
     expect(store.redo()).toBeUndefined();
     expect(store.getState()).toBe(initial);
   });
+
+  it('creates a manual rank-coded performer and dot through commands', () => {
+    const store = createCommandStore(makeDocument());
+    store.apply({
+      type: 'performer.create',
+      performer: { id: 'performer-2', rankCode: 'T1', displayName: 'Trumpet 1' },
+    });
+    const placed = store.apply({
+      type: 'dot.create',
+      setId: 'set-1',
+      performerId: 'performer-2',
+      dot: { x: 115200, y: 51200 },
+    });
+
+    expect(placed.document.performers).toContainEqual({
+      id: 'performer-2', rankCode: 'T1', displayName: 'Trumpet 1',
+    });
+    expect(placed.document.sets[0]?.positions['performer-2']).toEqual({ x: 115200, y: 51200 });
+    expect(store.getUndoCommands().map((command) => command.type)).toEqual(['performer.create', 'dot.create']);
+  });
+
+  it('moves a dot through the command store and supports undo/redo', () => {
+    const store = createCommandStore(makeDocument());
+    const moved = store.apply({
+      type: 'dot.move',
+      setId: 'set-1',
+      performerId: 'performer-1',
+      dot: { x: 122400, y: 44000 },
+    });
+
+    expect(moved.document.sets[0]?.positions['performer-1']).toEqual({ x: 122400, y: 44000 });
+    expect(store.undo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 144000, y: 76800 });
+    expect(store.redo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 122400, y: 44000 });
+  });
+
+  it('rejects an out-of-bounds dot before it enters document state', () => {
+    const store = createCommandStore(makeDocument());
+
+    expect(() => store.apply({
+      type: 'dot.move',
+      setId: 'set-1',
+      performerId: 'performer-1',
+      dot: { x: 288001, y: 51200 },
+    })).toThrow(/integer FU within x=0\.\.288000 and y=0\.\.153600/);
+    expect(store.getState().document.sets[0]?.positions['performer-1']).toEqual({ x: 144000, y: 76800 });
+    expect(store.canUndo()).toBe(false);
+  });
+
+  it('rejects duplicate rank codes without changing document state', () => {
+    const store = createCommandStore(makeDocument());
+
+    expect(() => store.apply({
+      type: 'performer.create',
+      performer: { id: 'performer-2', rankCode: 'p1', displayName: 'Duplicate' },
+    })).toThrow('Rank code already exists: p1');
+    expect(store.getState().document.performers).toHaveLength(1);
+  });
 });

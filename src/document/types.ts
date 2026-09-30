@@ -75,6 +75,19 @@ export interface DocumentState {
 export type DocumentCommand =
   | { readonly type: 'show.title.set'; readonly title: string }
   | { readonly type: 'show.total-counts.set'; readonly totalCounts: number }
+  | { readonly type: 'performer.create'; readonly performer: Performer }
+  | {
+    readonly type: 'dot.create';
+    readonly setId: Identifier;
+    readonly performerId: Identifier;
+    readonly dot: Dot;
+  }
+  | {
+    readonly type: 'dot.move';
+    readonly setId: Identifier;
+    readonly performerId: Identifier;
+    readonly dot: Dot;
+  }
   | { readonly type: 'document.replace'; readonly document: FreeformDocument };
 
 export interface CommandStore {

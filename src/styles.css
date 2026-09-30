@@ -45,3 +45,45 @@ section section {
 .capability--ready { border-color: #367a62; }
 .capability--blocked { border-color: #c16b5b; }
 .capability p:last-child { margin-bottom: 0; }
+
+.editor-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.editor-form {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 1px solid #3b4a5e;
+  border-radius: 0.5rem;
+  background: #152133;
+}
+
+.editor-form h3 { margin: 0 0 0.25rem; font-size: 1rem; }
+.editor-form label { color: #b7c5d7; font-size: 0.85rem; }
+input, select, button {
+  min-height: 2.25rem;
+  border: 1px solid #5a718d;
+  border-radius: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  color: inherit;
+  background: #0f1724;
+  font: inherit;
+}
+button { cursor: pointer; background: #214f78; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid #90bdea; outline-offset: 2px; }
+
+.history-controls { display: flex; gap: 0.75rem; }
+.editor-message { color: #b9e7ce; }
+.inspection-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.inspection-table caption { padding: 0 0 0.75rem; text-align: left; color: #b7c5d7; }
+.inspection-table th, .inspection-table td { padding: 0.55rem; border-top: 1px solid #3b4a5e; text-align: left; vertical-align: top; }
+.inspection-table th { font-weight: 700; }
+
+@media (max-width: 520px) {
+  .app-shell { padding: 2rem 0; }
+  .inspection-table { display: block; overflow-x: auto; }
+}
