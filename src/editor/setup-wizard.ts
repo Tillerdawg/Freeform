@@ -255,10 +255,18 @@ export function renderSetupWizard(root: HTMLElement, { store, onComplete }: Setu
     instrument.value = section.instrument;
     instrument.addEventListener('input', () => {
       const suggested = suggestPrefix(instrument.value);
-      sections = sections.map((candidate) => candidate.key === section.key
-        ? { ...candidate, instrument: instrument.value, prefix: candidate.prefixTouched ? candidate.prefix : suggested }
-        : candidate);
-      render();
+      const current = sections.find((candidate) => candidate.key === section.key)!;
+      const updated = {
+        ...current,
+        instrument: instrument.value,
+        prefix: current.prefixTouched ? current.prefix : suggested,
+      };
+      sections = sections.map((candidate) => candidate.key === section.key ? updated : candidate);
+      if (!updated.prefixTouched) {
+        const prefixInput = root.querySelector<HTMLInputElement>(`#setup-prefix-${section.key}`);
+        if (prefixInput) prefixInput.value = updated.prefix;
+      }
+      updateCurrentStatus();
     });
     const count = input(`setup-count-${section.key}`, 'Count', 'number');
     count.min = '1';

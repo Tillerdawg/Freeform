@@ -16,6 +16,15 @@ function inputValue(input: HTMLInputElement, value: string): void {
   input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+function typeIncrementally(input: HTMLInputElement, value: string): void {
+  for (const character of value) {
+    input.value += character;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(input.isConnected).toBe(true);
+    expect(document.activeElement).toBe(input);
+  }
+}
+
 describe('setup wizard layout', () => {
   it('centers odd and even small sections on the 50-yard line with two-step spacing', () => {
     const [even, odd] = layoutSections([
@@ -116,5 +125,28 @@ describe('setup wizard generation', () => {
     expect(root.querySelector('#setup-total')?.textContent).toBe('Total performers: 2');
     expect(root.querySelector('#setup-prefix-error')?.textContent).toContain('duplicate: P');
     expect(root.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+  });
+
+  it('keeps instrument input connected and focused during incremental typing while applying its prefix suggestion', () => {
+    const root = document.createElement('div');
+    const store = createCommandStore(createEmptyDocument());
+    document.body.append(root);
+    try {
+      renderSetupWizard(root, { store, onComplete: () => {} });
+
+      const instrument = root.querySelector<HTMLInputElement>('[id^="setup-instrument-"]')!;
+      instrument.focus();
+      typeIncrementally(instrument, 'Piccolo');
+
+      expect(instrument.value).toBe('Piccolo');
+      const prefix = root.querySelector<HTMLInputElement>('.setup-prefix')!;
+      expect(prefix.value).toBe('P');
+
+      inputValue(prefix, 'PX');
+      inputValue(instrument, 'Trumpet');
+      expect(prefix.value).toBe('PX');
+    } finally {
+      root.remove();
+    }
   });
 });
