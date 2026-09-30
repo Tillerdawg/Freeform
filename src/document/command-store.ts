@@ -70,6 +70,10 @@ function reduce(document: FreeformDocument, command: DocumentCommand): FreeformD
       return { ...document, show: { ...document.show, totalCounts: command.totalCounts } };
     case 'performer.create':
       return addPerformer(document, command);
+    case 'performer.remove':
+      return removePerformer(document, command.performerId);
+    case 'performer.displayName.batchSet':
+      return batchSetPerformerDisplayNames(document, command.updates);
     case 'set.create':
       return addSet(document, command.set);
     case 'set.remove':
@@ -216,6 +220,42 @@ function addPerformer(
       ...set,
       positions: { ...set.positions, [performer.id]: positionsBySet[set.id]! },
     })),
+  };
+}
+
+function removePerformer(document: FreeformDocument, performerId: string): FreeformDocument {
+  if (!document.performers.some((performer) => performer.id === performerId)) {
+    throw new Error(`Unknown performer: ${performerId}`);
+  }
+  return {
+    ...document,
+    performers: document.performers.filter((performer) => performer.id !== performerId),
+    sets: document.sets.map((set) => ({
+      ...set,
+      positions: Object.fromEntries(Object.entries(set.positions).filter(([id]) => id !== performerId)),
+    })),
+  };
+}
+
+function batchSetPerformerDisplayNames(
+  document: FreeformDocument,
+  updates: Readonly<Record<string, string>>,
+): FreeformDocument {
+  for (const [performerId, displayName] of Object.entries(updates)) {
+    if (!document.performers.some((performer) => performer.id === performerId)) {
+      throw new Error(`Unknown performer: ${performerId}`);
+    }
+    if (displayName.trim().length === 0) {
+      throw new Error('Performer display name is required.');
+    }
+  }
+  return {
+    ...document,
+    performers: document.performers.map((performer) => (
+      Object.prototype.hasOwnProperty.call(updates, performer.id)
+        ? { ...performer, displayName: updates[performer.id]! }
+        : performer
+    )),
   };
 }
 

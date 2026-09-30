@@ -99,6 +99,111 @@ describe('document command store', () => {
     expect(() => validateDocumentSetsAndTransitions(store.redo()!.document)).not.toThrow();
   });
 
+  it('removes a performer and every dot placement across all sets with undo/redo', () => {
+    const source = makeDocument();
+    const twoPerformerDocument: FreeformDocument = {
+      ...source,
+      performers: [
+        ...source.performers,
+        { id: 'performer-2', rankCode: 'P2', displayName: 'Performer 2' },
+      ],
+      sets: [
+        { ...source.sets[0]!, positions: { ...source.sets[0]!.positions, 'performer-2': { x: 115200, y: 51200 } } },
+        {
+          id: 'set-2', name: 'Set 2', startCount: 16,
+          positions: {
+            'performer-1': { x: 129600, y: 51200 },
+            'performer-2': { x: 100800, y: 51200 },
+          },
+        },
+      ],
+    };
+    const store = createCommandStore(twoPerformerDocument);
+
+    const removed = store.apply({ type: 'performer.remove', performerId: 'performer-2' });
+
+    expect(removed.document.performers.map(({ id }) => id)).toEqual(['performer-1']);
+    expect(removed.document.sets.map((set) => set.positions)).toEqual([
+      { 'performer-1': { x: 144000, y: 76800 } },
+      { 'performer-1': { x: 129600, y: 51200 } },
+    ]);
+    expect(store.undo()?.document.sets.every((set) => 'performer-2' in set.positions)).toBe(true);
+    expect(store.redo()?.document.sets.every((set) => !('performer-2' in set.positions))).toBe(true);
+  });
+
+  it('rejects removal of an unknown performer without changing document state', () => {
+    const store = createCommandStore(makeDocument());
+    const initial = store.getState();
+
+    expect(() => store.apply({ type: 'performer.remove', performerId: 'missing' }))
+      .toThrow('Unknown performer: missing');
+    expect(store.getState()).toBe(initial);
+    expect(store.canUndo()).toBe(false);
+  });
+
+  it('sets multiple performer display names as one atomic undoable command', () => {
+    const source = makeDocument();
+    const store = createCommandStore({
+      ...source,
+      performers: [
+        ...source.performers,
+        { id: 'performer-2', rankCode: 'P2', displayName: 'Performer 2' },
+      ],
+      sets: source.sets.map((set) => ({
+        ...set,
+        positions: { ...set.positions, 'performer-2': { x: 115200, y: 51200 } },
+      })),
+    });
+    const command = {
+      type: 'performer.displayName.batchSet' as const,
+      updates: { 'performer-1': 'Lead', 'performer-2': 'Support' },
+    };
+
+    store.apply(command);
+
+    expect(store.getState().document.performers.map(({ displayName }) => displayName)).toEqual(['Lead', 'Support']);
+    expect(store.getUndoCommands()).toEqual([command]);
+    expect(store.undo()?.document.performers.map(({ displayName }) => displayName)).toEqual(['Performer 1', 'Performer 2']);
+    expect(store.redo()?.document.performers.map(({ displayName }) => displayName)).toEqual(['Lead', 'Support']);
+  });
+
+  it('sets one performer display name through the same bulk command', () => {
+    const store = createCommandStore(makeDocument());
+
+    store.apply({ type: 'performer.displayName.batchSet', updates: { 'performer-1': 'Soloist' } });
+
+    expect(store.getState().document.performers[0]?.displayName).toBe('Soloist');
+    expect(store.getUndoCommands()).toHaveLength(1);
+  });
+
+  it('rejects an invalid display-name batch without partially applying updates', () => {
+    const source = makeDocument();
+    const store = createCommandStore({
+      ...source,
+      performers: [
+        ...source.performers,
+        { id: 'performer-2', rankCode: 'P2', displayName: 'Performer 2' },
+      ],
+      sets: source.sets.map((set) => ({
+        ...set,
+        positions: { ...set.positions, 'performer-2': { x: 115200, y: 51200 } },
+      })),
+    });
+    const initial = store.getState();
+
+    expect(() => store.apply({
+      type: 'performer.displayName.batchSet',
+      updates: { 'performer-1': 'Would change', 'performer-2': '   ' },
+    })).toThrow('Performer display name is required.');
+    expect(store.getState()).toBe(initial);
+    expect(store.getState().document.performers.map(({ displayName }) => displayName)).toEqual(['Performer 1', 'Performer 2']);
+    expect(() => store.apply({
+      type: 'performer.displayName.batchSet',
+      updates: { 'performer-1': 'Would change', missing: 'Unknown' },
+    })).toThrow('Unknown performer: missing');
+    expect(store.getState()).toBe(initial);
+  });
+
   it('moves a dot through the command store and supports undo/redo', () => {
     const store = createCommandStore(makeDocument());
     const moved = store.apply({

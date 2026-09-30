@@ -13,6 +13,7 @@ const ARC_LENGTH_EPSILON_FU = 1e-9;
 
 export type FtlValidationCode =
   | 'FTL_END_MISMATCH'
+  | 'FTL_MISSING_MEMBER'
   | 'FTL_OFFSET_ORDER'
   | 'INSUFFICIENT_FTL_PATH'
   | 'FTL_START_MISMATCH'
@@ -123,12 +124,15 @@ export function validateFtlTransition(
   validateFtlExpectedEnds(transition);
 }
 
-/** Validates every non-diagnostic FTL invariant for canonical document state. */
+/**
+ * Validates canonical FTL state while preserving a stale member reference as a
+ * repairable playback block after performer removal.
+ */
 export function validateFtlTransitionForDocument(
   document: Pick<FreeformDocument, 'performers' | 'sets'>,
   transition: Transition,
 ): void {
-  validateFtlCore(document, transition);
+  validateFtlCore(document, transition, { allowMissingMembers: true });
 }
 
 export function sampleFtlTransition(
@@ -169,6 +173,7 @@ export function memberIds(ftl: FtlDefinition): readonly Identifier[] {
 function validateFtlCore(
   document: Pick<FreeformDocument, 'performers' | 'sets'>,
   transition: Transition,
+  options: { readonly allowMissingMembers?: boolean } = {},
 ): void {
   validateTransitionTopology(document, transition);
   if (transition.mode !== 'ftl' || !transition.ftl) throw new Error('FTL transitions require an FTL definition.');
@@ -179,8 +184,13 @@ function validateFtlCore(
   const members = memberIds(ftl);
   if (new Set(members).size !== members.length) throw new Error('FTL leader and followers must be unique.');
   const performerIds = document.performers.map(({ id }) => id);
-  if (members.length !== performerIds.length || members.some((id) => !performerIds.includes(id))) {
+  if (performerIds.some((id) => !members.includes(id))) {
     throw new FtlValidationError('FTL_MEMBER_COVERAGE', 'FTL formation must include every active performer exactly once.');
+  }
+  const missingMembers = members.filter((id) => !performerIds.includes(id));
+  if (missingMembers.length > 0) {
+    if (options.allowMissingMembers) return;
+    throw new FtlValidationError('FTL_MISSING_MEMBER', `FTL formation references removed or unknown performer(s): ${missingMembers.join(', ')}.`);
   }
   const offsetIds = Object.keys(ftl.offsetUnits);
   if (offsetIds.length !== members.length || offsetIds.some((id) => !members.includes(id))) {

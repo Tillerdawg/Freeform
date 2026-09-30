@@ -84,6 +84,11 @@ export type DocumentCommand =
     readonly performer: Performer;
     readonly positionsBySet: Readonly<Record<Identifier, Dot>>;
   }
+  | { readonly type: 'performer.remove'; readonly performerId: Identifier }
+  | {
+    readonly type: 'performer.displayName.batchSet';
+    readonly updates: Readonly<Record<Identifier, string>>;
+  }
   | { readonly type: 'set.create'; readonly set: SetPage }
   | { readonly type: 'set.remove'; readonly setId: Identifier }
   | { readonly type: 'set.reorder'; readonly setId: Identifier; readonly startCount: number }

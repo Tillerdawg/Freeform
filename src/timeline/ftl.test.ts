@@ -11,6 +11,7 @@ import {
   samplePolyline,
   validateFtlTransition,
 } from './ftl';
+import { sampleFloatTransition } from './float';
 import { createPlaybackController } from './playback';
 
 function loadFixture(): FreeformDocument {
@@ -134,6 +135,58 @@ describe('FTL validation', () => {
     expect(() => createCommandStore(persistedMismatch)).not.toThrow();
     expectValidationCode(() => validateFtlTransition(persistedMismatch, mismatch), 'FTL_END_MISMATCH');
     expectValidationCode(() => sampleFtlTransition(persistedMismatch, mismatch, 0), 'FTL_END_MISMATCH');
+  });
+
+  it('keeps removal-induced FTL member references as a clear blocked state until the writer fixes or converts it', () => {
+    const fixture = loadFixture();
+    const unaffectedFloat: Transition = {
+      id: 'float-2', fromSetId: 'set-2', toSetId: 'set-3', counts: 16, mode: 'float',
+    };
+    const document: FreeformDocument = {
+      ...fixture,
+      sets: [
+        ...fixture.sets,
+        { id: 'set-3', name: 'Set 3', startCount: 32, positions: structuredClone(fixture.sets[1]!.positions) },
+      ],
+      transitions: [...fixture.transitions, unaffectedFloat],
+    };
+
+    for (const performerId of ['e', 'd']) {
+      const store = createCommandStore(document);
+      const afterRemoval = store.apply({ type: 'performer.remove', performerId });
+      const affected = afterRemoval.document.transitions.find(({ id }) => id === 'ftl-1')!;
+
+      expectValidationCode(() => validateFtlTransition(afterRemoval.document, affected), 'FTL_MISSING_MEMBER');
+      expectValidationCode(() => sampleFtlTransition(afterRemoval.document, affected, 0), 'FTL_MISSING_MEMBER');
+      expectValidationCode(() => createPlaybackController(afterRemoval.document, affected).getState(), 'FTL_MISSING_MEMBER');
+      expect(sampleFloatTransition(afterRemoval.document, unaffectedFloat, 8).positions).toEqual(
+        afterRemoval.document.sets[1]!.positions,
+      );
+    }
+
+    const store = createCommandStore(document);
+    const afterRemoval = store.apply({ type: 'performer.remove', performerId: 'e' });
+    const staleFtl = afterRemoval.document.transitions.find(({ id }) => id === 'ftl-1')!;
+    const fixedFtl: Transition = {
+      ...staleFtl,
+      ftl: {
+        ...staleFtl.ftl!,
+        leaderId: 'd',
+        followerIds: ['c', 'b', 'a'],
+        offsetUnits: { d: 0, c: 7200, b: 14400, a: 21600 },
+        path: [{ x: 136800, y: 51200 }, { x: 57600, y: 51200 }],
+        expectedEndPositions: { a: { x: 86400, y: 51200 }, b: { x: 93600, y: 51200 }, c: { x: 100800, y: 51200 }, d: { x: 108000, y: 51200 } },
+      },
+    };
+    const fixedDocument = { ...afterRemoval.document, transitions: [fixedFtl, unaffectedFloat] };
+
+    expect(() => createCommandStore(fixedDocument)).not.toThrow();
+    expect(() => validateFtlTransition(fixedDocument, fixedFtl)).not.toThrow();
+    expect(() => sampleFtlTransition(fixedDocument, fixedFtl, 16)).not.toThrow();
+    const convertedTransition: Transition = { ...staleFtl, mode: 'float', ftl: undefined };
+    const convertedDocument = { ...afterRemoval.document, transitions: [convertedTransition, unaffectedFloat] };
+    expect(() => createCommandStore(convertedDocument)).not.toThrow();
+    expect(() => createPlaybackController(convertedDocument, convertedTransition).getState()).not.toThrow();
   });
 
   it('reproduces the documented self-intersection tie-break vector exactly', () => {
