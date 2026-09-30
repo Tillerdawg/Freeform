@@ -38,6 +38,23 @@ function rosterDocument(): FreeformDocument {
   };
 }
 
+function numericEndingPrefixDocument(): FreeformDocument {
+  const document = rosterDocument();
+  return {
+    ...document,
+    performers: [
+      { id: 't11', rankCode: 'T11', displayName: 'T11', section: 'Tenor' },
+      { id: 't12', rankCode: 'T12', displayName: 'T12', section: 'Tenor' },
+    ],
+    sets: document.sets.map((set, index) => ({
+      ...set,
+      positions: index === 0
+        ? { t11: { x: 28800, y: 36000 }, t12: { x: 142200, y: 0 } }
+        : { t11: { x: 259200, y: 118000 }, t12: { x: 142200, y: 0 } },
+    })),
+  };
+}
+
 function ftlDocument(): FreeformDocument {
   return {
     format: 'freeform',
@@ -100,6 +117,35 @@ describe('post-wizard roster editor', () => {
       { x: 259200, y: 118000 },
     ]);
     expect(store.getUndoCommands().at(-1)).toMatchObject({ type: 'performer.create', performer: { rankCode: 'P3' } });
+  });
+
+  it('keeps a numeric-ending setup-wizard prefix and adds its next performer without resetting shaped dots', () => {
+    const store = createCommandStore(numericEndingPrefixDocument());
+
+    expect(listRosterPrefixes(store.getState().document)).toEqual([
+      { prefix: 'T1', section: 'Tenor', nextNumber: 3 },
+    ]);
+    const performer = addPerformerToRosterPrefix(store, 'T1');
+
+    expect(performer).toEqual({ id: 't13', rankCode: 'T13', displayName: 'T13', section: 'Tenor' });
+    expect(store.getState().document.sets.map((set) => set.positions.t13)).toEqual([
+      { x: 144000, y: 76800 },
+      { x: 144000, y: 76800 },
+    ]);
+    expect(store.getState().document.sets.map((set) => set.positions.t11)).toEqual([
+      { x: 28800, y: 36000 },
+      { x: 259200, y: 118000 },
+    ]);
+  });
+
+  it('renders roster guidance and field-center copy as visible muted text', () => {
+    const root = document.createElement('div');
+    renderRoster(root);
+
+    expect(root.textContent).toContain('Add a late arrival to an existing rank-code prefix');
+    expect(root.textContent).toContain('The new dot starts at field center in every existing set.');
+    expect(root.querySelectorAll('p.muted')).toHaveLength(2);
+    expect(root.textContent).not.toContain('muted');
   });
 
   it('saves every changed display name as one atomic batch command from the roster table', () => {

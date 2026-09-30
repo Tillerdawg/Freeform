@@ -20,23 +20,43 @@ export interface RosterEditorOptions {
  * the initial layout has been edited.
  */
 export function listRosterPrefixes(document: FreeformDocument): readonly RosterPrefix[] {
-  const groups = new Map<string, { prefix: string; section?: string; highestNumber: number }>();
+  const groups = new Map<string, {
+    prefix: string;
+    section?: string;
+    highestNumber: number;
+    performerIds: Set<string>;
+    numbers: Set<number>;
+  }>();
   for (const performer of document.performers) {
-    const parts = splitRankCode(performer.rankCode);
-    if (!parts) continue;
-    const key = parts.prefix.toLowerCase();
-    const current = groups.get(key);
-    if (current) {
-      current.highestNumber = Math.max(current.highestNumber, parts.number);
-    } else {
-      groups.set(key, { prefix: parts.prefix, section: performer.section, highestNumber: parts.number });
+    for (const parts of rankCodeCandidates(performer.rankCode)) {
+      const key = parts.prefix.toLowerCase();
+      const current = groups.get(key);
+      if (current) {
+        current.highestNumber = Math.max(current.highestNumber, parts.number);
+        current.performerIds.add(performer.id);
+        current.numbers.add(parts.number);
+      } else {
+        groups.set(key, {
+          prefix: parts.prefix,
+          section: performer.section,
+          highestNumber: parts.number,
+          performerIds: new Set([performer.id]),
+          numbers: new Set([parts.number]),
+        });
+      }
     }
   }
-  return [...groups.values()].map(({ prefix, section, highestNumber }) => ({
-    prefix,
-    section,
-    nextNumber: nextNumber(prefix, highestNumber),
-  }));
+  const exactSequences = [...groups.values()].filter((group) => isSequenceFromOne(group.numbers));
+  const candidates = exactSequences.length > 0 ? exactSequences : [...groups.values()];
+  return candidates
+    .filter((candidate) => !candidates.some((other) => other !== candidate
+      && candidate.performerIds.size < other.performerIds.size
+      && [...candidate.performerIds].every((id) => other.performerIds.has(id))))
+    .map(({ prefix, section, highestNumber }) => ({
+      prefix,
+      section,
+      nextNumber: nextNumber(prefix, highestNumber),
+    }));
 }
 
 /** Adds the next rank-coded performer and covers every existing set at field center. */
@@ -77,7 +97,7 @@ export function renderRosterEditor({ store, onCommitted, setStatus }: RosterEdit
   title.id = 'roster-editor-title';
   panel.append(
     title,
-    textElement('p', 'muted', 'Add a late arrival to an existing rank-code prefix, assign display names, or remove a departed performer. Existing dots are never relaid out.'),
+    textElement('p', 'Add a late arrival to an existing rank-code prefix, assign display names, or remove a departed performer. Existing dots are never relaid out.', 'muted'),
     createAddForm(currentDocument),
     createRosterTable(currentDocument),
   );
@@ -89,7 +109,7 @@ export function renderRosterEditor({ store, onCommitted, setStatus }: RosterEdit
     form.append(textElement('h4', 'Add performer to an existing prefix'));
     const prefixes = listRosterPrefixes(currentDocument);
     if (prefixes.length === 0) {
-      form.append(textElement('p', 'muted', 'Create a numeric rank-coded performer before adding to a roster prefix.'));
+      form.append(textElement('p', 'Create a numeric rank-coded performer before adding to a roster prefix.', 'muted'));
       return form;
     }
     const prefix = select('roster-prefix', 'Existing rank-code prefix', prefixes.map((candidate) => ({
@@ -99,7 +119,7 @@ export function renderRosterEditor({ store, onCommitted, setStatus }: RosterEdit
     form.append(
       labelFor(prefix, 'Existing rank-code prefix'),
       prefix,
-      textElement('p', 'muted', 'The new dot starts at field center in every existing set.'),
+      textElement('p', 'The new dot starts at field center in every existing set.', 'muted'),
       submitButton('Add performer'),
     );
     form.addEventListener('submit', (event) => {
@@ -120,7 +140,7 @@ export function renderRosterEditor({ store, onCommitted, setStatus }: RosterEdit
     form.id = 'roster-display-names';
     form.append(textElement('h4', 'Display names'));
     if (currentDocument.performers.length === 0) {
-      form.append(textElement('p', 'muted', 'The roster is empty.'));
+      form.append(textElement('p', 'The roster is empty.', 'muted'));
       return form;
     }
     const table = document.createElement('table');
@@ -196,11 +216,21 @@ export function renderRosterEditor({ store, onCommitted, setStatus }: RosterEdit
   }
 }
 
-function splitRankCode(rankCode: string): { readonly prefix: string; readonly number: number } | undefined {
-  const match = /^([A-Za-z][A-Za-z0-9_-]*?)(\d+)$/.exec(rankCode);
-  if (!match) return undefined;
-  const number = Number(match[2]);
-  return Number.isSafeInteger(number) ? { prefix: match[1]!, number } : undefined;
+function rankCodeCandidates(rankCode: string): readonly { readonly prefix: string; readonly number: number }[] {
+  const candidates: { prefix: string; number: number }[] = [];
+  for (let suffixStart = 1; suffixStart < rankCode.length; suffixStart += 1) {
+    const prefix = rankCode.slice(0, suffixStart);
+    const suffix = rankCode.slice(suffixStart);
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(prefix) || !/^\d+$/.test(suffix)) continue;
+    const number = Number(suffix);
+    if (Number.isSafeInteger(number)) candidates.push({ prefix, number });
+  }
+  return candidates;
+}
+
+function isSequenceFromOne(numbers: ReadonlySet<number>): boolean {
+  const highestNumber = Math.max(...numbers);
+  return highestNumber === numbers.size && [...numbers].every((number) => number >= 1 && number <= highestNumber);
 }
 
 function nextNumber(prefix: string, highestNumber: number): number {
