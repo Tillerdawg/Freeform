@@ -158,6 +158,22 @@ describe('SVG field editor', () => {
     expect(afterRedo?.document.sets[0]?.positions['performer-1']).toEqual(endDot);
   });
 
+  it('does not commit a move when the browser cancels a drag sequence', () => {
+    editor.snapping.setEnabled(false);
+    const transform = createFieldTransform(store.getState().document.field);
+    const dotGroup = svg.querySelector('[data-performer-id="performer-1"]')!;
+    const startPixel = transform.toPixel({ x: 144000, y: 76800 });
+    const cancelledTarget = transform.toPixel({ x: 60000, y: 40000 });
+
+    firePointerEvent(dotGroup, 'pointerdown', { clientX: startPixel.x, clientY: startPixel.y });
+    firePointerEvent(svg, 'pointermove', { clientX: cancelledTarget.x, clientY: cancelledTarget.y });
+    firePointerEvent(svg, 'pointercancel', { clientX: cancelledTarget.x, clientY: cancelledTarget.y });
+
+    expect(store.getUndoCommands()).toHaveLength(0);
+    expect(store.getState().document.sets[0]?.positions['performer-1']).toEqual({ x: 144000, y: 76800 });
+    expect(editor.root.querySelector('.field-editor__readout')?.textContent).toContain('Drag cancelled');
+  });
+
   it('snaps a dragged position to exactly what snapToQuarterStepGrid produces by default', () => {
     const transform = createFieldTransform(store.getState().document.field);
     const dotGroup = svg.querySelector('[data-performer-id="performer-1"]')!;

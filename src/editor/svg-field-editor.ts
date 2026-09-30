@@ -287,6 +287,17 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
     commitDot(performerId, dot, true);
   }
 
+  function handleSvgPointerCancel(event: PointerEvent): void {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    drag = undefined;
+    svg.releasePointerCapture?.(event.pointerId);
+    // A cancelled pointer sequence has no user-confirmed drop location. Restore
+    // the visual from canonical store state rather than turning cancellation
+    // into an accidental dot.move command.
+    drawField();
+    readout.textContent = 'Drag cancelled; dot position unchanged.';
+  }
+
   function handleEmptyFieldClick(event: PointerEvent): void {
     if (!activePerformerId) {
       setStatus('Choose a performer before placing a dot on the field.');
@@ -336,7 +347,7 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
   svg.addEventListener('pointerdown', handleSvgPointerDown);
   svg.addEventListener('pointermove', handleSvgPointerMove);
   svg.addEventListener('pointerup', handleSvgPointerUp);
-  svg.addEventListener('pointercancel', handleSvgPointerUp);
+  svg.addEventListener('pointercancel', handleSvgPointerCancel);
 
   return {
     root,
