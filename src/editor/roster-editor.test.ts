@@ -9,6 +9,7 @@ import {
   listRosterPrefixes,
   renderRosterEditor,
 } from './roster-editor';
+import { applySetup, createEmptyDocument } from './setup-wizard';
 
 const supportedReport: FeatureReport = {
   supported: true,
@@ -133,6 +134,36 @@ describe('post-wizard roster editor', () => {
       { x: 144000, y: 76800 },
     ]);
     expect(store.getState().document.sets.map((set) => set.positions.t11)).toEqual([
+      { x: 28800, y: 36000 },
+      { x: 259200, y: 118000 },
+    ]);
+  });
+
+  it('keeps a zero-ending wizard prefix as A0 and adds A03 across every set without resetting shaped dots', () => {
+    const store = createCommandStore(createEmptyDocument());
+    applySetup(store, 'Alto Zero', [{ instrument: 'Alto Zero', count: '2', prefix: 'A0' }]);
+    store.apply({ type: 'dot.move', setId: 'set-1', performerId: 'a01', dot: { x: 28800, y: 36000 } });
+    store.apply({
+      type: 'set.create',
+      set: {
+        id: 'set-2', name: 'Set 2', startCount: 16,
+        positions: { a01: { x: 259200, y: 118000 }, a02: { x: 142200, y: 0 } },
+      },
+    });
+
+    expect(listRosterPrefixes(store.getState().document)).toEqual([
+      { prefix: 'A0', section: 'Alto Zero', nextNumber: 3 },
+    ]);
+    const editor = renderRosterEditor({ store, onCommitted: () => {}, setStatus: () => {} });
+    expect(Array.from(editor.querySelector<HTMLSelectElement>('#roster-prefix')!.options).map((option) => option.value)).toEqual(['A0']);
+    const performer = addPerformerToRosterPrefix(store, 'A0');
+
+    expect(performer).toEqual({ id: 'a03', rankCode: 'A03', displayName: 'A03', section: 'Alto Zero' });
+    expect(store.getState().document.sets.map((set) => set.positions.a03)).toEqual([
+      { x: 144000, y: 76800 },
+      { x: 144000, y: 76800 },
+    ]);
+    expect(store.getState().document.sets.map((set) => set.positions.a01)).toEqual([
       { x: 28800, y: 36000 },
       { x: 259200, y: 118000 },
     ]);

@@ -222,6 +222,10 @@ function rankCodeCandidates(rankCode: string): readonly { readonly prefix: strin
     const prefix = rankCode.slice(0, suffixStart);
     const suffix = rankCode.slice(suffixStart);
     if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(prefix) || !/^\d+$/.test(suffix)) continue;
+    // The setup wizard appends canonical decimal sequence numbers. A leading-zero
+    // suffix can therefore only be part of the persisted prefix (A01 is A0 + 1,
+    // not A + 01), otherwise a legal zero-ending prefix would gain a bogus group.
+    if (suffix.length > 1 && suffix.startsWith('0')) continue;
     const number = Number(suffix);
     if (Number.isSafeInteger(number)) candidates.push({ prefix, number });
   }
