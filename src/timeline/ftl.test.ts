@@ -31,6 +31,10 @@ function expectValidationCode(action: () => void, code: FtlValidationError['code
   }
 }
 
+function distanceBetween(first: Dot, second: Dot): number {
+  return Math.hypot(second.x - first.x, second.y - first.y);
+}
+
 describe('FTL fixture replay', () => {
   it('loads the real worked fixture and reproduces hardcoded offsets, D_FU, 8.0-to-5, and E count-16 endpoint', () => {
     const document = loadFixture();
@@ -55,13 +59,22 @@ describe('FTL fixture replay', () => {
     const document = loadFixture();
     const transition = fixtureTransition(document);
     const ftl = transition.ftl!;
-    const sample = sampleFtlTransition(document, transition, 8);
+    const samples = Array.from(
+      { length: transition.counts + 1 },
+      (_, count) => sampleFtlTransition(document, transition, count),
+    );
 
     for (const performerId of ['e', 'd', 'c', 'b', 'a']) {
-      const startOffset = ftl.offsetUnits[performerId]!;
-      const endOffset = startOffset + ftl.distanceUnits;
-      expect(endOffset - startOffset).toBe(28800);
-      expect(sample.positions[performerId]).toEqual(samplePolyline(ftl.path, startOffset + 14400));
+      const countToCountTraversal = samples.slice(1).map((sample, index) => (
+        distanceBetween(samples[index]!.positions[performerId]!, sample.positions[performerId]!)
+      ));
+
+      // The fixture path is a single straight segment, so sampled geometric
+      // traversal equals its arc-length traversal. Checking all 16 intervals
+      // catches a member that stops or marks time partway through the move.
+      expect(countToCountTraversal).toHaveLength(16);
+      expect(countToCountTraversal).toEqual(Array(16).fill(1800));
+      expect(countToCountTraversal.reduce((total, distance) => total + distance, 0)).toBe(ftl.distanceUnits);
     }
   });
 
@@ -84,6 +97,24 @@ describe('FTL validation', () => {
     };
 
     expectValidationCode(() => validateFtlTransition(document, insufficient), 'INSUFFICIENT_FTL_PATH');
+  });
+
+  it('rejects a path short by less than one FU instead of endpoint-clamping samples', () => {
+    const document = loadFixture();
+    const transition = fixtureTransition(document);
+    const pathShortByHalfFu: Transition = {
+      ...transition,
+      ftl: {
+        ...transition.ftl!,
+        // Its diagonal length is less than the required 57600 FU by under
+        // 1 FU, yet C(max(offset) + D) remains undefined and must reject.
+        path: [{ x: 144000, y: 51200 }, { x: 86401, y: 51207 }],
+      },
+    };
+
+    expectValidationCode(() => validateFtlTransition(document, pathShortByHalfFu), 'INSUFFICIENT_FTL_PATH');
+    expectValidationCode(() => sampleFtlTransition(document, pathShortByHalfFu, 16), 'INSUFFICIENT_FTL_PATH');
+    expectValidationCode(() => samplePolyline(pathShortByHalfFu.ftl!.path, 57600), 'INSUFFICIENT_FTL_PATH');
   });
 
   it('flags a mismatched expected end with FTL_END_MISMATCH and blocks FTL sampling/playback', () => {

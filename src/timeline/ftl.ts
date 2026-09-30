@@ -2,7 +2,14 @@ import { FIVE_YARDS_FU, assertValidDot } from '../geometry/nfhs';
 import { validateTransitionTopology } from '../document/sets';
 import type { Dot, FreeformDocument, FtlDefinition, Identifier, Transition } from '../document/types';
 
-const EPSILON_FU = 1;
+/** Geometric equivalence threshold mandated for start/end dot comparisons. */
+const POSITION_TOLERANCE_FU = 1;
+/**
+ * Arc-length domain checks have no semantic one-FU grace period. This only
+ * absorbs IEEE-754 rounding at a segment boundary; a path that is genuinely
+ * short by any positive, meaningful amount cannot be sampled or validated.
+ */
+const ARC_LENGTH_EPSILON_FU = 1e-9;
 
 export type FtlValidationCode =
   | 'FTL_END_MISMATCH'
@@ -50,7 +57,7 @@ export function projectDotOntoPolyline(path: readonly Dot[], dot: Dot): readonly
   const segments = makeSegments(path);
   const candidates = segments.map((segment) => projectOntoSegment(segment, dot));
   const nearestDistance = Math.min(...candidates.map((candidate) => candidate.distanceFU));
-  const tied = candidates.filter((candidate) => candidate.distanceFU <= nearestDistance + EPSILON_FU);
+  const tied = candidates.filter((candidate) => candidate.distanceFU <= nearestDistance + POSITION_TOLERANCE_FU);
   return deduplicateProjections(tied);
 }
 
@@ -91,11 +98,15 @@ export function deriveFtlOffsets(
 
 export function samplePolyline(path: readonly Dot[], offsetUnits: number): Dot {
   const segments = makeSegments(path);
-  if (!Number.isFinite(offsetUnits) || offsetUnits < -EPSILON_FU || offsetUnits > segments.at(-1)!.endOffset + EPSILON_FU) {
+  if (
+    !Number.isFinite(offsetUnits)
+    || offsetUnits < -ARC_LENGTH_EPSILON_FU
+    || offsetUnits > segments.at(-1)!.endOffset + ARC_LENGTH_EPSILON_FU
+  ) {
     throw new FtlValidationError('INSUFFICIENT_FTL_PATH', `Path does not define offset ${offsetUnits}.`);
   }
   const clampedOffset = Math.max(0, Math.min(segments.at(-1)!.endOffset, offsetUnits));
-  const segment = segments.find((candidate) => clampedOffset <= candidate.endOffset + EPSILON_FU)!;
+  const segment = segments.find((candidate) => clampedOffset <= candidate.endOffset + ARC_LENGTH_EPSILON_FU)!;
   const localOffset = Math.max(0, Math.min(segment.length, clampedOffset - segment.startOffset));
   const ratio = localOffset / segment.length;
   return {
@@ -194,13 +205,13 @@ function validateFtlCore(
 
   const pathLength = makeSegments(ftl.path).at(-1)!.endOffset;
   const maxOffset = Math.max(...members.map((id) => ftl.offsetUnits[id]!));
-  if (pathLength + EPSILON_FU < maxOffset + ftl.distanceUnits) {
+  if (pathLength + ARC_LENGTH_EPSILON_FU < maxOffset + ftl.distanceUnits) {
     throw new FtlValidationError('INSUFFICIENT_FTL_PATH', 'Path must cover every formation offset plus the common travel distance.');
   }
   for (const memberId of members) {
     const start = from.positions[memberId]!;
     const derivedStart = samplePolyline(ftl.path, ftl.offsetUnits[memberId]!);
-    if (distanceBetween(start, derivedStart) > EPSILON_FU) {
+    if (distanceBetween(start, derivedStart) > POSITION_TOLERANCE_FU) {
       throw new FtlValidationError('FTL_START_MISMATCH', `Start dot for ${memberId} does not match its FTL path offset within 1 FU.`);
     }
   }
@@ -217,7 +228,7 @@ function validateFtlExpectedEnds(transition: Transition): void {
   for (const memberId of members) {
     const expected = ftl.expectedEndPositions[memberId]!;
     const derived = samplePolyline(ftl.path, ftl.offsetUnits[memberId]! + ftl.distanceUnits);
-    if (distanceBetween(expected, derived) > EPSILON_FU) {
+    if (distanceBetween(expected, derived) > POSITION_TOLERANCE_FU) {
       throw new FtlValidationError('FTL_END_MISMATCH', `Expected end dot for ${memberId} does not match the derived FTL end within 1 FU.`);
     }
   }
