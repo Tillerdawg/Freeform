@@ -9,6 +9,7 @@ import { inspectCoordinate, NFHS_11_PLAYER_FIELD } from '../geometry/nfhs';
 import type { FeatureReport } from '../platform/features';
 import { renderSvgFieldEditor, type SvgFieldEditor } from './svg-field-editor';
 import { createTimelinePanel } from '../timeline/timeline-panel';
+import { renderRosterEditor } from './roster-editor';
 
 export interface DotEditorOptions {
   readonly store: CommandStore;
@@ -125,6 +126,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       fieldEditor.root,
     );
     editor.append(fieldSection);
+    editor.append(renderRosterEditor({ store, onCommitted: render, setStatus: setMessage }));
 
     const controls = element('div', 'editor-controls');
     controls.append(createPerformerForm(render, setMessage), createDotForm(render, setMessage));

@@ -62,7 +62,12 @@ section section {
 }
 
 .editor-form h3 { margin: 0 0 0.25rem; font-size: 1rem; }
+.editor-form h4, .roster-editor__table h4 { margin: 0 0 0.25rem; font-size: 1rem; }
 .editor-form label { color: #b7c5d7; font-size: 0.85rem; }
+.roster-editor { display: grid; gap: 1rem; }
+.roster-editor__table { display: grid; gap: 0.75rem; }
+.roster-editor__table input { width: 100%; }
+.roster-remove { background: #783d3b; }
 .setup-wizard {
   display: grid;
   gap: 1rem;
