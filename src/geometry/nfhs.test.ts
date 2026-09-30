@@ -61,6 +61,13 @@ describe('coordinate derivation golden labels', () => {
       .toBe('1 Step Outside Side 1 40, On Front Hash');
   });
 
+  it('labels both sides of a nonzero 50-yard-line offset unambiguously', () => {
+    expect(inspectCoordinate({ x: 140400, y: 51200 }).notation)
+      .toBe('2 Steps Outside 50 (Side 1), On Front Hash');
+    expect(inspectCoordinate({ x: 147600, y: 51200 }).notation)
+      .toBe('2 Steps Outside 50 (Side 2), On Front Hash');
+  });
+
   it('labels In Front Of and Behind directions', () => {
     expect(inspectCoordinate({ x: 144000, y: 49400 }).notation)
       .toBe('On 50, 1 Step In Front Of Front Hash');

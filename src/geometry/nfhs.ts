@@ -98,6 +98,14 @@ function inspectHorizontal(x: number): CoordinateInspection['horizontal'] {
     return { notation: `On ${lineLabel(line)}`, rawDistance: rawStepDistance(0) };
   }
 
+  if (line === NFHS_11_PLAYER_FIELD.lengthUnits / 2) {
+    const side = x < line ? 'Side 1' : 'Side 2';
+    return {
+      notation: `${formatRoundedSteps(distance)} Outside 50 (${side})`,
+      rawDistance: rawStepDistance(distance),
+    };
+  }
+
   const direction = towardFifty(x, line) ? 'Inside' : 'Outside';
   return {
     notation: `${formatRoundedSteps(distance)} ${direction} ${lineLabel(line)}`,

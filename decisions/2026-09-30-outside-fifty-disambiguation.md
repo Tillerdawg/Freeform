@@ -1,0 +1,5 @@
+# Outside-50 coordinate disambiguation
+
+Status: accepted normative specification correction for Kanban task `t_d6773cd2`.
+
+DECISION | J | Outside-50 horizontal coordinate notation | After Huffer's independent review identified that a nonzero offset from midfield rendered as the same bare `Outside 50` string on both sides, authorize correcting §3.2 and §3.3 to require `<steps> Outside 50 (Side 1)` for `x < 144000` and `<steps> Outside 50 (Side 2)` for `x > 144000`; structured entry must require that side selector for a 50-line offset | The 50 has no side of its own, so a bare `Outside 50` cannot identify which side of midfield contains the dot and is non-bijective; this is a narrow normative correction to make the coordinate grammar deterministic | Existing exact `On 50`, non-50 Inside/Outside, and Splitting notation are unchanged. Inspection, structured coordinate building, UI controls, and executable documentation tests must produce and accept the explicit-side notation; bare `Outside 50` is no longer valid structured notation.

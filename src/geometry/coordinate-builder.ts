@@ -8,6 +8,7 @@ import {
 
 export type LandmarkName = 'Front Sideline' | 'Front Hash' | 'Back Hash' | 'Back Sideline';
 export type HorizontalDirection = 'Inside' | 'Outside';
+export type FiftySide = 'Side 1' | 'Side 2';
 export type VerticalDirection = 'In Front Of' | 'Behind';
 
 export interface OnLineInput {
@@ -28,6 +29,8 @@ export interface HorizontalOffsetInput {
   /** A positive integer number of quarter steps, not a floating-point step value. */
   readonly quarterSteps: number;
   readonly direction: HorizontalDirection;
+  /** Required only for an Outside offset from the 50-yard line. */
+  readonly fiftySide?: FiftySide;
 }
 
 export type HorizontalCoordinateInput = OnLineInput | SplittingInput | HorizontalOffsetInput;
@@ -128,7 +131,22 @@ function buildHorizontal(input: HorizontalCoordinateInput): number {
       assertFiveYardLine(input.line);
       assertPositiveQuarterSteps(input.quarterSteps);
       if (input.line === 50) {
-        throw new RangeError('Offset direction from the 50-yard line is ambiguous; use an adjacent five-yard line.');
+        if (input.direction !== 'Outside') {
+          throw new RangeError('50-yard line offsets are always Outside; specify Side 1 or Side 2.');
+        }
+        if (input.fiftySide !== 'Side 1' && input.fiftySide !== 'Side 2') {
+          throw new RangeError('50-yard line offsets require a Side 1 or Side 2 selector.');
+        }
+        const line = input.line * NFHS_11_PLAYER_FIELD.unitsPerYard;
+        const direction = input.fiftySide === 'Side 1' ? -1 : 1;
+        const x = line + direction * input.quarterSteps * FU_PER_QUARTER_STEP;
+        if (Math.abs(x - line) * 2 >= FIVE_YARDS_FU) {
+          throw new RangeError('Offset reaches or crosses a splitting point; use Splitting or a nearer yard line.');
+        }
+        return x;
+      }
+      if (input.fiftySide !== undefined) {
+        throw new RangeError('A Side 1 or Side 2 selector applies only to 50-yard line offsets.');
       }
       const line = input.line * NFHS_11_PLAYER_FIELD.unitsPerYard;
       const towardFifty = input.line < 50 ? 1 : -1;

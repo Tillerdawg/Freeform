@@ -57,6 +57,9 @@ def coordinate_horizontal(x_fu):
     _, line = distances[0]
     if x_fu == line:
         return f"On {line_label(line)}"
+    if line == 50 * FU_PER_YARD:
+        side = "Side 1" if x_fu < line else "Side 2"
+        return f"{format_steps(abs(x_fu - line))} Outside 50 ({side})"
     direction = "Inside" if ((line < 50 * FU_PER_YARD and x_fu > line) or
                              (line > 50 * FU_PER_YARD and x_fu < line)) else "Outside"
     return f"{format_steps(abs(x_fu - line))} {direction} {line_label(line)}"
@@ -84,6 +87,8 @@ def test_coordinate_grammar():
         ((113400, 51200), "1 Step Outside Side 1 40, On Front Hash", "outside offset"),
         ((171000, 51200), "1 Step Inside Side 2 40, On Front Hash", "Side 2 inside offset"),
         ((174600, 51200), "1 Step Outside Side 2 40, On Front Hash", "Side 2 outside offset"),
+        ((140400, 51200), "2 Steps Outside 50 (Side 1), On Front Hash", "50 Side 1 outside offset"),
+        ((147600, 51200), "2 Steps Outside 50 (Side 2), On Front Hash", "50 Side 2 outside offset"),
         ((115200, 25600), "On Side 1 40, 14.25 Steps Behind Front Sideline", "front sideline/front hash tie"),
         ((115200, 76800), "On Side 1 40, 14.25 Steps Behind Front Hash", "front hash/back hash tie"),
         ((115200, 128000), "On Side 1 40, 14.25 Steps Behind Back Hash", "back hash/back sideline tie"),
@@ -180,9 +185,9 @@ def test_collision_sampling_worked_example():
 def test_spec_text_matches_golden_grammar():
     spec = (Path(__file__).resolve().parent / "freeform-mvp-spec-v1.md").read_text(encoding="utf-8")
     required = (
-        "The exact horizontal grammar is one of `On <line>`, `Splitting <lower-line> & <higher-line>`, or `<steps> Inside <line>` / `<steps> Outside <line>`",
+        "The exact horizontal grammar is one of `On <line>`, `Splitting <lower-line> & <higher-line>`, `<steps> Inside <line>` / `<steps> Outside <line>` for a non-50 line, or `<steps> Outside 50 (Side 1|Side 2)` for a nonzero offset from the 50.",
         'horizontal = "Splitting " + labels(neighbors) # each label includes Side 1/Side 2 or is 50',
-        'horizontal = d + (toward50(dot.x,line) ? " Inside " : " Outside ") + label(line)',
+        'if line == 50: horizontal = d + " Outside 50 (" + (dot.x < line ? "Side 1" : "Side 2") + ")"',
         "Splitting Side 1 40 & Side 1 45, 4 Steps In Front Of Front Hash",
         "At `t=4/8`, both centers are `(7200,0)`, so the distance is `0 FU <= 2880 FU`",
     )

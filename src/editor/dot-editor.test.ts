@@ -18,6 +18,7 @@ function formValues(overrides: Partial<DotEditorCoordinateValues> = {}): DotEdit
     splittingHigher: '45',
     horizontalSteps: '1',
     horizontalDirection: 'Inside',
+    horizontalFiftySide: 'side-1',
     verticalMode: 'landmark',
     landmark: 'Front Hash',
     verticalSteps: '1',
@@ -73,6 +74,18 @@ describe('structured dot-editor form conversion', () => {
       verticalMode: 'offset',
       verticalDirection: 'Behind',
     }))).toEqual({ x: 171000, y: 53000 });
+    expect(buildDotFromEditorValues(formValues({
+      horizontalMode: 'offset',
+      side: '50',
+      horizontalSteps: '2',
+      horizontalFiftySide: 'side-1',
+    }))).toEqual({ x: 140400, y: 51200 });
+    expect(buildDotFromEditorValues(formValues({
+      horizontalMode: 'offset',
+      side: '50',
+      horizontalSteps: '2',
+      horizontalFiftySide: 'side-2',
+    }))).toEqual({ x: 147600, y: 51200 });
     expect(buildDotFromEditorValues(formValues({ useRawFu: true, x: '225', y: '25600' }))).toEqual({ x: 225, y: 25600 });
   });
 

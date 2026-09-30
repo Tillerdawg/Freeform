@@ -26,6 +26,7 @@ export interface DotEditorCoordinateValues {
   readonly splittingHigher: string;
   readonly horizontalSteps: string;
   readonly horizontalDirection: 'Inside' | 'Outside';
+  readonly horizontalFiftySide: 'side-1' | 'side-2';
   readonly verticalMode: string;
   readonly landmark: string;
   readonly verticalSteps: string;
@@ -45,6 +46,7 @@ export function buildDotFromEditorValues(values: DotEditorCoordinateValues): Dot
       values.splittingHigher,
       values.horizontalSteps,
       values.horizontalDirection,
+      values.horizontalFiftySide,
     ),
     vertical: values.verticalMode === 'landmark'
       ? { kind: 'landmark', landmark: values.landmark as 'Front Sideline' | 'Front Hash' | 'Back Hash' | 'Back Sideline' }
@@ -198,20 +200,31 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     horizontalSteps.value = '1';
     const inside = radio('horizontal-direction', 'Inside', 'Inside', true);
     const outside = radio('horizontal-direction', 'Outside', 'Outside');
-    const horizontalOffsetControls = element('div');
-    horizontalOffsetControls.append(
-      labelFor(horizontalSteps, 'Steps (multiples of 0.25)'), horizontalSteps,
+    const horizontalStepControls = element('div');
+    horizontalStepControls.append(labelFor(horizontalSteps, 'Steps (multiples of 0.25)'), horizontalSteps);
+    const horizontalDirectionControls = element('div');
+    horizontalDirectionControls.append(
       textElement('p', 'muted', 'Direction'),
       labelFor(inside, 'Inside'), inside,
       labelFor(outside, 'Outside'), outside,
     );
+    const horizontalOffsetControls = element('div');
+    horizontalOffsetControls.append(horizontalStepControls, horizontalDirectionControls);
     const splittingControls = element('div');
     splittingControls.append(
       labelFor(splittingLower, 'Splitting line nearer Side 1'), splittingLower,
       labelFor(splittingHigher, 'Splitting line nearer Side 2'), splittingHigher,
     );
+    const yardLineControls = element('div');
+    yardLineControls.append(labelFor(lineYard, 'Yard line'), lineYard);
     const singleLineControls = element('div');
-    singleLineControls.append(labelFor(side, 'Side'), side, labelFor(lineYard, 'Yard line'), lineYard);
+    singleLineControls.append(labelFor(side, 'Side'), side, yardLineControls);
+    const fiftySide = select('horizontal-fifty-side', 'Side from 50', [
+      { value: 'side-1', label: 'Side 1' },
+      { value: 'side-2', label: 'Side 2' },
+    ]);
+    const fiftyOffsetControls = element('div');
+    fiftyOffsetControls.append(labelFor(fiftySide, 'Side from 50'), fiftySide);
 
     const verticalMode = select('vertical-mode', 'Vertical placement', [
       { value: 'landmark', label: 'On landmark' },
@@ -261,8 +274,10 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       horizontalOffsetControls.hidden = horizontalMode.value !== 'offset';
       verticalOffsetControls.hidden = verticalMode.value !== 'offset';
       const fiftyOffset = horizontalMode.value === 'offset' && side.value === '50';
-      horizontalOffsetControls.hidden = horizontalMode.value !== 'offset' || fiftyOffset;
-      if (fiftyOffset) setStatus('Offset direction from the 50-yard line is ambiguous; choose an adjacent five-yard line.');
+      yardLineControls.hidden = side.value === '50';
+      horizontalOffsetControls.hidden = horizontalMode.value !== 'offset';
+      horizontalDirectionControls.hidden = fiftyOffset;
+      fiftyOffsetControls.hidden = !fiftyOffset;
     };
     horizontalMode.addEventListener('change', updateVisibleControls);
     side.addEventListener('change', updateVisibleControls);
@@ -276,6 +291,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       singleLineControls,
       splittingControls,
       horizontalOffsetControls,
+      fiftyOffsetControls,
       labelFor(verticalMode, 'Vertical placement'), verticalMode,
       labelFor(landmark, 'Landmark'), landmark,
       verticalOffsetControls,
@@ -301,6 +317,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
           splittingHigher: splittingHigher.value,
           horizontalSteps: horizontalSteps.value,
           horizontalDirection: inside.checked ? 'Inside' : 'Outside',
+          horizontalFiftySide: fiftySide.value as 'side-1' | 'side-2',
           verticalMode: verticalMode.value,
           landmark: landmark.value,
           verticalSteps: verticalSteps.value,
@@ -388,13 +405,18 @@ function horizontalInput(
   splittingHigher: string,
   steps: string,
   direction: 'Inside' | 'Outside',
+  fiftySide: 'side-1' | 'side-2',
 ): HorizontalCoordinateInput {
   if (mode === 'splitting') {
     return { kind: 'splitting', lowerLine: Number(splittingLower), higherLine: Number(splittingHigher) };
   }
   const line = yardLineFromSide(side, lineYard);
   if (mode === 'line') return { kind: 'line', line };
-  if (mode === 'offset') return { kind: 'offset', line, quarterSteps: parseQuarterSteps(steps), direction };
+  if (mode === 'offset') {
+    return line === 50
+      ? { kind: 'offset', line, quarterSteps: parseQuarterSteps(steps), direction: 'Outside', fiftySide: fiftySide === 'side-1' ? 'Side 1' : 'Side 2' }
+      : { kind: 'offset', line, quarterSteps: parseQuarterSteps(steps), direction };
+  }
   throw new RangeError(`Unknown horizontal placement mode: ${mode}`);
 }
 

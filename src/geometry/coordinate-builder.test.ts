@@ -79,6 +79,24 @@ const exactGoldenVectors: readonly GoldenVector[] = [
     notation: '1 Step Outside Side 1 40, On Front Hash',
   },
   {
+    name: 'a Side 1 Outside offset from the 50',
+    input: {
+      horizontal: { kind: 'offset', line: 50, quarterSteps: 8, direction: 'Outside', fiftySide: 'Side 1' },
+      vertical: { kind: 'landmark', landmark: 'Front Hash' },
+    },
+    dot: { x: 140400, y: 51200 },
+    notation: '2 Steps Outside 50 (Side 1), On Front Hash',
+  },
+  {
+    name: 'a Side 2 Outside offset from the 50',
+    input: {
+      horizontal: { kind: 'offset', line: 50, quarterSteps: 8, direction: 'Outside', fiftySide: 'Side 2' },
+      vertical: { kind: 'landmark', landmark: 'Front Hash' },
+    },
+    dot: { x: 147600, y: 51200 },
+    notation: '2 Steps Outside 50 (Side 2), On Front Hash',
+  },
+  {
     name: 'an In Front Of offset',
     input: {
       horizontal: { kind: 'line', line: 50 },
@@ -106,7 +124,7 @@ describe('derived coordinate builder exact round trips', () => {
     expect(inspectCoordinate(built).notation).toBe(notation);
   });
 
-  it('rejects structurally invalid, ambiguous, and out-of-field notation', () => {
+  it('rejects structurally invalid and out-of-field notation', () => {
     expect(() => buildCoordinate({
       horizontal: { kind: 'splitting', lowerLine: 40, higherLine: 50 },
       vertical: { kind: 'landmark', landmark: 'Front Hash' },
@@ -114,7 +132,11 @@ describe('derived coordinate builder exact round trips', () => {
     expect(() => buildCoordinate({
       horizontal: { kind: 'offset', line: 50, quarterSteps: 1, direction: 'Outside' },
       vertical: { kind: 'landmark', landmark: 'Front Hash' },
-    })).toThrow('ambiguous');
+    })).toThrow('Side 1 or Side 2');
+    expect(() => buildCoordinate({
+      horizontal: { kind: 'offset', line: 50, quarterSteps: 1, direction: 'Inside', fiftySide: 'Side 1' },
+      vertical: { kind: 'landmark', landmark: 'Front Hash' },
+    })).toThrow('always Outside');
     expect(() => buildCoordinate({
       horizontal: { kind: 'offset', line: 40, quarterSteps: 16, direction: 'Inside' },
       vertical: { kind: 'landmark', landmark: 'Front Hash' },
