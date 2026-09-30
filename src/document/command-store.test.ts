@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createCommandStore } from './command-store';
+import { buildCoordinate } from '../geometry/coordinate-builder';
 import { validateDocumentSetsAndTransitions } from './sets';
 import type { FreeformDocument } from './types';
 
@@ -108,6 +109,19 @@ describe('document command store', () => {
     });
 
     expect(moved.document.sets[0]?.positions['performer-1']).toEqual({ x: 122400, y: 44000 });
+    expect(store.undo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 144000, y: 76800 });
+    expect(store.redo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 122400, y: 44000 });
+  });
+
+  it('moves a derived coordinate through the same command and undo/redo boundary', () => {
+    const store = createCommandStore(makeDocument());
+    const dot = buildCoordinate({
+      horizontal: { kind: 'splitting', lowerLine: 40, higherLine: 45 },
+      vertical: { kind: 'offset', landmark: 'Front Hash', quarterSteps: 16, direction: 'In Front Of' },
+    });
+
+    store.apply({ type: 'dot.move', setId: 'set-1', performerId: 'performer-1', dot });
+    expect(store.getState().document.sets[0]?.positions['performer-1']).toEqual({ x: 122400, y: 44000 });
     expect(store.undo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 144000, y: 76800 });
     expect(store.redo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 122400, y: 44000 });
   });

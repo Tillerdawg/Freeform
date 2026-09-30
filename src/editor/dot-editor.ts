@@ -1,4 +1,9 @@
 import type { CommandStore } from '../document/types';
+import {
+  buildCoordinate,
+  parseQuarterSteps,
+  type HorizontalCoordinateInput,
+} from '../geometry/coordinate-builder';
 import { inspectCoordinate, NFHS_11_PLAYER_FIELD } from '../geometry/nfhs';
 import type { FeatureReport } from '../platform/features';
 import { createTimelinePanel } from '../timeline/timeline-panel';
@@ -128,31 +133,138 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       'Performer',
       store.getState().document.performers.map((performer) => ({ value: performer.id, label: `${performer.rankCode} — ${performer.displayName}` })),
     );
+    const horizontalMode = select('horizontal-mode', 'Horizontal placement', [
+      { value: 'line', label: 'On yard line' },
+      { value: 'splitting', label: 'Splitting adjacent lines' },
+      { value: 'offset', label: 'Inside / Outside yard line' },
+    ]);
+    const side = select('horizontal-side', 'Side', [
+      { value: 'side-1', label: 'Side 1' },
+      { value: 'side-2', label: 'Side 2' },
+      { value: '50', label: '50' },
+    ]);
+    const lineYard = select('horizontal-yard-line', 'Yard line', yardOptions(0, 45));
+    const splittingLower = select('splitting-lower-line', 'Splitting lower line', yardOptions(0, 95));
+    const splittingHigher = select('splitting-higher-line', 'Splitting higher line', yardOptions(5, 100));
+    splittingLower.value = '40';
+    splittingHigher.value = '45';
+    const horizontalSteps = input('horizontal-steps', 'Steps', 'number');
+    horizontalSteps.min = '0.25';
+    horizontalSteps.step = '0.25';
+    horizontalSteps.value = '1';
+    const inside = radio('horizontal-direction', 'Inside', 'Inside', true);
+    const outside = radio('horizontal-direction', 'Outside', 'Outside');
+    const horizontalOffsetControls = element('div');
+    horizontalOffsetControls.append(
+      labelFor(horizontalSteps, 'Steps (multiples of 0.25)'), horizontalSteps,
+      textElement('p', 'muted', 'Direction'),
+      labelFor(inside, 'Inside'), inside,
+      labelFor(outside, 'Outside'), outside,
+    );
+    const splittingControls = element('div');
+    splittingControls.append(
+      labelFor(splittingLower, 'Splitting lower line'), splittingLower,
+      labelFor(splittingHigher, 'Splitting higher line'), splittingHigher,
+    );
+
+    const verticalMode = select('vertical-mode', 'Vertical placement', [
+      { value: 'landmark', label: 'On landmark' },
+      { value: 'offset', label: 'In Front Of / Behind landmark' },
+    ]);
+    const landmark = select('vertical-landmark', 'Landmark', [
+      { value: 'Front Sideline', label: 'Front Sideline' },
+      { value: 'Front Hash', label: 'Front Hash' },
+      { value: 'Back Hash', label: 'Back Hash' },
+      { value: 'Back Sideline', label: 'Back Sideline' },
+    ]);
+    landmark.value = 'Front Hash';
+    const verticalSteps = input('vertical-steps', 'Steps', 'number');
+    verticalSteps.min = '0.25';
+    verticalSteps.step = '0.25';
+    verticalSteps.value = '1';
+    const inFrontOf = radio('vertical-direction', 'In Front Of', 'In Front Of', true);
+    const behind = radio('vertical-direction', 'Behind', 'Behind');
+    const verticalOffsetControls = element('div');
+    verticalOffsetControls.append(
+      labelFor(verticalSteps, 'Steps (multiples of 0.25)'), verticalSteps,
+      textElement('p', 'muted', 'Direction'),
+      labelFor(inFrontOf, 'In Front Of'), inFrontOf,
+      labelFor(behind, 'Behind'), behind,
+    );
+
+    const advanced = element('details');
+    advanced.append(textElement('summary', undefined, 'Advanced: exact raw FU entry'));
+    const useRawFu = input('use-raw-fu', 'Use raw FU entry', 'checkbox');
     const x = input('dot-x', 'X (FU)', 'number');
-    x.required = true;
     x.min = '0';
     x.max = String(NFHS_11_PLAYER_FIELD.lengthUnits);
     x.step = '1';
     const y = input('dot-y', 'Y (FU)', 'number');
-    y.required = true;
     y.min = '0';
     y.max = String(NFHS_11_PLAYER_FIELD.widthUnits);
     y.step = '1';
+    advanced.append(
+      labelFor(useRawFu, 'Use raw FU instead of the derived coordinate'), useRawFu,
+      labelFor(x, 'X (FU)'), x,
+      labelFor(y, 'Y (FU)'), y,
+    );
+
+    const updateVisibleControls = (): void => {
+      splittingControls.hidden = horizontalMode.value !== 'splitting';
+      horizontalOffsetControls.hidden = horizontalMode.value !== 'offset';
+      verticalOffsetControls.hidden = verticalMode.value !== 'offset';
+      const fiftyOffset = horizontalMode.value === 'offset' && side.value === '50';
+      horizontalOffsetControls.hidden = horizontalMode.value !== 'offset' || fiftyOffset;
+      if (fiftyOffset) setStatus('Offset direction from the 50-yard line is ambiguous; choose an adjacent five-yard line.');
+    };
+    horizontalMode.addEventListener('change', updateVisibleControls);
+    side.addEventListener('change', updateVisibleControls);
+    verticalMode.addEventListener('change', updateVisibleControls);
+
     form.append(
       labelFor(setId, 'Set'), setId,
       labelFor(performerId, 'Performer'), performerId,
-      labelFor(x, 'X (FU)'), x,
-      labelFor(y, 'Y (FU)'), y,
+      textElement('h4', undefined, 'Derived coordinate'),
+      labelFor(horizontalMode, 'Horizontal placement'), horizontalMode,
+      labelFor(side, 'Side'), side,
+      labelFor(lineYard, 'Yard line'), lineYard,
+      splittingControls,
+      horizontalOffsetControls,
+      labelFor(verticalMode, 'Vertical placement'), verticalMode,
+      labelFor(landmark, 'Landmark'), landmark,
+      verticalOffsetControls,
+      advanced,
       submit('Place dot'),
     );
+    updateVisibleControls();
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       const selectedSet = setId.value;
       const selectedPerformer = performerId.value;
-      const dot = { x: Number(x.value), y: Number(y.value) };
       const set = store.getState().document.sets.find((candidate) => candidate.id === selectedSet);
       const existing = Boolean(set && selectedPerformer in set.positions);
       try {
+        const dot = useRawFu.checked
+          ? rawDot(x.value, y.value)
+          : buildCoordinate({
+            horizontal: horizontalInput(
+              horizontalMode.value,
+              side.value,
+              lineYard.value,
+              splittingLower.value,
+              splittingHigher.value,
+              horizontalSteps.value,
+              inside.checked ? 'Inside' : 'Outside',
+            ),
+            vertical: verticalMode.value === 'landmark'
+              ? { kind: 'landmark', landmark: landmark.value as 'Front Sideline' | 'Front Hash' | 'Back Hash' | 'Back Sideline' }
+              : {
+                kind: 'offset',
+                landmark: landmark.value as 'Front Sideline' | 'Front Hash' | 'Back Hash' | 'Back Sideline',
+                quarterSteps: parseQuarterSteps(verticalSteps.value),
+                direction: inFrontOf.checked ? 'In Front Of' : 'Behind',
+              },
+          });
         store.apply({
           type: existing ? 'dot.move' : 'dot.create',
           setId: selectedSet,
@@ -213,6 +325,44 @@ function rawDistance(distance: { readonly units: number; readonly numeratorUnits
   return `${distance.units} FU; ${distance.numeratorUnits}/${distance.denominatorUnits} steps`;
 }
 
+function yardOptions(start: number, end: number): readonly { readonly value: string; readonly label: string }[] {
+  const options: { value: string; label: string }[] = [];
+  for (let yard = start; yard <= end; yard += 5) options.push({ value: String(yard), label: `${yard}` });
+  return options;
+}
+
+function horizontalInput(
+  mode: string,
+  side: string,
+  lineYard: string,
+  splittingLower: string,
+  splittingHigher: string,
+  steps: string,
+  direction: 'Inside' | 'Outside',
+): HorizontalCoordinateInput {
+  if (mode === 'splitting') {
+    return { kind: 'splitting', lowerLine: Number(splittingLower), higherLine: Number(splittingHigher) };
+  }
+  const line = yardLineFromSide(side, lineYard);
+  if (mode === 'line') return { kind: 'line', line };
+  if (mode === 'offset') return { kind: 'offset', line, quarterSteps: parseQuarterSteps(steps), direction };
+  throw new RangeError(`Unknown horizontal placement mode: ${mode}`);
+}
+
+function yardLineFromSide(side: string, yard: string): number {
+  const line = Number(yard);
+  if (!Number.isInteger(line)) throw new RangeError('Choose a valid yard line.');
+  if (side === 'side-1') return line;
+  if (side === 'side-2') return 100 - line;
+  if (side === '50') return 50;
+  throw new RangeError(`Unknown side: ${side}`);
+}
+
+function rawDot(x: string, y: string): { readonly x: number; readonly y: number } {
+  if (x.trim() === '' || y.trim() === '') throw new RangeError('Raw FU entry requires both X and Y.');
+  return { x: Number(x), y: Number(y) };
+}
+
 function element<K extends keyof HTMLElementTagNameMap>(tagName: K, className?: string): HTMLElementTagNameMap[K] {
   const item = document.createElement(tagName);
   if (className) item.className = className;
@@ -238,6 +388,14 @@ function input(id: string, labelText: string, type: string): HTMLInputElement {
   field.type = type;
   field.setAttribute('aria-label', labelText);
   field.placeholder = labelText;
+  return field;
+}
+
+function radio(name: string, id: string, value: string, checked = false): HTMLInputElement {
+  const field = input(id, value, 'radio');
+  field.name = name;
+  field.value = value;
+  field.checked = checked;
   return field;
 }
 
