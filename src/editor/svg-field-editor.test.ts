@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createCommandStore } from '../document/command-store';
-import type { CommandStore, DocumentCommand, DocumentState, Dot, FreeformDocument } from '../document/types';
+import type { FreeformDocument } from '../document/types';
 import { snapToQuarterStepGrid } from '../geometry/coordinate-builder';
 import { inspectCoordinate } from '../geometry/nfhs';
 import { createFieldTransform } from './field-geometry';
@@ -247,116 +247,24 @@ describe('SVG field editor', () => {
     expect(readout?.textContent).toContain('snap off');
   });
 
-  it('rejects a click for a performer that already has a dot in the active set without creating a duplicate', () => {
+  it('clicking a field position moves the selected performer via dot.move and supports undo/redo', () => {
     editor.setActivePerformerId('performer-1');
-    const transform = createFieldTransform(store.getState().document.field);
-    const pixel = transform.toPixel({ x: 10000, y: 10000 });
-
-    firePointerEvent(svg, 'pointerdown', { clientX: pixel.x, clientY: pixel.y });
-    firePointerEvent(svg, 'pointerup', { clientX: pixel.x, clientY: pixel.y });
-
-    expect(store.getUndoCommands()).toHaveLength(0);
-    expect(statuses.some((message) => message.includes('already has a dot'))).toBe(true);
-  });
-});
-
-/**
- * The production CommandStore (src/document/command-store.ts) enforces
- * complete set coverage — every performer has a dot in every existing set —
- * at construction and after every applied command (see makeState ->
- * validateDocumentSetsAndTransitions). This is verified directly above: a
- * document with any performer missing a dot from an existing set throws at
- * createCommandStore() construction, and performer.create requires a dot for
- * every existing set atomically. Consequently there is no reachable sequence
- * of real commands that leaves an existing performer without a dot in an
- * existing set, so the "click-to-create" acceptance path (dot.create for a
- * performer without a dot) cannot be exercised against the real store today.
- *
- * This fake store — implementing the exact CommandStore contract the SVG
- * editor depends on, with the same dot.create/dot.move accept/reject rules
- * as the real reducer's placeDot() but without the full-coverage invariant —
- * isolates and proves the SVG editor's OWN wiring: it calls store.apply with
- * dot.create (not dot.move) for a performer lacking a dot, and the resulting
- * document state reflects the click. It is a wiring test, not a substitute
- * for real-store integration; the real-store behavior above is likewise
- * covered directly (dragging an existing dot -> dot.move).
- */
-function createPartialCoverageFakeStore(document: FreeformDocument): CommandStore {
-  let current: DocumentState = { document, revision: 0 };
-  const undoHistory: DocumentCommand[] = [];
-
-  function apply(command: DocumentCommand): DocumentState {
-    if (command.type !== 'dot.create' && command.type !== 'dot.move') {
-      throw new Error(`Fake store only supports dot.create/dot.move, got: ${command.type}`);
-    }
-    const set = current.document.sets.find((candidate) => candidate.id === command.setId);
-    if (!set) throw new Error(`Unknown set: ${command.setId}`);
-    const hasExistingDot = command.performerId in set.positions;
-    if (command.type === 'dot.move' && !hasExistingDot) {
-      throw new Error(`Cannot move missing dot for performer: ${command.performerId}`);
-    }
-    if (command.type === 'dot.create' && hasExistingDot) {
-      throw new Error(`Dot already exists for performer: ${command.performerId}`);
-    }
-    const nextDocument: FreeformDocument = {
-      ...current.document,
-      sets: current.document.sets.map((candidate) => candidate.id === set.id
-        ? { ...candidate, positions: { ...candidate.positions, [command.performerId]: command.dot } }
-        : candidate),
-    };
-    undoHistory.push(command);
-    current = { document: nextDocument, revision: current.revision + 1 };
-    return current;
-  }
-
-  return {
-    getState: () => current,
-    apply,
-    undo: () => undefined,
-    redo: () => undefined,
-    canUndo: () => false,
-    canRedo: () => false,
-    getUndoCommands: () => undoHistory,
-  };
-}
-
-describe('SVG field editor wiring for dot.create (fake store — see comment above)', () => {
-  it('clicking an empty field position for a performer without a dot issues dot.create and reflects it in document state', () => {
-    const partialDocument: FreeformDocument = {
-      ...makeDocument(),
-      sets: [{
-        id: 'set-1',
-        name: 'Set 1',
-        startCount: 0,
-        // performer-2 intentionally has no dot — reachable only via this fake
-        // store, per the comment above.
-        positions: { 'performer-1': { x: 144000, y: 76800 } },
-      }],
-    };
-    const fakeStore = createPartialCoverageFakeStore(partialDocument);
-    const statuses: string[] = [];
-    let commits = 0;
-    const editor = renderSvgFieldEditor({
-      store: fakeStore,
-      setStatus: (message) => statuses.push(message),
-      onCommitted: () => { commits += 1; },
-    });
-    editor.setActivePerformerId('performer-2');
     editor.snapping.setEnabled(false);
-
-    const svg = editor.root.querySelector('svg')!;
-    stubBoundingClientRect(svg, svg.viewBox.baseVal.width || 980, svg.viewBox.baseVal.height || 560);
-    const transform = createFieldTransform(fakeStore.getState().document.field);
-    const targetDot: Dot = { x: 50000, y: 30000 };
+    const transform = createFieldTransform(store.getState().document.field);
+    const originalDot = { x: 144000, y: 76800 };
+    const targetDot = { x: 10000, y: 10000 };
     const pixel = transform.toPixel(targetDot);
 
     firePointerEvent(svg, 'pointerdown', { clientX: pixel.x, clientY: pixel.y });
     firePointerEvent(svg, 'pointerup', { clientX: pixel.x, clientY: pixel.y });
 
-    const undoCommands = fakeStore.getUndoCommands();
+    const undoCommands = store.getUndoCommands();
     expect(undoCommands).toHaveLength(1);
-    expect(undoCommands[0]).toMatchObject({ type: 'dot.create', performerId: 'performer-2' });
-    expect(fakeStore.getState().document.sets[0]?.positions['performer-2']).toEqual(targetDot);
+    expect(undoCommands[0]).toMatchObject({ type: 'dot.move', performerId: 'performer-1' });
+    expect(store.getState().document.sets[0]?.positions['performer-1']).toEqual(targetDot);
     expect(commits).toBe(1);
+
+    expect(store.undo()?.document.sets[0]?.positions['performer-1']).toEqual(originalDot);
+    expect(store.redo()?.document.sets[0]?.positions['performer-1']).toEqual(targetDot);
   });
 });

@@ -20,7 +20,7 @@ export interface SvgFieldEditor {
   /** The set the graphical editor is currently placing/moving dots within. */
   getActiveSetId(): Identifier;
   setActiveSetId(setId: Identifier): void;
-  /** The performer the next click-to-place gesture will create a dot for. */
+  /** The performer the next field click will move. */
   getActivePerformerId(): Identifier | undefined;
   setActivePerformerId(performerId: Identifier | undefined): void;
   readonly snapping: {
@@ -36,7 +36,7 @@ interface DragState {
 
 /**
  * Renders the interactive SVG field. This module owns no document state: every
- * placement/move crosses through `store.apply` with `dot.create`/`dot.move`,
+ * every move crosses through `store.apply` with `dot.move`,
  * matching the structured form's boundary (M1 decision record; see also
  * `decisions/2026-09-30-svg-field-transform.md`). SVG pixel coordinates never
  * leave this module as persisted state — `toFieldUnits`/`snapToQuarterStepGrid`
@@ -58,7 +58,7 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
   readout.className = 'field-editor__readout';
   readout.setAttribute('role', 'status');
   readout.setAttribute('aria-live', 'polite');
-  readout.textContent = 'Click an empty field position to place the selected performer, or drag an existing dot.';
+  readout.textContent = 'Click a field position to move the selected performer, or drag an existing dot.';
 
   const toolbar = document.createElement('div');
   toolbar.className = 'field-editor__toolbar';
@@ -75,9 +75,9 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
   });
 
   const performerSelectLabel = document.createElement('label');
-  performerSelectLabel.textContent = 'Performer to place';
+  performerSelectLabel.textContent = 'Performer to move';
   const performerSelect = document.createElement('select');
-  performerSelect.setAttribute('aria-label', 'Performer the next field click places');
+  performerSelect.setAttribute('aria-label', 'Performer the next field click moves');
   performerSelect.id = 'field-editor-performer';
   performerSelectLabel.htmlFor = performerSelect.id;
   performerSelect.addEventListener('change', () => {
@@ -260,7 +260,7 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
     const target = event.target as Element | null;
     const dotGroup = target?.closest<SVGGElement>('[data-performer-id]');
     if (!dotGroup) {
-      handleEmptyFieldClick(event);
+      handleFieldClick(event);
       return;
     }
     const performerId = dotGroup.getAttribute('data-performer-id');
@@ -284,7 +284,7 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
     const dot = resolveDragDot(event);
     drag = undefined;
     svg.releasePointerCapture?.(event.pointerId);
-    commitDot(performerId, dot, true);
+    commitDot(performerId, dot);
   }
 
   function handleSvgPointerCancel(event: PointerEvent): void {
@@ -298,22 +298,16 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
     readout.textContent = 'Drag cancelled; dot position unchanged.';
   }
 
-  function handleEmptyFieldClick(event: PointerEvent): void {
+  function handleFieldClick(event: PointerEvent): void {
     if (!activePerformerId) {
-      setStatus('Choose a performer before placing a dot on the field.');
-      return;
-    }
-    const set = currentSet();
-    if (!set) return;
-    if (activePerformerId in set.positions) {
-      setStatus('That performer already has a dot in this set. Drag it to move it.');
+      setStatus('Choose a performer before moving a dot on the field.');
       return;
     }
     const dot = resolveDragDot(event);
-    commitDot(activePerformerId, dot, false);
+    commitDot(activePerformerId, dot);
   }
 
-  function commitDot(performerId: Identifier, dot: Dot, mustAlreadyExist: boolean): void {
+  function commitDot(performerId: Identifier, dot: Dot): void {
     if (!isValidDot(dot)) {
       setStatus('That position is outside the field bounds.');
       drawField();
@@ -321,12 +315,12 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
     }
     try {
       store.apply({
-        type: mustAlreadyExist ? 'dot.move' : 'dot.create',
+        type: 'dot.move',
         setId: activeSetId,
         performerId,
         dot,
       });
-      setStatus(`${mustAlreadyExist ? 'Moved' : 'Placed'} dot at (${dot.x}, ${dot.y}) FU via the field.`);
+      setStatus(`Moved dot at (${dot.x}, ${dot.y}) FU via the field.`);
       onCommitted();
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not update the dot.');
