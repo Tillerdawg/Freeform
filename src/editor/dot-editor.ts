@@ -7,6 +7,7 @@ import {
 } from '../geometry/coordinate-builder';
 import { inspectCoordinate, NFHS_11_PLAYER_FIELD } from '../geometry/nfhs';
 import type { FeatureReport } from '../platform/features';
+import { renderSvgFieldEditor, type SvgFieldEditor } from './svg-field-editor';
 import { createTimelinePanel } from '../timeline/timeline-panel';
 
 export interface DotEditorOptions {
@@ -67,6 +68,12 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
   let message = '';
   const setMessage = (nextMessage: string): void => { message = nextMessage; };
 
+  const fieldEditor: SvgFieldEditor = renderSvgFieldEditor({
+    store,
+    setStatus: (nextMessage) => { message = nextMessage; render(); },
+    onCommitted: () => render(),
+  });
+
   const render = (): void => {
     const state = store.getState();
     const document = state.document;
@@ -102,6 +109,22 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       ),
       textElement('p', 'muted', `${document.show.title} · revision ${state.revision}`),
     );
+
+    fieldEditor.refresh();
+    const fieldSection = element('section');
+    fieldSection.setAttribute('aria-labelledby', 'field-editor-title');
+    const fieldTitle = textElement('h3', undefined, 'Graphical field placement');
+    fieldTitle.id = 'field-editor-title';
+    fieldSection.append(
+      fieldTitle,
+      textElement(
+        'p',
+        'muted',
+        'Click an empty field position to place the selected performer\u2019s dot, or drag an existing dot to move it. The structured form below remains available for exact keyboard entry.',
+      ),
+      fieldEditor.root,
+    );
+    editor.append(fieldSection);
 
     const controls = element('div', 'editor-controls');
     controls.append(createPerformerForm(render, setMessage), createDotForm(render, setMessage));

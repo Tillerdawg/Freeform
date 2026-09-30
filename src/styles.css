@@ -95,6 +95,21 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px s
 .inspection-table th, .inspection-table td { padding: 0.55rem; border-top: 1px solid #3b4a5e; text-align: left; vertical-align: top; }
 .inspection-table th { font-weight: 700; }
 
+.field-editor { display: grid; gap: 0.6rem; margin: 1rem 0; }
+.field-editor__toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.field-editor__toolbar label { color: #b7c5d7; font-size: 0.85rem; margin-right: 0.25rem; }
+.field-editor__snap-toggle { display: flex; align-items: center; gap: 0.5rem; color: #b7c5d7; font-size: 0.9rem; }
+.field-editor__snap-toggle input { min-height: auto; width: auto; }
+.field-editor__svg { width: 100%; height: auto; border: 1px solid #3b4a5e; border-radius: 0.5rem; background: #163521; touch-action: none; }
+.field-editor__boundary { fill: none; stroke: #e7edf7; stroke-width: 2; }
+.field-editor__yard-line { stroke: rgb(231 237 247 / 55%); stroke-width: 1; }
+.field-editor__yard-line--fifty { stroke: #e7edf7; stroke-width: 2; }
+.field-editor__yard-label { fill: #b7c5d7; font-size: 10px; }
+.field-editor__hash-tick { stroke: #e7edf7; stroke-width: 2; }
+.field-editor__dot circle { fill: #90bdea; stroke: #111823; stroke-width: 1.5; cursor: grab; }
+.field-editor__dot text { fill: #111823; font-size: 9px; font-weight: 700; pointer-events: none; }
+.field-editor__readout { color: #b9e7ce; font-variant-numeric: tabular-nums; margin: 0; }
+
 @media (max-width: 520px) {
   .app-shell { padding: 2rem 0; }
   .inspection-table { display: block; overflow-x: auto; }

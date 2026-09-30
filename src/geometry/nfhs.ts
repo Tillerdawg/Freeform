@@ -134,7 +134,8 @@ function inspectVertical(y: number): CoordinateInspection['vertical'] {
   };
 }
 
-function lineLabel(line: number): string {
+/** Formats a canonical five-yard line the same way `inspectCoordinate` labels it. */
+export function lineLabel(line: number): string {
   const yards = line / FU_PER_YARD;
   if (yards === 50) return '50';
   return yards < 50 ? `Side 1 ${yards}` : `Side 2 ${100 - yards}`;
