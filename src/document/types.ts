@@ -75,7 +75,15 @@ export interface DocumentState {
 export type DocumentCommand =
   | { readonly type: 'show.title.set'; readonly title: string }
   | { readonly type: 'show.total-counts.set'; readonly totalCounts: number }
-  | { readonly type: 'performer.create'; readonly performer: Performer }
+  | {
+    /**
+     * A performer is created together with one valid dot for every existing
+     * set, preserving the complete-set invariant atomically.
+     */
+    readonly type: 'performer.create';
+    readonly performer: Performer;
+    readonly positionsBySet: Readonly<Record<Identifier, Dot>>;
+  }
   | { readonly type: 'set.create'; readonly set: SetPage }
   | { readonly type: 'set.remove'; readonly setId: Identifier }
   | { readonly type: 'set.reorder'; readonly setId: Identifier; readonly startCount: number }

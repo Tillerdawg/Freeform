@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createCommandStore } from './command-store';
+import { validateDocumentSetsAndTransitions } from './sets';
 import type { FreeformDocument } from './types';
 
 function makeDocument(): FreeformDocument {
@@ -80,24 +81,21 @@ describe('document command store', () => {
     expect(store.getState()).toBe(initial);
   });
 
-  it('creates a manual rank-coded performer and dot through commands', () => {
+  it('creates a manual rank-coded performer with complete set coverage atomically', () => {
     const store = createCommandStore(makeDocument());
     store.apply({
       type: 'performer.create',
       performer: { id: 'performer-2', rankCode: 'T1', displayName: 'Trumpet 1' },
-    });
-    const placed = store.apply({
-      type: 'dot.create',
-      setId: 'set-1',
-      performerId: 'performer-2',
-      dot: { x: 115200, y: 51200 },
+      positionsBySet: { 'set-1': { x: 115200, y: 51200 } },
     });
 
-    expect(placed.document.performers).toContainEqual({
+    expect(store.getState().document.performers).toContainEqual({
       id: 'performer-2', rankCode: 'T1', displayName: 'Trumpet 1',
     });
-    expect(placed.document.sets[0]?.positions['performer-2']).toEqual({ x: 115200, y: 51200 });
-    expect(store.getUndoCommands().map((command) => command.type)).toEqual(['performer.create', 'dot.create']);
+    expect(store.getState().document.sets[0]?.positions['performer-2']).toEqual({ x: 115200, y: 51200 });
+    expect(() => validateDocumentSetsAndTransitions(store.getState().document)).not.toThrow();
+    expect(() => validateDocumentSetsAndTransitions(store.undo()!.document)).not.toThrow();
+    expect(() => validateDocumentSetsAndTransitions(store.redo()!.document)).not.toThrow();
   });
 
   it('moves a dot through the command store and supports undo/redo', () => {
@@ -133,6 +131,7 @@ describe('document command store', () => {
     expect(() => store.apply({
       type: 'performer.create',
       performer: { id: 'performer-2', rankCode: 'p1', displayName: 'Duplicate' },
+      positionsBySet: { 'set-1': { x: 115200, y: 51200 } },
     })).toThrow('Rank code already exists: p1');
     expect(store.getState().document.performers).toHaveLength(1);
   });
@@ -157,6 +156,10 @@ describe('document command store', () => {
     const store = createCommandStore({
       ...source,
       performers: [...source.performers, { id: 'performer-2', rankCode: 'P2', displayName: 'Performer 2' }],
+      sets: source.sets.map((set) => ({
+        ...set,
+        positions: { ...set.positions, 'performer-2': { x: 115200, y: 51200 } },
+      })),
     });
 
     expect(() => store.apply({
@@ -172,16 +175,32 @@ describe('document command store', () => {
     })).toThrow('Set set-2 contains an unknown performer dot: ghost');
   });
 
-  it('adds missing performer coverage through a command and supports undo/redo', () => {
+  it('rejects incomplete performer creation without exposing invalid coverage', () => {
     const store = createCommandStore(makeDocument());
-    store.apply({ type: 'performer.create', performer: { id: 'performer-2', rankCode: 'P2', displayName: 'Performer 2' } });
-    store.apply({
-      type: 'set.performer.add', setId: 'set-1', performerId: 'performer-2', dot: { x: 115200, y: 51200 },
-    });
+    const initial = store.getState();
 
-    expect(store.getState().document.sets[0]?.positions['performer-2']).toEqual({ x: 115200, y: 51200 });
-    expect(store.undo()?.document.sets[0]?.positions['performer-2']).toBeUndefined();
-    expect(store.redo()?.document.sets[0]?.positions['performer-2']).toEqual({ x: 115200, y: 51200 });
+    expect(() => store.apply({
+      type: 'performer.create',
+      performer: { id: 'performer-2', rankCode: 'P2', displayName: 'Performer 2' },
+      positionsBySet: {},
+    })).toThrow('Creating a performer requires exactly one dot for every existing set.');
+    expect(store.getState()).toBe(initial);
+    expect(() => validateDocumentSetsAndTransitions(store.getState().document)).not.toThrow();
+  });
+
+  it('rejects incomplete document replacement without changing canonical state', () => {
+    const store = createCommandStore(makeDocument());
+    const initial = store.getState();
+    const invalid = {
+      ...makeDocument(),
+      sets: [{ ...makeDocument().sets[0]!, positions: {} }],
+    };
+
+    expect(() => store.apply({ type: 'document.replace', document: invalid })).toThrow(
+      'Set set-1 must contain exactly one dot for each active performer.',
+    );
+    expect(store.getState()).toBe(initial);
+    expect(() => validateDocumentSetsAndTransitions(store.getState().document)).not.toThrow();
   });
 
   it('rejects removal of required performer coverage', () => {

@@ -105,8 +105,12 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
         store.apply({
           type: 'performer.create',
           performer: { id: `performer-${code.toLowerCase()}`, rankCode: code, displayName: name },
+          positionsBySet: Object.fromEntries(store.getState().document.sets.map((set) => [
+            set.id,
+            { x: 144000, y: 76800 },
+          ])),
         });
-        setStatus(`Created performer ${code}. Place its dot with integer FU values.`);
+        setStatus(`Created performer ${code} at the field center in every set. Move its dots with integer FU values.`);
       } catch (error) {
         setStatus(error instanceof Error ? error.message : 'Could not create performer.');
       }

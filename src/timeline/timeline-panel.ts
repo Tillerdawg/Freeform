@@ -57,7 +57,11 @@ export function createTimelinePanel(
     handleKeyDown(event) {
       const controller = getPlayback();
       if (controller?.handleKeyDown(event)) {
-        if (!controller.getState().isPlaying) clearTimer();
+        if (event.key === ' ' || event.key === 'Spacebar') {
+          if (controller.getState().isPlaying) play(); else clearTimer();
+        } else if (!controller.getState().isPlaying) {
+          clearTimer();
+        }
         refresh();
       }
     },

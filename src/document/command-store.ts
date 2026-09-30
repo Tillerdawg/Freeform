@@ -5,7 +5,12 @@ import type {
   FreeformDocument,
 } from './types';
 import { assertValidDot } from '../geometry/nfhs';
-import { validateFloatTransition, validateOrderedSets, validateSetCoverage } from './sets';
+import {
+  validateDocumentSetsAndTransitions,
+  validateFloatTransition,
+  validateOrderedSets,
+  validateSetCoverage,
+} from './sets';
 
 interface HistoryEntry {
   readonly command: DocumentCommand;
@@ -64,7 +69,7 @@ function reduce(document: FreeformDocument, command: DocumentCommand): FreeformD
     case 'show.total-counts.set':
       return { ...document, show: { ...document.show, totalCounts: command.totalCounts } };
     case 'performer.create':
-      return addPerformer(document, command.performer);
+      return addPerformer(document, command);
     case 'set.create':
       return addSet(document, command.set);
     case 'set.remove':
@@ -176,8 +181,9 @@ function removeTransition(document: FreeformDocument, transitionId: string): Fre
 
 function addPerformer(
   document: FreeformDocument,
-  performer: FreeformDocument['performers'][number],
+  command: Extract<DocumentCommand, { readonly type: 'performer.create' }>,
 ): FreeformDocument {
+  const { performer, positionsBySet } = command;
   if (!/^[a-z][a-z0-9_-]{0,63}$/.test(performer.id)) {
     throw new Error(`Invalid performer ID: ${performer.id}`);
   }
@@ -193,7 +199,24 @@ function addPerformer(
   if (document.performers.some((candidate) => candidate.rankCode.toLowerCase() === performer.rankCode.toLowerCase())) {
     throw new Error(`Rank code already exists: ${performer.rankCode}`);
   }
-  return { ...document, performers: [...document.performers, performer] };
+  const expectedSetIds = new Set(document.sets.map(({ id }) => id));
+  const coveredSetIds = Object.keys(positionsBySet);
+  if (coveredSetIds.length !== expectedSetIds.size || coveredSetIds.some((setId) => !expectedSetIds.has(setId))) {
+    throw new Error('Creating a performer requires exactly one dot for every existing set.');
+  }
+  for (const setId of expectedSetIds) {
+    const dot = positionsBySet[setId];
+    if (!dot) throw new Error(`Creating performer ${performer.id} is missing a dot for set: ${setId}`);
+    assertValidDot(dot);
+  }
+  return {
+    ...document,
+    performers: [...document.performers, performer],
+    sets: document.sets.map((set) => ({
+      ...set,
+      positions: { ...set.positions, [performer.id]: positionsBySet[set.id]! },
+    })),
+  };
 }
 
 function placeDot(
@@ -226,6 +249,10 @@ function placeDot(
 }
 
 function makeState(document: FreeformDocument, revision: number): DocumentState {
+  // This is the canonical-state boundary. Every successful initialization,
+  // replacement, command application, undo, and redo exposes a fully covered
+  // ordered set graph rather than a document that callers must validate later.
+  validateDocumentSetsAndTransitions(document);
   return freeze({ document: clone(document), revision });
 }
 
