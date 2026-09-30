@@ -1,9 +1,16 @@
-import type { CommandStore, Dot, Identifier } from '../document/types';
+import type { CommandStore, Dot, FreeformDocument, Identifier } from '../document/types';
 import { snapToQuarterStepGrid } from '../geometry/coordinate-builder';
-import { inspectCoordinate, isValidDot, lineLabel, NFHS_11_PLAYER_FIELD } from '../geometry/nfhs';
+import { FU_PER_STEP, inspectCoordinate, isValidDot, NFHS_11_PLAYER_FIELD } from '../geometry/nfhs';
 import { createFieldTransform, type FieldTransform, type PixelPoint } from './field-geometry';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/** Field-only label formatting; coordinate inspection keeps its normative side-prefixed labels. */
+function yardNumberLabel(x: number, field: FreeformDocument['field']): string {
+  const yardsFromSideOne = x / field.unitsPerYard;
+  const totalYards = field.lengthUnits / field.unitsPerYard;
+  return String(Math.min(yardsFromSideOne, totalYards - yardsFromSideOne));
+}
 
 export interface SvgFieldEditorOptions {
   readonly store: CommandStore;
@@ -148,6 +155,40 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
     const topLeft = transform.toPixel({ x: 0, y: 0 });
     const bottomRight = transform.toPixel({ x: field.lengthUnits, y: field.widthUnits });
 
+    const yardLineUnits = field.unitsPerYard * 5;
+    const halfYardLineUnits = yardLineUnits / 2;
+    const horizontalHalfStepUnits = FU_PER_STEP * 4;
+
+    function appendStepLine(start: Dot, end: Dot, isHalfLine: boolean): void {
+      const startPixel = transform.toPixel(start);
+      const endPixel = transform.toPixel(end);
+      const line = document.createElementNS(SVG_NS, 'line');
+      line.setAttribute('class', isHalfLine ? 'field-editor__step-line--half' : 'field-editor__step-line');
+      line.setAttribute('x1', String(startPixel.x));
+      line.setAttribute('y1', String(startPixel.y));
+      line.setAttribute('x2', String(endPixel.x));
+      line.setAttribute('y2', String(endPixel.y));
+      svg.append(line);
+    }
+
+    // Lay down the full 8-to-5 grid before the field landmarks so the heavier
+    // yard lines, hash marks, and performer dots stay visually prominent.
+    for (let x = FU_PER_STEP; x < field.lengthUnits; x += FU_PER_STEP) {
+      if (x % yardLineUnits === 0) continue;
+      appendStepLine(
+        { x, y: 0 },
+        { x, y: field.widthUnits },
+        x % yardLineUnits === halfYardLineUnits,
+      );
+    }
+    for (let y = 0; y <= field.widthUnits; y += FU_PER_STEP) {
+      appendStepLine(
+        { x: 0, y },
+        { x: field.lengthUnits, y },
+        y % horizontalHalfStepUnits === 0,
+      );
+    }
+
     const boundary = document.createElementNS(SVG_NS, 'rect');
     boundary.setAttribute('class', 'field-editor__boundary');
     boundary.setAttribute('x', String(topLeft.x));
@@ -168,13 +209,16 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
       line.setAttribute('y2', String(bottom.y));
       svg.append(line);
 
-      const label = document.createElementNS(SVG_NS, 'text');
-      label.setAttribute('class', 'field-editor__yard-label');
-      label.setAttribute('x', String(top.x));
-      label.setAttribute('y', String(top.y - 6));
-      label.setAttribute('text-anchor', 'middle');
-      label.textContent = lineLabel(x);
-      svg.append(label);
+      const labelText = yardNumberLabel(x, field);
+      for (const labelY of [top.y - 6, bottom.y + 16]) {
+        const label = document.createElementNS(SVG_NS, 'text');
+        label.setAttribute('class', 'field-editor__yard-label');
+        label.setAttribute('x', String(top.x));
+        label.setAttribute('y', String(labelY));
+        label.setAttribute('text-anchor', 'middle');
+        label.textContent = labelText;
+        svg.append(label);
+      }
     }
 
     for (const hashY of [field.frontHashY, field.backHashY]) {

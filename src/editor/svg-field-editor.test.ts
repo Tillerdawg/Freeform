@@ -99,6 +99,56 @@ describe('SVG field editor', () => {
     expect(svg.getAttribute('viewBox')).toBe(transform.viewBox);
   });
 
+  it('renders bare yard numbers above and below both sides of the field', () => {
+    const field = store.getState().document.field;
+    const transform = createFieldTransform(field);
+    const labels = [...svg.querySelectorAll<SVGTextElement>('.field-editor__yard-label')];
+
+    for (const yard of [40, 60]) {
+      const x = transform.toPixel({ x: yard * field.unitsPerYard, y: 0 }).x;
+      const matchingLabels = labels.filter((label) => Number(label.getAttribute('x')) === x);
+      expect(matchingLabels.map((label) => label.textContent)).toEqual(['40', '40']);
+      expect(matchingLabels.map((label) => Number(label.getAttribute('y')))).toEqual([34, 536]);
+    }
+
+    const fiftyX = transform.toPixel({ x: field.lengthUnits / 2, y: 0 }).x;
+    expect(labels.filter((label) => Number(label.getAttribute('x')) === fiftyX).map((label) => label.textContent)).toEqual(['50', '50']);
+    expect(labels.some((label) => label.textContent?.includes('Side'))).toBe(false);
+  });
+
+  it('renders the vertical 8-to-5 grid with one half-step line and six thin lines per yard-line span', () => {
+    const verticalLines = (selector: string) => [...svg.querySelectorAll<SVGLineElement>(selector)].filter((line) => (
+      Number(line.getAttribute('x1')) === Number(line.getAttribute('x2'))
+      && Number(line.getAttribute('y1')) === 40
+      && Number(line.getAttribute('y2')) === 520
+    ));
+    const halfLines = verticalLines('.field-editor__step-line--half');
+    const thinLines = verticalLines('.field-editor__step-line');
+
+    expect(halfLines.map((line) => Number(line.getAttribute('x1')))).toEqual(expect.arrayContaining([62.5, 107.5]));
+    expect(thinLines
+      .filter((line) => Number(line.getAttribute('x1')) > 40 && Number(line.getAttribute('x1')) < 85)
+      .map((line) => Number(line.getAttribute('x1'))))
+      .toEqual([45.625, 51.25, 56.875, 68.125, 73.75, 79.375]);
+  });
+
+  it('renders horizontal half-step and thin grid lines from the front sideline', () => {
+    const horizontalLines = (selector: string) => [...svg.querySelectorAll<SVGLineElement>(selector)].filter((line) => (
+      Number(line.getAttribute('y1')) === Number(line.getAttribute('y2'))
+      && Number(line.getAttribute('x1')) === 40
+      && Number(line.getAttribute('x2')) === 940
+    ));
+
+    expect(horizontalLines('.field-editor__step-line--half')
+      .slice(0, 4)
+      .map((line) => Number(line.getAttribute('y1'))))
+      .toEqual([40, 62.5, 85, 107.5]);
+    expect(horizontalLines('.field-editor__step-line')
+      .slice(0, 6)
+      .map((line) => Number(line.getAttribute('y1'))))
+      .toEqual([45.625, 51.25, 56.875, 68.125, 73.75, 79.375]);
+  });
+
   it('renders the 50-yard line and both hash marks at their exact expected SVG pixel positions', () => {
     const field = store.getState().document.field;
     const transform = createFieldTransform(field);

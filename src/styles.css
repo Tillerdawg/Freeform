@@ -102,6 +102,8 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px s
 .field-editor__snap-toggle input { min-height: auto; width: auto; }
 .field-editor__svg { width: 100%; height: auto; border: 1px solid #3b4a5e; border-radius: 0.5rem; background: #163521; touch-action: none; }
 .field-editor__boundary { fill: none; stroke: #e7edf7; stroke-width: 2; }
+.field-editor__step-line { stroke: rgb(231 237 247 / 22%); stroke-width: 0.35; }
+.field-editor__step-line--half { stroke: rgb(231 237 247 / 38%); stroke-width: 0.7; }
 .field-editor__yard-line { stroke: rgb(231 237 247 / 55%); stroke-width: 1; }
 .field-editor__yard-line--fifty { stroke: #e7edf7; stroke-width: 2; }
 .field-editor__yard-label { fill: #b7c5d7; font-size: 10px; }
