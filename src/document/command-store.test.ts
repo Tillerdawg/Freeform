@@ -136,4 +136,112 @@ describe('document command store', () => {
     })).toThrow('Rank code already exists: p1');
     expect(store.getState().document.performers).toHaveLength(1);
   });
+
+  it('creates a fully covered ordered set and supports undo/redo', () => {
+    const store = createCommandStore(makeDocument());
+    store.apply({
+      type: 'set.create',
+      set: {
+        id: 'set-2', name: 'Set 2', startCount: 16,
+        positions: { 'performer-1': { x: 115200, y: 51200 } },
+      },
+    });
+
+    expect(store.getState().document.sets.map((set) => set.id)).toEqual(['set-1', 'set-2']);
+    expect(store.undo()?.document.sets).toHaveLength(1);
+    expect(store.redo()?.document.sets[1]?.positions).toEqual({ 'performer-1': { x: 115200, y: 51200 } });
+  });
+
+  it('rejects set creation with missing or unknown performer coverage', () => {
+    const source = makeDocument();
+    const store = createCommandStore({
+      ...source,
+      performers: [...source.performers, { id: 'performer-2', rankCode: 'P2', displayName: 'Performer 2' }],
+    });
+
+    expect(() => store.apply({
+      type: 'set.create',
+      set: { id: 'set-2', name: 'Incomplete', startCount: 16, positions: { 'performer-1': { x: 1, y: 1 } } },
+    })).toThrow('Set set-2 must contain exactly one dot for each active performer.');
+    expect(() => store.apply({
+      type: 'set.create',
+      set: {
+        id: 'set-2', name: 'Unknown', startCount: 16,
+        positions: { 'performer-1': { x: 1, y: 1 }, ghost: { x: 2, y: 2 } },
+      },
+    })).toThrow('Set set-2 contains an unknown performer dot: ghost');
+  });
+
+  it('adds missing performer coverage through a command and supports undo/redo', () => {
+    const store = createCommandStore(makeDocument());
+    store.apply({ type: 'performer.create', performer: { id: 'performer-2', rankCode: 'P2', displayName: 'Performer 2' } });
+    store.apply({
+      type: 'set.performer.add', setId: 'set-1', performerId: 'performer-2', dot: { x: 115200, y: 51200 },
+    });
+
+    expect(store.getState().document.sets[0]?.positions['performer-2']).toEqual({ x: 115200, y: 51200 });
+    expect(store.undo()?.document.sets[0]?.positions['performer-2']).toBeUndefined();
+    expect(store.redo()?.document.sets[0]?.positions['performer-2']).toEqual({ x: 115200, y: 51200 });
+  });
+
+  it('rejects removal of required performer coverage', () => {
+    const store = createCommandStore(makeDocument());
+
+    expect(() => store.apply({ type: 'set.performer.remove', setId: 'set-1', performerId: 'performer-1' }))
+      .toThrow('Removing performer coverage would violate the complete-set requirement.');
+  });
+
+  it('reorders an unconnected set through a command and supports undo/redo', () => {
+    const store = createCommandStore(makeDocument());
+    store.apply({ type: 'set.create', set: {
+      id: 'set-2', name: 'Set 2', startCount: 16, positions: { 'performer-1': { x: 115200, y: 51200 } },
+    } });
+    store.apply({ type: 'set.create', set: {
+      id: 'set-3', name: 'Set 3', startCount: 32, positions: { 'performer-1': { x: 86400, y: 51200 } },
+    } });
+    store.apply({ type: 'set.reorder', setId: 'set-3', startCount: 8 });
+
+    expect(store.getState().document.sets.map((set) => set.id)).toEqual(['set-1', 'set-3', 'set-2']);
+    expect(store.undo()?.document.sets.map((set) => set.id)).toEqual(['set-1', 'set-2', 'set-3']);
+    expect(store.redo()?.document.sets.map((set) => set.id)).toEqual(['set-1', 'set-3', 'set-2']);
+  });
+
+  it('reorders sets only with strictly ascending start counts and preserves transition timing', () => {
+    const store = createCommandStore(makeDocument());
+    store.apply({ type: 'set.create', set: {
+      id: 'set-2', name: 'Set 2', startCount: 16, positions: { 'performer-1': { x: 115200, y: 51200 } },
+    } });
+    store.apply({ type: 'transition.create', transition: {
+      id: 'float-1', fromSetId: 'set-1', toSetId: 'set-2', counts: 16, mode: 'float',
+    } });
+
+    expect(() => store.apply({ type: 'set.reorder', setId: 'set-2', startCount: 8 }))
+      .toThrow('Transition counts must equal the difference between adjacent set start counts.');
+    expect(store.getState().document.sets[1]?.startCount).toBe(16);
+  });
+
+  it('rejects a transition that is not adjacent or does not match set count timing', () => {
+    const store = createCommandStore(makeDocument());
+    store.apply({ type: 'set.create', set: {
+      id: 'set-2', name: 'Set 2', startCount: 16, positions: { 'performer-1': { x: 115200, y: 51200 } },
+    } });
+
+    expect(() => store.apply({ type: 'transition.create', transition: {
+      id: 'float-1', fromSetId: 'set-1', toSetId: 'set-2', counts: 12, mode: 'float',
+    } })).toThrow('Transition counts must equal the difference between adjacent set start counts.');
+  });
+
+  it('allows at most one transition for each adjacent set gap', () => {
+    const store = createCommandStore(makeDocument());
+    store.apply({ type: 'set.create', set: {
+      id: 'set-2', name: 'Set 2', startCount: 16, positions: { 'performer-1': { x: 115200, y: 51200 } },
+    } });
+    store.apply({ type: 'transition.create', transition: {
+      id: 'float-1', fromSetId: 'set-1', toSetId: 'set-2', counts: 16, mode: 'float',
+    } });
+
+    expect(() => store.apply({ type: 'transition.create', transition: {
+      id: 'float-2', fromSetId: 'set-1', toSetId: 'set-2', counts: 16, mode: 'float',
+    } })).toThrow('A transition already connects set-1 to set-2.');
+  });
 });

@@ -5,6 +5,7 @@ import type {
   FreeformDocument,
 } from './types';
 import { assertValidDot } from '../geometry/nfhs';
+import { validateFloatTransition, validateOrderedSets, validateSetCoverage } from './sets';
 
 interface HistoryEntry {
   readonly command: DocumentCommand;
@@ -64,13 +65,113 @@ function reduce(document: FreeformDocument, command: DocumentCommand): FreeformD
       return { ...document, show: { ...document.show, totalCounts: command.totalCounts } };
     case 'performer.create':
       return addPerformer(document, command.performer);
+    case 'set.create':
+      return addSet(document, command.set);
+    case 'set.remove':
+      return removeSet(document, command.setId);
+    case 'set.reorder':
+      return reorderSet(document, command.setId, command.startCount);
+    case 'set.performer.add':
+      return addSetPerformerCoverage(document, command);
+    case 'set.performer.remove':
+      return removeSetPerformerCoverage(document, command);
     case 'dot.create':
       return placeDot(document, command, false);
     case 'dot.move':
       return placeDot(document, command, true);
+    case 'transition.create':
+      return addTransition(document, command.transition);
+    case 'transition.remove':
+      return removeTransition(document, command.transitionId);
     case 'document.replace':
       return command.document;
   }
+}
+
+function addSet(document: FreeformDocument, set: FreeformDocument['sets'][number]): FreeformDocument {
+  if (document.sets.some((candidate) => candidate.id === set.id)) {
+    throw new Error(`Set ID already exists: ${set.id}`);
+  }
+  validateSetCoverage(document.performers, set);
+  const next = { ...document, sets: [...document.sets, set].sort((left, right) => left.startCount - right.startCount) };
+  validateOrderedSets(next);
+  return next;
+}
+
+function removeSet(document: FreeformDocument, setId: string): FreeformDocument {
+  if (!document.sets.some((set) => set.id === setId)) throw new Error(`Unknown set: ${setId}`);
+  if (document.sets.length === 1) throw new Error('A document must retain at least one set.');
+  if (document.transitions.some((transition) => transition.fromSetId === setId || transition.toSetId === setId)) {
+    throw new Error(`Remove transitions connected to set ${setId} before removing it.`);
+  }
+  return { ...document, sets: document.sets.filter((set) => set.id !== setId) };
+}
+
+function reorderSet(document: FreeformDocument, setId: string, startCount: number): FreeformDocument {
+  if (!Number.isInteger(startCount) || startCount < 0) {
+    throw new Error('Set start count must be a nonnegative integer.');
+  }
+  if (!document.sets.some((set) => set.id === setId)) throw new Error(`Unknown set: ${setId}`);
+  const next = {
+    ...document,
+    sets: document.sets
+      .map((set) => set.id === setId ? { ...set, startCount } : set)
+      .sort((left, right) => left.startCount - right.startCount),
+  };
+  validateOrderedSets(next);
+  for (const transition of next.transitions) validateFloatTransition(next, transition);
+  return next;
+}
+
+function addSetPerformerCoverage(
+  document: FreeformDocument,
+  command: Extract<DocumentCommand, { readonly type: 'set.performer.add' }>,
+): FreeformDocument {
+  assertValidDot(command.dot);
+  if (!document.performers.some((performer) => performer.id === command.performerId)) {
+    throw new Error(`Unknown performer: ${command.performerId}`);
+  }
+  const set = document.sets.find((candidate) => candidate.id === command.setId);
+  if (!set) throw new Error(`Unknown set: ${command.setId}`);
+  if (command.performerId in set.positions) {
+    throw new Error(`Set ${set.id} already contains a dot for performer: ${command.performerId}`);
+  }
+  return {
+    ...document,
+    sets: document.sets.map((candidate) => candidate.id === set.id
+      ? { ...candidate, positions: { ...candidate.positions, [command.performerId]: command.dot } }
+      : candidate),
+  };
+}
+
+function removeSetPerformerCoverage(
+  document: FreeformDocument,
+  command: Extract<DocumentCommand, { readonly type: 'set.performer.remove' }>,
+): FreeformDocument {
+  const set = document.sets.find((candidate) => candidate.id === command.setId);
+  if (!set) throw new Error(`Unknown set: ${command.setId}`);
+  if (!(command.performerId in set.positions)) {
+    throw new Error(`Set ${set.id} has no dot for performer: ${command.performerId}`);
+  }
+  throw new Error('Removing performer coverage would violate the complete-set requirement.');
+}
+
+function addTransition(document: FreeformDocument, transition: FreeformDocument['transitions'][number]): FreeformDocument {
+  if (document.transitions.some((candidate) => candidate.id === transition.id)) {
+    throw new Error(`Transition ID already exists: ${transition.id}`);
+  }
+  if (document.transitions.some((candidate) => candidate.fromSetId === transition.fromSetId && candidate.toSetId === transition.toSetId)) {
+    throw new Error(`A transition already connects ${transition.fromSetId} to ${transition.toSetId}.`);
+  }
+  validateFloatTransition(document, transition);
+  return { ...document, transitions: [...document.transitions, transition] };
+}
+
+function removeTransition(document: FreeformDocument, transitionId: string): FreeformDocument {
+  if (!document.transitions.some((transition) => transition.id === transitionId)) {
+    throw new Error(`Unknown transition: ${transitionId}`);
+  }
+  return { ...document, transitions: document.transitions.filter((transition) => transition.id !== transitionId) };
 }
 
 function addPerformer(

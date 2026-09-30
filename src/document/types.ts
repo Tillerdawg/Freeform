@@ -76,6 +76,20 @@ export type DocumentCommand =
   | { readonly type: 'show.title.set'; readonly title: string }
   | { readonly type: 'show.total-counts.set'; readonly totalCounts: number }
   | { readonly type: 'performer.create'; readonly performer: Performer }
+  | { readonly type: 'set.create'; readonly set: SetPage }
+  | { readonly type: 'set.remove'; readonly setId: Identifier }
+  | { readonly type: 'set.reorder'; readonly setId: Identifier; readonly startCount: number }
+  | {
+    readonly type: 'set.performer.add';
+    readonly setId: Identifier;
+    readonly performerId: Identifier;
+    readonly dot: Dot;
+  }
+  | {
+    readonly type: 'set.performer.remove';
+    readonly setId: Identifier;
+    readonly performerId: Identifier;
+  }
   | {
     readonly type: 'dot.create';
     readonly setId: Identifier;
@@ -88,6 +102,8 @@ export type DocumentCommand =
     readonly performerId: Identifier;
     readonly dot: Dot;
   }
+  | { readonly type: 'transition.create'; readonly transition: Transition }
+  | { readonly type: 'transition.remove'; readonly transitionId: Identifier }
   | { readonly type: 'document.replace'; readonly document: FreeformDocument };
 
 export interface CommandStore {

@@ -1,6 +1,7 @@
 import type { CommandStore } from '../document/types';
 import { inspectCoordinate, NFHS_11_PLAYER_FIELD } from '../geometry/nfhs';
 import type { FeatureReport } from '../platform/features';
+import { createTimelinePanel } from '../timeline/timeline-panel';
 
 export interface DotEditorOptions {
   readonly store: CommandStore;
@@ -13,6 +14,7 @@ export interface DotEditorOptions {
  */
 export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorOptions): void {
   let message = '';
+  const setMessage = (nextMessage: string): void => { message = nextMessage; };
 
   const render = (): void => {
     const state = store.getState();
@@ -23,9 +25,9 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     const shell = element('section', 'app-shell');
     const header = element('header');
     header.append(
-      textElement('p', 'eyebrow', 'Freeform · M2 geometry'),
+      textElement('p', 'eyebrow', 'Freeform · M3 sets and float timeline'),
       textElement('h1', undefined, 'Freeform'),
-      textElement('p', 'subtitle', 'Canonical NFHS field coordinates and dot editor.'),
+      textElement('p', 'subtitle', 'Canonical NFHS coordinates, complete sets, and count-by-count float playback.'),
     );
     shell.append(header);
 
@@ -69,6 +71,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     redo.disabled = !store.canRedo();
     history.append(undo, redo);
     editor.append(history);
+    editor.append(timeline.render());
 
     if (message) editor.append(textElement('p', 'editor-message', message, 'status'));
     editor.append(createInspectionTable());
@@ -76,7 +79,8 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     root.append(shell);
   };
 
-  const setMessage = (nextMessage: string): void => { message = nextMessage; };
+  const timeline = createTimelinePanel(store, render, setMessage);
+  root.addEventListener('keydown', (event) => timeline.handleKeyDown(event));
 
   const createPerformerForm = (rerender: () => void, setStatus: (message: string) => void): HTMLFormElement => {
     const form = element('form', 'editor-form');
