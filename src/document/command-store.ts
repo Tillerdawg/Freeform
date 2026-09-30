@@ -7,7 +7,7 @@ import type {
 import { assertValidDot } from '../geometry/nfhs';
 import {
   validateDocumentSetsAndTransitions,
-  validateFloatTransition,
+  validateTransition,
   validateOrderedSets,
   validateSetCoverage,
 } from './sets';
@@ -124,7 +124,7 @@ function reorderSet(document: FreeformDocument, setId: string, startCount: numbe
       .sort((left, right) => left.startCount - right.startCount),
   };
   validateOrderedSets(next);
-  for (const transition of next.transitions) validateFloatTransition(next, transition);
+  for (const transition of next.transitions) validateTransition(next, transition);
   return next;
 }
 
@@ -168,7 +168,7 @@ function addTransition(document: FreeformDocument, transition: FreeformDocument[
   if (document.transitions.some((candidate) => candidate.fromSetId === transition.fromSetId && candidate.toSetId === transition.toSetId)) {
     throw new Error(`A transition already connects ${transition.fromSetId} to ${transition.toSetId}.`);
   }
-  validateFloatTransition(document, transition);
+  validateTransition(document, transition);
   return { ...document, transitions: [...document.transitions, transition] };
 }
 

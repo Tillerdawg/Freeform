@@ -1,4 +1,5 @@
 import { assertValidDot } from '../geometry/nfhs';
+import { validateFtlTransitionForDocument } from '../timeline/ftl';
 import type { FreeformDocument, Identifier, SetPage, Transition } from './types';
 
 /** Validates the semantic set and float-topology invariants required for authoring. */
@@ -50,14 +51,22 @@ export function validateFloatTransition(
   document: Pick<FreeformDocument, 'performers' | 'sets'>,
   transition: Transition,
 ): void {
+  validateTransitionTopology(document, transition);
+  if (transition.mode !== 'float') {
+    throw new Error('Expected a float transition.');
+  }
+}
+
+/** Validates IDs, adjacency, count timing, and complete endpoint coverage for either motion mode. */
+export function validateTransitionTopology(
+  document: Pick<FreeformDocument, 'performers' | 'sets'>,
+  transition: Transition,
+): void {
   if (!/^[a-z][a-z0-9_-]{0,63}$/.test(transition.id)) {
     throw new Error(`Invalid transition ID: ${transition.id}`);
   }
   if (!Number.isInteger(transition.counts) || transition.counts <= 0) {
     throw new Error('Transition counts must be a positive integer.');
-  }
-  if (transition.mode !== 'float') {
-    throw new Error('M3 only supports float transitions.');
   }
   const fromIndex = document.sets.findIndex(({ id }) => id === transition.fromSetId);
   const toIndex = document.sets.findIndex(({ id }) => id === transition.toSetId);
@@ -73,12 +82,20 @@ export function validateFloatTransition(
   validateSetCoverage(document.performers, to);
 }
 
+export function validateTransition(
+  document: Pick<FreeformDocument, 'performers' | 'sets'>,
+  transition: Transition,
+): void {
+  if (transition.mode === 'float') validateFloatTransition(document, transition);
+  else validateFtlTransitionForDocument(document, transition);
+}
+
 export function validateDocumentSetsAndTransitions(document: FreeformDocument): void {
   validateOrderedSets(document);
   const transitionIds = new Set<string>();
   for (const transition of document.transitions) {
     if (transitionIds.has(transition.id)) throw new Error(`Transition ID already exists: ${transition.id}`);
     transitionIds.add(transition.id);
-    validateFloatTransition(document, transition);
+    validateTransition(document, transition);
   }
 }

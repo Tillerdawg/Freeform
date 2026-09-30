@@ -25,9 +25,9 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     const shell = element('section', 'app-shell');
     const header = element('header');
     header.append(
-      textElement('p', 'eyebrow', 'Freeform · M3 sets and float timeline'),
+      textElement('p', 'eyebrow', 'Freeform · M4 FTL paths and timeline'),
       textElement('h1', undefined, 'Freeform'),
-      textElement('p', 'subtitle', 'Canonical NFHS coordinates, complete sets, and count-by-count float playback.'),
+      textElement('p', 'subtitle', 'Canonical NFHS coordinates, complete sets, and count-by-count float or FTL playback.'),
     );
     shell.append(header);
 

@@ -1,10 +1,13 @@
 import type { FreeformDocument, Identifier, Transition } from '../document/types';
 import { sampleFloatTransition, type FloatSample } from './float';
+import { sampleFtlTransition, type FtlSample } from './ftl';
+
+export type TransitionSample = FloatSample | FtlSample;
 
 export interface PlaybackState {
   readonly count: number;
   readonly isPlaying: boolean;
-  readonly sample: FloatSample;
+  readonly sample: TransitionSample;
 }
 
 export interface KeyboardEventLike {
@@ -25,8 +28,8 @@ export interface PlaybackController {
 }
 
 /**
- * Sequential single-transition playback for M3. The controller has no clock so
- * the DOM layer can choose its timer and re-render each integer sample exactly.
+ * Sequential single-transition playback. The controller has no clock so the DOM
+ * layer can choose its timer and re-render each integer sample exactly.
  */
 export function createPlaybackController(
   document: Pick<FreeformDocument, 'performers' | 'sets'>,
@@ -38,7 +41,9 @@ export function createPlaybackController(
   const state = (): PlaybackState => ({
     count,
     isPlaying,
-    sample: sampleFloatTransition(document, transition, count),
+    sample: transition.mode === 'float'
+      ? sampleFloatTransition(document, transition, count)
+      : sampleFtlTransition(document, transition, count),
   });
   const seek = (nextCount: number): PlaybackState => {
     if (!Number.isInteger(nextCount)) throw new RangeError('Playback count must be an integer.');

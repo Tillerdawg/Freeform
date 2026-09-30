@@ -63,7 +63,7 @@ section section {
 
 .editor-form h3 { margin: 0 0 0.25rem; font-size: 1rem; }
 .editor-form label { color: #b7c5d7; font-size: 0.85rem; }
-input, select, button {
+input, select, textarea, button {
   min-height: 2.25rem;
   border: 1px solid #5a718d;
   border-radius: 0.35rem;
