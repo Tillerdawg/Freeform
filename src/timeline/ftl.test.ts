@@ -167,6 +167,27 @@ describe('FTL validation', () => {
     const store = createCommandStore(document);
     const afterRemoval = store.apply({ type: 'performer.remove', performerId: 'e' });
     const staleFtl = afterRemoval.document.transitions.find(({ id }) => id === 'ftl-1')!;
+    const malformedOffsetMap: Transition = {
+      ...staleFtl,
+      ftl: { ...staleFtl.ftl!, offsetUnits: {} },
+    };
+    const malformedPath: Transition = {
+      ...staleFtl,
+      ftl: { ...staleFtl.ftl!, path: [{ x: 144000, y: 51200 }] },
+    };
+    const malformedOffsetDocument = { ...afterRemoval.document, transitions: [malformedOffsetMap, unaffectedFloat] };
+    const malformedPathDocument = { ...afterRemoval.document, transitions: [malformedPath, unaffectedFloat] };
+
+    // Removal-induced missing members may persist, but they must not turn into
+    // a blanket bypass for independent canonical FTL invariants.
+    expect(() => createCommandStore(malformedOffsetDocument)).toThrow('FTL offsets must name every formation member exactly once.');
+    expect(() => createCommandStore(malformedPathDocument)).toThrow('FTL path needs at least two points.');
+    const replacementStore = createCommandStore(afterRemoval.document);
+    expect(() => replacementStore.apply({ type: 'document.replace', document: malformedOffsetDocument })).toThrow(
+      'FTL offsets must name every formation member exactly once.',
+    );
+    expect(replacementStore.getState().document).toEqual(afterRemoval.document);
+
     const fixedFtl: Transition = {
       ...staleFtl,
       ftl: {

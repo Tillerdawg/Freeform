@@ -189,8 +189,9 @@ function validateFtlCore(
   }
   const missingMembers = members.filter((id) => !performerIds.includes(id));
   if (missingMembers.length > 0) {
-    if (options.allowMissingMembers) return;
-    throw new FtlValidationError('FTL_MISSING_MEMBER', `FTL formation references removed or unknown performer(s): ${missingMembers.join(', ')}.`);
+    if (!options.allowMissingMembers) {
+      throw new FtlValidationError('FTL_MISSING_MEMBER', `FTL formation references removed or unknown performer(s): ${missingMembers.join(', ')}.`);
+    }
   }
   const offsetIds = Object.keys(ftl.offsetUnits);
   if (offsetIds.length !== members.length || offsetIds.some((id) => !members.includes(id))) {
@@ -206,7 +207,9 @@ function validateFtlCore(
     if (offset < previousOffset) {
       throw new FtlValidationError('FTL_OFFSET_ORDER', 'FTL offsets must be non-decreasing in authored formation order.');
     }
-    if (previousMemberId && offset === previousOffset && !sameDot(from.positions[memberId]!, from.positions[previousMemberId]!)) {
+    const start = from.positions[memberId];
+    const previousStart = previousMemberId ? from.positions[previousMemberId] : undefined;
+    if (previousMemberId && offset === previousOffset && start && previousStart && !sameDot(start, previousStart)) {
       throw new FtlValidationError('FTL_OFFSET_ORDER', 'Equal FTL offsets are permitted only for performers sharing one start dot.');
     }
     previousOffset = offset;
@@ -219,7 +222,10 @@ function validateFtlCore(
     throw new FtlValidationError('INSUFFICIENT_FTL_PATH', 'Path must cover every formation offset plus the common travel distance.');
   }
   for (const memberId of members) {
-    const start = from.positions[memberId]!;
+    const start = from.positions[memberId];
+    // Canonical state permits only the missing start-dot comparison caused by
+    // a removed performer. All path and offset invariants still run above.
+    if (!start) continue;
     const derivedStart = samplePolyline(ftl.path, ftl.offsetUnits[memberId]!);
     if (distanceBetween(start, derivedStart) > POSITION_TOLERANCE_FU) {
       throw new FtlValidationError('FTL_START_MISMATCH', `Start dot for ${memberId} does not match its FTL path offset within 1 FU.`);
