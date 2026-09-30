@@ -1,6 +1,7 @@
-import type { CommandStore } from '../document/types';
+import type { CommandStore, Dot } from '../document/types';
 import {
   buildCoordinate,
+  formatYardLine,
   parseQuarterSteps,
   type HorizontalCoordinateInput,
 } from '../geometry/coordinate-builder';
@@ -11,6 +12,49 @@ import { createTimelinePanel } from '../timeline/timeline-panel';
 export interface DotEditorOptions {
   readonly store: CommandStore;
   readonly report: FeatureReport;
+}
+
+/** The string and checkbox values collected by the structured dot form. */
+export interface DotEditorCoordinateValues {
+  readonly useRawFu: boolean;
+  readonly x: string;
+  readonly y: string;
+  readonly horizontalMode: string;
+  readonly side: string;
+  readonly lineYard: string;
+  readonly splittingLower: string;
+  readonly splittingHigher: string;
+  readonly horizontalSteps: string;
+  readonly horizontalDirection: 'Inside' | 'Outside';
+  readonly verticalMode: string;
+  readonly landmark: string;
+  readonly verticalSteps: string;
+  readonly verticalDirection: 'In Front Of' | 'Behind';
+}
+
+/** Converts browser form values to the canonical dot sent to the command store. */
+export function buildDotFromEditorValues(values: DotEditorCoordinateValues): Dot {
+  if (values.useRawFu) return rawDot(values.x, values.y);
+
+  return buildCoordinate({
+    horizontal: horizontalInput(
+      values.horizontalMode,
+      values.side,
+      values.lineYard,
+      values.splittingLower,
+      values.splittingHigher,
+      values.horizontalSteps,
+      values.horizontalDirection,
+    ),
+    vertical: values.verticalMode === 'landmark'
+      ? { kind: 'landmark', landmark: values.landmark as 'Front Sideline' | 'Front Hash' | 'Back Hash' | 'Back Sideline' }
+      : {
+        kind: 'offset',
+        landmark: values.landmark as 'Front Sideline' | 'Front Hash' | 'Back Hash' | 'Back Sideline',
+        quarterSteps: parseQuarterSteps(values.verticalSteps),
+        direction: values.verticalDirection,
+      },
+  });
 }
 
 /**
@@ -144,8 +188,8 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       { value: '50', label: '50' },
     ]);
     const lineYard = select('horizontal-yard-line', 'Yard line', yardOptions(0, 45));
-    const splittingLower = select('splitting-lower-line', 'Splitting lower line', yardOptions(0, 95));
-    const splittingHigher = select('splitting-higher-line', 'Splitting higher line', yardOptions(5, 100));
+    const splittingLower = select('splitting-lower-line', 'Splitting line nearer Side 1', fieldLineOptions(0, 95));
+    const splittingHigher = select('splitting-higher-line', 'Splitting line nearer Side 2', fieldLineOptions(5, 100));
     splittingLower.value = '40';
     splittingHigher.value = '45';
     const horizontalSteps = input('horizontal-steps', 'Steps', 'number');
@@ -163,9 +207,11 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     );
     const splittingControls = element('div');
     splittingControls.append(
-      labelFor(splittingLower, 'Splitting lower line'), splittingLower,
-      labelFor(splittingHigher, 'Splitting higher line'), splittingHigher,
+      labelFor(splittingLower, 'Splitting line nearer Side 1'), splittingLower,
+      labelFor(splittingHigher, 'Splitting line nearer Side 2'), splittingHigher,
     );
+    const singleLineControls = element('div');
+    singleLineControls.append(labelFor(side, 'Side'), side, labelFor(lineYard, 'Yard line'), lineYard);
 
     const verticalMode = select('vertical-mode', 'Vertical placement', [
       { value: 'landmark', label: 'On landmark' },
@@ -210,6 +256,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     );
 
     const updateVisibleControls = (): void => {
+      singleLineControls.hidden = horizontalMode.value === 'splitting';
       splittingControls.hidden = horizontalMode.value !== 'splitting';
       horizontalOffsetControls.hidden = horizontalMode.value !== 'offset';
       verticalOffsetControls.hidden = verticalMode.value !== 'offset';
@@ -226,8 +273,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       labelFor(performerId, 'Performer'), performerId,
       textElement('h4', undefined, 'Derived coordinate'),
       labelFor(horizontalMode, 'Horizontal placement'), horizontalMode,
-      labelFor(side, 'Side'), side,
-      labelFor(lineYard, 'Yard line'), lineYard,
+      singleLineControls,
       splittingControls,
       horizontalOffsetControls,
       labelFor(verticalMode, 'Vertical placement'), verticalMode,
@@ -244,27 +290,22 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       const set = store.getState().document.sets.find((candidate) => candidate.id === selectedSet);
       const existing = Boolean(set && selectedPerformer in set.positions);
       try {
-        const dot = useRawFu.checked
-          ? rawDot(x.value, y.value)
-          : buildCoordinate({
-            horizontal: horizontalInput(
-              horizontalMode.value,
-              side.value,
-              lineYard.value,
-              splittingLower.value,
-              splittingHigher.value,
-              horizontalSteps.value,
-              inside.checked ? 'Inside' : 'Outside',
-            ),
-            vertical: verticalMode.value === 'landmark'
-              ? { kind: 'landmark', landmark: landmark.value as 'Front Sideline' | 'Front Hash' | 'Back Hash' | 'Back Sideline' }
-              : {
-                kind: 'offset',
-                landmark: landmark.value as 'Front Sideline' | 'Front Hash' | 'Back Hash' | 'Back Sideline',
-                quarterSteps: parseQuarterSteps(verticalSteps.value),
-                direction: inFrontOf.checked ? 'In Front Of' : 'Behind',
-              },
-          });
+        const dot = buildDotFromEditorValues({
+          useRawFu: useRawFu.checked,
+          x: x.value,
+          y: y.value,
+          horizontalMode: horizontalMode.value,
+          side: side.value,
+          lineYard: lineYard.value,
+          splittingLower: splittingLower.value,
+          splittingHigher: splittingHigher.value,
+          horizontalSteps: horizontalSteps.value,
+          horizontalDirection: inside.checked ? 'Inside' : 'Outside',
+          verticalMode: verticalMode.value,
+          landmark: landmark.value,
+          verticalSteps: verticalSteps.value,
+          verticalDirection: inFrontOf.checked ? 'In Front Of' : 'Behind',
+        });
         store.apply({
           type: existing ? 'dot.move' : 'dot.create',
           setId: selectedSet,
@@ -328,6 +369,14 @@ function rawDistance(distance: { readonly units: number; readonly numeratorUnits
 function yardOptions(start: number, end: number): readonly { readonly value: string; readonly label: string }[] {
   const options: { value: string; label: string }[] = [];
   for (let yard = start; yard <= end; yard += 5) options.push({ value: String(yard), label: `${yard}` });
+  return options;
+}
+
+function fieldLineOptions(start: number, end: number): readonly { readonly value: string; readonly label: string }[] {
+  const options: { value: string; label: string }[] = [];
+  for (let yard = start; yard <= end; yard += 5) {
+    options.push({ value: String(yard), label: formatYardLine(yard) });
+  }
   return options;
 }
 

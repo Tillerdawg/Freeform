@@ -144,9 +144,35 @@ describe('quarter-step snapping', () => {
     [{ x: 117225, y: 49425 }, { x: 117450, y: 49400 }],
     [{ x: 122175, y: 44010 }, { x: 122400, y: 44000 }],
     [{ x: 287900, y: 153425 }, { x: 288000, y: 153600 }],
-    [{ x: 719, y: 25600 }, { x: 900, y: 25650 }],
+    [{ x: 719, y: 25600 }, { x: 900, y: 25200 }],
     [{ x: 225, y: 51425 }, { x: 450, y: 51650 }],
   ] as const)('snaps %# %o to %o', (dot, expected) => {
     expect(snapToQuarterStepGrid(dot)).toEqual(expected);
+  });
+
+  it.each([
+    [25599, 25200, { kind: 'offset', landmark: 'Front Sideline', quarterSteps: 56, direction: 'Behind' }, 'On 50, 14 Steps Behind Front Sideline'],
+    [25600, 25200, { kind: 'offset', landmark: 'Front Sideline', quarterSteps: 56, direction: 'Behind' }, 'On 50, 14 Steps Behind Front Sideline'],
+    [25601, 26000, { kind: 'offset', landmark: 'Front Hash', quarterSteps: 56, direction: 'In Front Of' }, 'On 50, 14 Steps In Front Of Front Hash'],
+    [76799, 76400, { kind: 'offset', landmark: 'Front Hash', quarterSteps: 56, direction: 'Behind' }, 'On 50, 14 Steps Behind Front Hash'],
+    [76800, 76400, { kind: 'offset', landmark: 'Front Hash', quarterSteps: 56, direction: 'Behind' }, 'On 50, 14 Steps Behind Front Hash'],
+    [76801, 77200, { kind: 'offset', landmark: 'Back Hash', quarterSteps: 56, direction: 'In Front Of' }, 'On 50, 14 Steps In Front Of Back Hash'],
+    [127999, 127600, { kind: 'offset', landmark: 'Back Hash', quarterSteps: 56, direction: 'Behind' }, 'On 50, 14 Steps Behind Back Hash'],
+    [128000, 127600, { kind: 'offset', landmark: 'Back Hash', quarterSteps: 56, direction: 'Behind' }, 'On 50, 14 Steps Behind Back Hash'],
+    [128001, 128400, { kind: 'offset', landmark: 'Back Sideline', quarterSteps: 56, direction: 'In Front Of' }, 'On 50, 14 Steps In Front Of Back Sideline'],
+  ] as const)('keeps y=%i stable and builder-valid at a landmark bisector', (y, expectedY, vertical, notation) => {
+    const snapped = snapToQuarterStepGrid({ x: 144000, y });
+
+    expect(snapped).toEqual({ x: 144000, y: expectedY });
+    expect(snapToQuarterStepGrid(snapped)).toEqual(snapped);
+    expect(buildCoordinate({ horizontal: { kind: 'line', line: 50 }, vertical })).toEqual(snapped);
+    expect(inspectCoordinate(snapped).notation).toBe(notation);
+  });
+
+  it('is idempotent for every canonical y coordinate on the 50-yard line', () => {
+    for (let y = 0; y <= 153600; y += 1) {
+      const snapped = snapToQuarterStepGrid({ x: 144000, y });
+      expect(snapToQuarterStepGrid(snapped)).toEqual(snapped);
+    }
   });
 });

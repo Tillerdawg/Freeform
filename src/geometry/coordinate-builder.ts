@@ -106,7 +106,7 @@ export function snapToQuarterStepGrid(dot: Dot): Dot {
   const yLandmark = nearestLandmarkY(dot.y);
   const snapped = {
     x: xLine + roundToNearestQuarterStep(dot.x - xLine),
-    y: yLandmark + roundToNearestQuarterStep(dot.y - yLandmark),
+    y: snapVerticalToInspectionCell(dot.y, yLandmark),
   };
   assertValidDot(snapped);
   return snapped;
@@ -181,6 +181,35 @@ function nearestLandmarkY(y: number): number {
       ? candidate
       : nearest;
   });
+}
+
+/**
+ * A hash's FU coordinate is not necessarily divisible by 450. Naively rounding
+ * from the nearest input landmark can therefore cross a landmark bisector and
+ * produce a dot whose inspection selects a different landmark. Restrict the
+ * result to the inspection cell of the landmark selected before rounding, so a
+ * snapped dot remains an exact builder-valid instruction and is idempotent.
+ */
+function snapVerticalToInspectionCell(y: number, landmark: number): number {
+  const landmarks = Object.values(LANDMARK_Y).sort((left, right) => left - right);
+  const index = landmarks.indexOf(landmark);
+  if (index === -1) throw new Error('Unknown landmark.');
+
+  // inspectCoordinate awards an exact bisector tie to the lower-y landmark.
+  const lowerBound = index === 0
+    ? 0
+    : Math.floor((landmarks[index - 1]! + landmark) / 2) + 1;
+  const upperBound = index === landmarks.length - 1
+    ? NFHS_11_PLAYER_FIELD.widthUnits
+    : Math.floor((landmark + landmarks[index + 1]!) / 2);
+  const minimumQuarterOffset = Math.ceil((lowerBound - landmark) / FU_PER_QUARTER_STEP);
+  const maximumQuarterOffset = Math.floor((upperBound - landmark) / FU_PER_QUARTER_STEP);
+  const roundedQuarterOffset = roundToNearestQuarterStep(y - landmark) / FU_PER_QUARTER_STEP;
+  const constrainedQuarterOffset = Math.min(
+    maximumQuarterOffset,
+    Math.max(minimumQuarterOffset, roundedQuarterOffset),
+  );
+  return landmark + constrainedQuarterOffset * FU_PER_QUARTER_STEP;
 }
 
 function roundToNearestQuarterStep(units: number): number {
