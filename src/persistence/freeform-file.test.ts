@@ -136,6 +136,57 @@ describe('Freeform file codec and validation', () => {
     }
   });
 
+  it('matches the published Ajv date-time and URI formats at codec and command-store boundaries', () => {
+    const source = documentWithM6Data();
+    const withTimestamp = (key: 'createdAt' | 'updatedAt' | 'overriddenAt', value: string): FreeformDocument => {
+      if (key === 'overriddenAt') {
+        const transition = source.transitions[0]!;
+        return {
+          ...source,
+          transitions: [{
+            ...transition,
+            collisionOverrides: [{ ...transition.collisionOverrides![0]!, overriddenAt: value }],
+          }],
+        };
+      }
+      return { ...source, show: { ...source.show, [key]: value } };
+    };
+    const parityCases: Array<{ readonly document: FreeformDocument; readonly valid: boolean }> = [
+      // Leap seconds are valid only after converting their clock portion to UTC.
+      { document: withTimestamp('createdAt', '2024-02-29T23:59:60+01:00'), valid: false },
+      { document: withTimestamp('updatedAt', '2024-03-01T00:59:60+01:00'), valid: true },
+      { document: withTimestamp('overriddenAt', '2024-02-29T12:00:00+0530'), valid: true },
+      { document: withTimestamp('createdAt', '2024-02-29T12:00:00+05'), valid: true },
+      { document: withTimestamp('updatedAt', '2024-02-29\t12:00:00Z'), valid: true },
+      { document: { ...source, $schema: 'https://example.com/a b' } as unknown as FreeformDocument, valid: false },
+      { document: { ...source, $schema: 'https://example.com/%zz' } as unknown as FreeformDocument, valid: false },
+      { document: { ...source, $schema: 'urn:freeform:example' } as unknown as FreeformDocument, valid: true },
+      { document: { ...source, $schema: 'https://[2001:db8::1]/x' } as unknown as FreeformDocument, valid: true },
+    ];
+
+    for (const { document, valid } of parityCases) {
+      expect(schemaAccepts(document)).toBe(valid);
+      if (valid) {
+        expect(() => decodeDocument(encodeDocument(document))).not.toThrow();
+        expect(() => createCommandStore(document)).not.toThrow();
+      } else {
+        expect(() => encodeDocument(document)).toThrow(FreeformFileError);
+        expect(() => decodeDocument(bytes(document))).toThrow(FreeformFileError);
+        expect(() => createCommandStore(document)).toThrow(FreeformFileError);
+      }
+    }
+
+    const store = createCommandStore(source);
+    store.apply({ type: 'show.title.set', title: 'Draft' });
+    const before = store.undo()!;
+    for (const { document } of parityCases.filter((candidate) => !candidate.valid)) {
+      expect(() => store.apply({ type: 'document.replace', document })).toThrow(FreeformFileError);
+      expect(store.getState()).toBe(before);
+      expect(store.canRedo()).toBe(true);
+    }
+    expect(store.redo()?.document.show.title).toBe('Draft');
+  });
+
   it('rejects structural and semantic corruption without repairing it', () => {
     const unknownRoot = { ...documentWithM6Data(), surprise: true };
     expect(() => validateCurrentDocument(unknownRoot)).toThrow(FreeformFileError);

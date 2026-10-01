@@ -1,4 +1,5 @@
 import { validateDocumentAnnotations } from '../document/annotations';
+import { isAjvRfc3339DateTime } from '../document/rfc3339';
 import { validateDocumentSetsAndTransitions } from '../document/sets';
 import type { CommandStore, FreeformDocument } from '../document/types';
 import { validateFtlTransition } from '../timeline/ftl';
@@ -264,27 +265,17 @@ function number(value: unknown, min: number, max: number | undefined, exclusiveM
 function boolean(value: unknown, label: string): void { if (typeof value !== 'boolean') throw fileError('SCHEMA', `${label} must be a boolean.`); }
 function isoDate(value: unknown, label: string): void {
   if (typeof value !== 'string') throw fileError('SCHEMA', `${label} must be an ISO date-time.`);
-  // Match Ajv's RFC3339 date-time behavior, including lower-case separators,
-  // arbitrary fractional precision, offsets, and a legal leap second. Native
-  // Date.parse cannot be the authority here because it normalizes bad dates.
-  const match = /^(\d{4})-(\d\d)-(\d\d)[Tt ](\d\d):(\d\d):(\d\d)(?:[.](\d+))?([Zz]|[+-](\d\d):(\d\d))$/.exec(value);
-  if (!match) throw fileError('SCHEMA', `${label} must be an ISO date-time.`);
-  const [, yearText, monthText, dayText, hourText, minuteText, secondText, , zone, zoneHourText, zoneMinuteText] = match;
-  const year = Number(yearText);
-  const month = Number(monthText);
-  const day = Number(dayText);
-  const hour = Number(hourText);
-  const minute = Number(minuteText);
-  const second = Number(secondText);
-  const zoneHour = zone === 'Z' || zone === 'z' ? 0 : Number(zoneHourText);
-  const zoneMinute = zone === 'Z' || zone === 'z' ? 0 : Number(zoneMinuteText);
-  const daysInMonth = month === 2 ? (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28) : ([4, 6, 9, 11].includes(month) ? 30 : 31);
-  if (month < 1 || month > 12 || day < 1 || day > daysInMonth || hour > 23 || minute > 59 || second > 60
-    || (second === 60 && (hour !== 23 || minute !== 59)) || zoneHour > 23 || zoneMinute > 59) {
+  // This is the exact behavior of docs' Ajv 8.20.0/ajv-formats 3.0.1
+  // `date-time` validator. Do not use Date.parse: it normalizes bad dates;
+  // do not simplify the time-zone forms: this accepts +05, +0530 and +05:30.
+  if (!isAjvRfc3339DateTime(value)) {
     throw fileError('SCHEMA', `${label} must be an ISO date-time.`);
   }
 }
-function uri(value: unknown, label: string): void { if (typeof value !== 'string') throw fileError('SCHEMA', `${label} must be a URI.`); try { new URL(value); } catch { throw fileError('SCHEMA', `${label} must be a URI.`); } }
+// Copied verbatim in meaning from ajv-formats 3.0.1 full `uri` format. A
+// WHATWG URL is a parser/normalizer, not JSON Schema URI format validation.
+const AJV_URI = /^(?:[a-z][a-z0-9+\-.]*:)(?:\/?\/(?:(?:[a-z0-9\-._~!$&'()*+,;=:]|%[0-9a-f]{2})*@)?(?:\[(?:(?:(?:(?:[0-9a-f]{1,4}:){6}|::(?:[0-9a-f]{1,4}:){5}|(?:[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){4}|(?:(?:[0-9a-f]{1,4}:){0,1}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){3}|(?:(?:[0-9a-f]{1,4}:){0,2}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){2}|(?:(?:[0-9a-f]{1,4}:){0,3}[0-9a-f]{1,4})?::[0-9a-f]{1,4}:|(?:(?:[0-9a-f]{1,4}:){0,4}[0-9a-f]{1,4})?::)(?:[0-9a-f]{1,4}:[0-9a-f]{1,4}|(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?))|(?:(?:[0-9a-f]{1,4}:){0,5}[0-9a-f]{1,4})?::[0-9a-f]{1,4}|(?:(?:[0-9a-f]{1,4}:){0,6}[0-9a-f]{1,4})?::)|[Vv][0-9a-f]+\.[a-z0-9\-._~!$&'()*+,;=:]+)\]|(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)|(?:[a-z0-9\-._~!$&'()*+,;=]|%[0-9a-f]{2})*)(?::\d*)?(?:\/(?:[a-z0-9\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*|\/(?:(?:[a-z0-9\-._~!$&'"()*+,;=:@]|%[0-9a-f]{2})+(?:\/(?:[a-z0-9\-._~!$&'"()*+,;=:@]|%[0-9a-f]{2})*)*)?|(?:[a-z0-9\-._~!$&'"()*+,;=:@]|%[0-9a-f]{2})+(?:\/(?:[a-z0-9\-._~!$&'"()*+,;=:@]|%[0-9a-f]{2})*)*)(?:\?(?:[a-z0-9\-._~!$&'"()*+,;=:@/?]|%[0-9a-f]{2})*)?(?:#(?:[a-z0-9\-._~!$&'"()*+,;=:@/?]|%[0-9a-f]{2})*)?$/i;
+function uri(value: unknown, label: string): void { if (typeof value !== 'string' || !AJV_URI.test(value)) throw fileError('SCHEMA', `${label} must be a URI.`); }
 function unique(values: readonly string[], label: string): void { if (new Set(values).size !== values.length) throw fileError('SEMANTIC', `Duplicate ${label}.`); }
 function requireSemver(value: unknown, label: string): readonly [number, number, number] { if (typeof value !== 'string') throw fileError('INVALID_VERSION', `${label} must be a semantic version.`); const match = /^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)$/.exec(value); if (!match) throw fileError('INVALID_VERSION', `${label} must be a semantic version without prerelease metadata.`); return [Number(match[1]), Number(match[2]), Number(match[3])]; }
 function fileError(code: string, message: string): FreeformFileError { return new FreeformFileError(message, code); }

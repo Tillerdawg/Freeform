@@ -1,6 +1,7 @@
 import { assertValidDot } from '../geometry/nfhs';
 import { validateFtlTransitionForDocument } from '../timeline/ftl';
 import type { CollisionOverride, FreeformDocument, Identifier, SetPage, Transition } from './types';
+import { isAjvRfc3339DateTime } from './rfc3339';
 
 /** Validates the semantic set and float-topology invariants required for authoring. */
 export function validateSetCoverage(
@@ -129,7 +130,7 @@ export function validateCollisionOverride(
   if (override.authorLabel.trim().length === 0 || override.authorLabel.length > 120) {
     throw new Error('Collision override local actor label must contain 1 through 120 characters.');
   }
-  if (!isValidIsoTimestamp(override.overriddenAt)) {
+  if (!isAjvRfc3339DateTime(override.overriddenAt)) {
     throw new Error('Collision override timestamp must be a valid ISO 8601 date-time.');
   }
 }
@@ -142,17 +143,4 @@ function validateCollisionOverrides(document: FreeformDocument, transition: Tran
     if (seen.has(key)) throw new Error(`Transition ${transition.id} contains a duplicate collision override.`);
     seen.add(key);
   }
-}
-
-function isValidIsoTimestamp(value: string): boolean {
-  const match = /^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.(\d{1,3}))?Z$/.exec(value);
-  if (!match) return false;
-
-  const milliseconds = (match[2] ?? '').padEnd(3, '0');
-  const canonicalValue = `${match[1]}.${milliseconds}Z`;
-  const parsed = Date.parse(canonicalValue);
-  // Date.parse normalizes impossible dates (for example, February 31) rather
-  // than rejecting them. Re-formatting and comparing the exact accepted UTC
-  // representation rejects normalization while preserving .1/.12/.123 input.
-  return !Number.isNaN(parsed) && new Date(parsed).toISOString() === canonicalValue;
 }
