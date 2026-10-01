@@ -145,6 +145,25 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px s
 .field-editor__dot text { fill: #111823; font-size: 9px; font-weight: 700; pointer-events: none; }
 .field-editor__readout { color: #b9e7ce; font-variant-numeric: tabular-nums; margin: 0; }
 
+.annotation-editor, .annotation-manager, .annotation-context-view { display: grid; gap: 0.85rem; margin-top: 1.5rem; }
+.annotation-editor__hint { margin: 0; color: #b7c5d7; font-size: 0.9rem; }
+.annotation-preview { display: grid; gap: 0.45rem; }
+.annotation-preview__svg, .annotation-context-view__svg { width: 100%; height: auto; border: 1px solid #3b4a5e; border-radius: 0.5rem; background: #163521; touch-action: none; }
+.annotation-preview__boundary { fill: none; stroke: #e7edf7; stroke-width: 2; }
+.annotation__line { stroke: #f2d580; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.annotation__arrow-head { fill: #f2d580; }
+.annotation__label, .annotation__note, .annotation__symbol { fill: #f2d580; font-size: 16px; font-weight: 700; paint-order: stroke; stroke: #111823; stroke-width: 3px; stroke-linejoin: round; }
+.annotation__note { fill: #b9e7ce; }
+.annotation__symbol { fill: #f1a59c; }
+.annotation:focus-visible { outline: none; }
+.annotation:focus-visible .annotation__line, .annotation:focus-visible .annotation__label, .annotation:focus-visible .annotation__note, .annotation:focus-visible .annotation__symbol { stroke: #90bdea; stroke-width: 5px; }
+.annotation-manager__rows { display: grid; gap: 0.5rem; }
+.annotation-manager__row { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; padding: 0.65rem; border: 1px solid #3b4a5e; border-radius: 0.5rem; background: #152133; }
+.annotation-manager__row label { color: #b7c5d7; font-size: 0.85rem; }
+.annotation-manager__row input[type="checkbox"] { min-height: auto; width: auto; }
+.annotation-manager__row.is-selected { border-color: #90bdea; }
+.annotation-context-view { margin: 1rem 0; }
+
 @media (max-width: 520px) {
   .app-shell { padding: 2rem 0; }
   .inspection-table { display: block; overflow-x: auto; }

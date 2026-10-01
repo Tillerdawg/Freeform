@@ -288,7 +288,7 @@ describe('annotations, layers, and symbols', () => {
     expect(ids(selectAnnotations(document, { audience: 'editor', context: { kind: 'active-transition', transitionId: 'transition-1' } })))
       .toEqual(['show-label', 'transition-1-arrow', 'show-symbol', 'p2-note', 'locked-label']);
     expect(ids(selectAnnotations(document, { audience: 'editor', context: { kind: 'active-transition', transitionId: 'transition-2' } })))
-      .toEqual(['show-label', 'transition-2-freehand', 'show-symbol', 'locked-label']);
+      .toEqual(['show-label', 'show-symbol', 'transition-2-freehand', 'locked-label']);
     expect(ids(selectAnnotations(document, { audience: 'editor', context: { kind: 'show' } })))
       .toEqual(['show-label', 'show-symbol', 'locked-label']);
     expect(ids(selectAnnotations(document, { audience: 'editor', context: { kind: 'set-range', firstSetId: 'set-1', lastSetId: 'set-2' } })))

@@ -8,6 +8,7 @@ import {
 import { inspectCoordinate, NFHS_11_PLAYER_FIELD } from '../geometry/nfhs';
 import type { FeatureReport } from '../platform/features';
 import { renderSvgFieldEditor, type SvgFieldEditor } from './svg-field-editor';
+import { renderAnnotationEditor } from './annotation-editor';
 import { createTimelinePanel } from '../timeline/timeline-panel';
 import { renderRosterEditor } from './roster-editor';
 
@@ -127,6 +128,10 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     );
     editor.append(fieldSection);
     editor.append(renderRosterEditor({ store, onCommitted: render, setStatus: setMessage }));
+
+    // This panel owns its drafts between its own commits. The document store is
+    // still the sole mutation boundary for every annotation/layer/symbol action.
+    editor.append(renderAnnotationEditor({ store, onCommitted: render, setStatus: setMessage }));
 
     const controls = element('div', 'editor-controls');
     controls.append(createPerformerForm(render, setMessage), createDotForm(render, setMessage));

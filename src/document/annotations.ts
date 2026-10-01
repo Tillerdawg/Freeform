@@ -87,7 +87,7 @@ export function selectAnnotations(
     }
   }
 
-  return document.annotations.filter((annotation) => {
+  const annotations = document.annotations.filter((annotation) => {
     const layer = layersById.get(annotation.layerId);
     if (!layer) throw new Error(`Annotation ${annotation.id} references an unknown layer: ${annotation.layerId}`);
     if (!applies(annotation.scope)) return false;
@@ -101,6 +101,12 @@ export function selectAnnotations(
         return annotation.visibility.performerPacket && annotation.performerId === selection.performerId;
     }
   });
+  // Layer array order is the canonical z-order: later layers draw on top.
+  // Keep a stable within-layer order from the annotation array.
+  return annotations.slice().sort((left, right) => (
+    (layersById.get(left.layerId) ? layers.indexOf(layersById.get(left.layerId)!) : 0)
+    - (layersById.get(right.layerId) ? layers.indexOf(layersById.get(right.layerId)!) : 0)
+  ));
 }
 
 function scopeMatcher(

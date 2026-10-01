@@ -3,6 +3,7 @@ import { calculatePairDistance, calculateTransitionStepStatuses } from './float'
 import { calculateFtlStepSizeStatus, deriveFtlOffsets, samplePolyline, validateFtlTransition } from './ftl';
 import { analyzeTransitionCollisions, type CollisionWarning } from './collision';
 import { createPlaybackController, type PlaybackController } from './playback';
+import { renderAnnotationContextView } from '../editor/annotation-renderer';
 
 export interface TimelinePanel {
   render(): HTMLElement;
@@ -54,7 +55,7 @@ export function createTimelinePanel(
       if (!current.isPlaying) clearTimer();
       // The app-level refresh replaces the timeline DOM. Do not destroy focus
       // from an in-progress threshold/override edit just to paint a playback tick.
-      if (!isCollisionEditorFocused()) refresh();
+      if (!isDraftEditorFocused()) refresh();
     }, 500);
   };
 
@@ -119,6 +120,11 @@ export function createTimelinePanel(
       });
       playbackControls.append(previous, playPause, next, slider, direct, text('output', `Count ${state.count} of ${transition.counts}`));
       panel.append(playbackControls);
+      panel.append(renderAnnotationContextView(
+        currentDocument,
+        { audience: 'editor', context: { kind: 'active-transition', transitionId: transition.id } },
+        'Showing whole-show and this transition’s marks. Marks scoped to either endpoint set are not shown while this transition plays.',
+      ));
 
       const sampleTable = element('table', 'inspection-table');
       sampleTable.append(tableHead(['Rank', 'Sample position (FU)', 'Step-size status']));
@@ -437,12 +443,13 @@ function parseFtlPath(value: string): readonly Dot[] {
   return points;
 }
 
-function isCollisionEditorFocused(): boolean {
+function isDraftEditorFocused(): boolean {
   if (typeof document === 'undefined') return false;
   const active = document.activeElement;
   return active instanceof HTMLElement && (
     active.id === 'collision-threshold'
     || active.id.startsWith('override-actor-')
     || active.id.startsWith('override-reason-')
+    || active.closest('.annotation-editor') !== null
   );
 }
