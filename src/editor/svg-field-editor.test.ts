@@ -91,7 +91,13 @@ describe('SVG field editor', () => {
 
   it('renders the field boundary, yard lines at every 5 yards, and both hash marks', () => {
     const transform = createFieldTransform(store.getState().document.field);
-    expect(svg.querySelector('.field-editor__boundary')).not.toBeNull();
+    const boundary = svg.querySelector('.field-editor__boundary')!;
+    // The front-to-back presentation flip must not produce the negative height
+    // that a direct subtraction of y=0 and y=widthUnits would create.
+    expect(boundary.getAttribute('x')).toBe('40');
+    expect(boundary.getAttribute('y')).toBe('40');
+    expect(boundary.getAttribute('width')).toBe('900');
+    expect(boundary.getAttribute('height')).toBe('480');
     // 21 yard lines: 0, 5, 10, ..., 100.
     expect(svg.querySelectorAll('.field-editor__yard-line').length).toBe(21);
     expect(svg.querySelectorAll('.field-editor__yard-line--fifty').length).toBe(1);
@@ -119,8 +125,8 @@ describe('SVG field editor', () => {
   it('renders the vertical 8-to-5 grid with one half-step line and six thin lines per yard-line span', () => {
     const verticalLines = (selector: string) => [...svg.querySelectorAll<SVGLineElement>(selector)].filter((line) => (
       Number(line.getAttribute('x1')) === Number(line.getAttribute('x2'))
-      && Number(line.getAttribute('y1')) === 40
-      && Number(line.getAttribute('y2')) === 520
+      && Math.min(Number(line.getAttribute('y1')), Number(line.getAttribute('y2'))) === 40
+      && Math.max(Number(line.getAttribute('y1')), Number(line.getAttribute('y2'))) === 520
     ));
     const halfLines = verticalLines('.field-editor__step-line--half');
     const thinLines = verticalLines('.field-editor__step-line');
@@ -132,7 +138,7 @@ describe('SVG field editor', () => {
       .toEqual([45.625, 51.25, 56.875, 68.125, 73.75, 79.375]);
   });
 
-  it('renders horizontal half-step and thin grid lines from the front sideline', () => {
+  it('renders horizontal half-step and thin grid lines upward from the lower front sideline', () => {
     const horizontalLines = (selector: string) => [...svg.querySelectorAll<SVGLineElement>(selector)].filter((line) => (
       Number(line.getAttribute('y1')) === Number(line.getAttribute('y2'))
       && Number(line.getAttribute('x1')) === 40
@@ -142,37 +148,34 @@ describe('SVG field editor', () => {
     expect(horizontalLines('.field-editor__step-line--half')
       .slice(0, 4)
       .map((line) => Number(line.getAttribute('y1'))))
-      .toEqual([40, 62.5, 85, 107.5]);
+      .toEqual([520, 497.5, 475, 452.5]);
     expect(horizontalLines('.field-editor__step-line')
       .slice(0, 6)
       .map((line) => Number(line.getAttribute('y1'))))
-      .toEqual([45.625, 51.25, 56.875, 68.125, 73.75, 79.375]);
+      .toEqual([514.375, 508.75, 503.125, 491.875, 486.25, 480.625]);
   });
 
   it('renders the 50-yard line and both hash marks at their exact expected SVG pixel positions', () => {
-    const field = store.getState().document.field;
-    const transform = createFieldTransform(field);
-
     const fiftyLine = svg.querySelector('.field-editor__yard-line--fifty')!;
-    const expectedFifty = transform.toPixel({ x: field.lengthUnits / 2, y: 0 });
-    expect(Number(fiftyLine.getAttribute('x1'))).toBe(expectedFifty.x);
-    expect(Number(fiftyLine.getAttribute('y1'))).toBe(expectedFifty.y);
-    expect(Number(fiftyLine.getAttribute('x2'))).toBe(transform.toPixel({ x: field.lengthUnits / 2, y: field.widthUnits }).x);
+    expect(Number(fiftyLine.getAttribute('x1'))).toBe(490);
+    expect(Number(fiftyLine.getAttribute('y1'))).toBe(520);
+    expect(Number(fiftyLine.getAttribute('x2'))).toBe(490);
+    expect(Number(fiftyLine.getAttribute('y2'))).toBe(40);
 
     const hashTicks = [...svg.querySelectorAll<SVGLineElement>('.field-editor__hash-tick')];
-    const frontHashPixelY = transform.toPixel({ x: 0, y: field.frontHashY }).y;
-    const backHashPixelY = transform.toPixel({ x: 0, y: field.backHashY }).y;
+    const frontHashPixelY = 360;
+    const backHashPixelY = 200;
     const frontTicks = hashTicks.filter((tick) => Number(tick.getAttribute('y1')) === frontHashPixelY);
     const backTicks = hashTicks.filter((tick) => Number(tick.getAttribute('y1')) === backHashPixelY);
     expect(frontTicks.length).toBeGreaterThan(0);
     expect(backTicks.length).toBeGreaterThan(0);
-    // Every hash tick sits exactly on its landmark's exact pixel row (no
-    // rounding drift), confirming the rendered marks land at the same exact
-    // pixel the transform function computes independently.
+    // Every hash tick sits exactly on an independently asserted landmark row,
+    // with no rounding drift in the rendered SVG.
     expect(hashTicks.every((tick) => {
       const y = Number(tick.getAttribute('y1'));
       return y === frontHashPixelY || y === backHashPixelY;
     })).toBe(true);
+    expect(frontHashPixelY).toBeGreaterThan(backHashPixelY);
   });
 
   it('renders a dot for each performer with a canonical dot in the active set, labeled by rank code', () => {
@@ -180,15 +183,16 @@ describe('SVG field editor', () => {
     const dot2 = svg.querySelector('[data-performer-id="performer-2"]');
     expect(dot1?.querySelector('text')?.textContent).toBe('P1');
     expect(dot2?.querySelector('text')?.textContent).toBe('P2');
+    expect([...svg.querySelectorAll('.field-editor__yard-label, .field-editor__dot text')]
+      .every((text) => text.getAttribute('transform') === null)).toBe(true);
   });
 
-  it('dragging an existing dot moves it via dot.move, and undo/redo still work afterward', () => {
+  it('dragging an existing dot to the lower rendered front moves it via dot.move, and undo/redo still work afterward', () => {
     editor.snapping.setEnabled(false);
-    const transform = createFieldTransform(store.getState().document.field);
     const dotGroup = svg.querySelector('[data-performer-id="performer-1"]')!;
-    const startPixel = transform.toPixel({ x: 144000, y: 76800 });
-    const endDot = { x: 60000, y: 40000 };
-    const endPixel = transform.toPixel(endDot);
+    const startPixel = { x: 490, y: 280 };
+    const endDot = { x: 60000, y: 0 };
+    const endPixel = { x: 227.5, y: 520 };
 
     firePointerEvent(dotGroup, 'pointerdown', { clientX: startPixel.x, clientY: startPixel.y });
     firePointerEvent(svg, 'pointermove', { clientX: endPixel.x, clientY: endPixel.y });
@@ -299,22 +303,44 @@ describe('SVG field editor', () => {
 
   it('clicking a field position moves the selected performer via dot.move and supports undo/redo', () => {
     editor.setActivePerformerId('performer-1');
-    editor.snapping.setEnabled(false);
-    const transform = createFieldTransform(store.getState().document.field);
     const originalDot = { x: 144000, y: 76800 };
-    const targetDot = { x: 10000, y: 10000 };
-    const pixel = transform.toPixel(targetDot);
+    // Direct lower/upper SVG landmarks independently exercise the inverse
+    // pointer conversion with snap-on default, not a test-side transform.
+    const lowerFrontPixel = { x: 40, y: 520 };
+    const upperBackPixel = { x: 940, y: 40 };
 
-    firePointerEvent(svg, 'pointerdown', { clientX: pixel.x, clientY: pixel.y });
-    firePointerEvent(svg, 'pointerup', { clientX: pixel.x, clientY: pixel.y });
+    firePointerEvent(svg, 'pointerdown', { clientX: lowerFrontPixel.x, clientY: lowerFrontPixel.y });
+    firePointerEvent(svg, 'pointerup', { clientX: lowerFrontPixel.x, clientY: lowerFrontPixel.y });
 
     const undoCommands = store.getUndoCommands();
     expect(undoCommands).toHaveLength(1);
     expect(undoCommands[0]).toMatchObject({ type: 'dot.move', performerId: 'performer-1' });
-    expect(store.getState().document.sets[0]?.positions['performer-1']).toEqual(targetDot);
+    expect(store.getState().document.sets[0]?.positions['performer-1']).toEqual({ x: 0, y: 0 });
     expect(commits).toBe(1);
 
+    firePointerEvent(svg, 'pointerdown', { clientX: upperBackPixel.x, clientY: upperBackPixel.y });
+    firePointerEvent(svg, 'pointerup', { clientX: upperBackPixel.x, clientY: upperBackPixel.y });
+    expect(store.getState().document.sets[0]?.positions['performer-1']).toEqual({ x: 288000, y: 153600 });
+    expect(store.getUndoCommands()).toHaveLength(2);
+
+    expect(store.undo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 0, y: 0 });
     expect(store.undo()?.document.sets[0]?.positions['performer-1']).toEqual(originalDot);
-    expect(store.redo()?.document.sets[0]?.positions['performer-1']).toEqual(targetDot);
+    expect(store.redo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 0, y: 0 });
+    expect(store.redo()?.document.sets[0]?.positions['performer-1']).toEqual({ x: 288000, y: 153600 });
+  });
+
+  it('snaps a lower rendered off-grid pointer to the expected canonical quarter-step point', () => {
+    editor.setActivePerformerId('performer-1');
+    // At this physical SVG position, inverse conversion is (60800, 640) FU;
+    // the established quarter-step snap result is (60750, 450) FU.
+    firePointerEvent(svg, 'pointerdown', { clientX: 230, clientY: 518 });
+    expect(store.getState().document.sets[0]?.positions['performer-1']).toEqual({ x: 60750, y: 450 });
+  });
+
+  it('does not mutate the document merely by rendering or refreshing the presentation orientation', () => {
+    const before = structuredClone(store.getState().document);
+    editor.refresh();
+    expect(store.getState().document).toEqual(before);
+    expect(store.getUndoCommands()).toHaveLength(0);
   });
 });

@@ -46,12 +46,15 @@ export function createFieldTransform(field: FreeformDocument['field']): FieldTra
     toPixel(dot) {
       return {
         x: FIELD_MARGIN_PX + (dot.x / lengthUnits) * FIELD_WIDTH_PX,
-        y: FIELD_MARGIN_PX + (dot.y / widthUnits) * FIELD_HEIGHT_PX,
+        // Canonical y=0 is the front sideline. SVG y increases downward, so
+        // invert only this presentation axis: the front is rendered at bottom
+        // and the back at top while document coordinates stay canonical.
+        y: FIELD_MARGIN_PX + ((widthUnits - dot.y) / widthUnits) * FIELD_HEIGHT_PX,
       };
     },
     toFieldUnits(point) {
       const rawX = ((point.x - FIELD_MARGIN_PX) / FIELD_WIDTH_PX) * lengthUnits;
-      const rawY = ((point.y - FIELD_MARGIN_PX) / FIELD_HEIGHT_PX) * widthUnits;
+      const rawY = widthUnits - ((point.y - FIELD_MARGIN_PX) / FIELD_HEIGHT_PX) * widthUnits;
       return {
         x: clamp(Math.round(rawX), 0, lengthUnits),
         y: clamp(Math.round(rawY), 0, widthUnits),

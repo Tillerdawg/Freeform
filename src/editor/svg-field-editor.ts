@@ -152,8 +152,12 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
     svg.setAttribute('width', String(transform.widthPx));
     svg.setAttribute('height', String(transform.heightPx));
 
-    const topLeft = transform.toPixel({ x: 0, y: 0 });
-    const bottomRight = transform.toPixel({ x: field.lengthUnits, y: field.widthUnits });
+    const frontSide = transform.toPixel({ x: 0, y: 0 });
+    const backSide = transform.toPixel({ x: field.lengthUnits, y: field.widthUnits });
+    const fieldLeft = Math.min(frontSide.x, backSide.x);
+    const fieldRight = Math.max(frontSide.x, backSide.x);
+    const fieldTop = Math.min(frontSide.y, backSide.y);
+    const fieldBottom = Math.max(frontSide.y, backSide.y);
 
     const yardLineUnits = field.unitsPerYard * 5;
     const halfYardLineUnits = yardLineUnits / 2;
@@ -191,29 +195,29 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
 
     const boundary = document.createElementNS(SVG_NS, 'rect');
     boundary.setAttribute('class', 'field-editor__boundary');
-    boundary.setAttribute('x', String(topLeft.x));
-    boundary.setAttribute('y', String(topLeft.y));
-    boundary.setAttribute('width', String(bottomRight.x - topLeft.x));
-    boundary.setAttribute('height', String(bottomRight.y - topLeft.y));
+    boundary.setAttribute('x', String(fieldLeft));
+    boundary.setAttribute('y', String(fieldTop));
+    boundary.setAttribute('width', String(fieldRight - fieldLeft));
+    boundary.setAttribute('height', String(fieldBottom - fieldTop));
     svg.append(boundary);
 
     for (let yard = 0; yard <= 100; yard += 5) {
       const x = yard * field.unitsPerYard;
-      const top = transform.toPixel({ x, y: 0 });
-      const bottom = transform.toPixel({ x, y: field.widthUnits });
+      const front = transform.toPixel({ x, y: 0 });
+      const back = transform.toPixel({ x, y: field.widthUnits });
       const line = document.createElementNS(SVG_NS, 'line');
       line.setAttribute('class', yard === 50 ? 'field-editor__yard-line field-editor__yard-line--fifty' : 'field-editor__yard-line');
-      line.setAttribute('x1', String(top.x));
-      line.setAttribute('y1', String(top.y));
-      line.setAttribute('x2', String(bottom.x));
-      line.setAttribute('y2', String(bottom.y));
+      line.setAttribute('x1', String(front.x));
+      line.setAttribute('y1', String(front.y));
+      line.setAttribute('x2', String(back.x));
+      line.setAttribute('y2', String(back.y));
       svg.append(line);
 
       const labelText = yardNumberLabel(x, field);
-      for (const labelY of [top.y - 6, bottom.y + 16]) {
+      for (const labelY of [fieldTop - 6, fieldBottom + 16]) {
         const label = document.createElementNS(SVG_NS, 'text');
         label.setAttribute('class', 'field-editor__yard-label');
-        label.setAttribute('x', String(top.x));
+        label.setAttribute('x', String(front.x));
         label.setAttribute('y', String(labelY));
         label.setAttribute('text-anchor', 'middle');
         label.textContent = labelText;
