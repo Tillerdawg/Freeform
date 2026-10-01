@@ -88,40 +88,134 @@ describe('annotations, layers, and symbols', () => {
     expect(store.getState()).toBe(initial);
   });
 
-  it('applies annotation, layer, and symbol commands immutably with full-content undo/redo', () => {
+  it('applies every annotation, layer, and symbol command immutably with complete undo/redo snapshots', () => {
     const document = makeDocument({ annotations: [], layers: [{ id: 'visible', name: 'Visible', visible: true, print: true, locked: false }], symbols: [] });
     const store = createCommandStore(document);
+    const expected = [store.getState().document];
+    const apply = (command: Parameters<typeof store.apply>[0]) => {
+      expected.push(store.apply(command).document);
+    };
     const symbol = { id: 'dot', name: 'Dot', glyph: 'circle' } as const;
+    const updatedSymbol = { id: 'dot', name: 'Filled Dot', glyph: 'circle-filled' } as const;
     const label = {
       id: 'new-note', kind: 'label', layerId: 'visible', scope: { kind: 'set', setId: 'set-1' }, visibility,
       text: 'Original', anchor: { x: 100000, y: 50000 },
     } as const;
-    const updated = {
+    const updatedAnnotation = {
       id: 'new-note', kind: 'symbol', layerId: 'visible', scope: { kind: 'transition', transitionId: 'transition-1' }, visibility,
       symbolId: 'dot', anchor: { x: 110000, y: 50000 }, rotationDegrees: 90, scale: 2,
     } as const;
+    const secondary = { id: 'secondary', name: 'Secondary', visible: false, print: false, locked: false } as const;
+    const updatedSecondary = { id: 'secondary', name: 'Published secondary', visible: true, print: true, locked: false } as const;
 
-    store.apply({ type: 'symbol.create', symbol });
-    store.apply({ type: 'annotation.create', annotation: label });
-    store.apply({ type: 'annotation.update', annotation: updated });
-    store.apply({ type: 'layer.create', layer: { id: 'secondary', name: 'Secondary', visible: false, print: false, locked: false } });
-    store.apply({ type: 'layer.reorder', layerId: 'secondary', index: 0 });
+    apply({ type: 'symbol.create', symbol });
+    apply({ type: 'symbol.update', symbol: updatedSymbol });
+    apply({ type: 'annotation.create', annotation: label });
+    apply({ type: 'annotation.update', annotation: updatedAnnotation });
+    apply({ type: 'annotation.remove', annotationId: 'new-note' });
+    apply({ type: 'layer.create', layer: secondary });
+    apply({ type: 'layer.update', layer: updatedSecondary });
+    apply({ type: 'layer.reorder', layerId: 'secondary', index: 0 });
+    apply({ type: 'layer.remove', layerId: 'visible' });
+    apply({ type: 'layer.remove', layerId: 'secondary' });
+    apply({ type: 'symbol.remove', symbolId: 'dot' });
 
-    expect(store.getState().document.layers?.map(({ id }) => id)).toEqual(['secondary', 'visible']);
-    expect(store.getState().document.annotations).toEqual([updated]);
-    expect(store.getState().document.symbols).toEqual([symbol]);
+    expect(store.getState().document).toEqual(expected.at(-1));
     expect(Object.isFrozen(store.getState().document.annotations)).toBe(true);
+    for (let index = expected.length - 2; index >= 0; index -= 1) {
+      expect(store.undo()?.document).toEqual(expected[index]);
+    }
+    for (let index = 1; index < expected.length; index += 1) {
+      expect(store.redo()?.document).toEqual(expected[index]);
+    }
+  });
 
-    expect(store.undo()?.document.layers?.map(({ id }) => id)).toEqual(['visible', 'secondary']);
-    expect(store.undo()?.document.layers?.map(({ id }) => id)).toEqual(['visible']);
-    expect(store.undo()?.document.annotations).toEqual([label]);
-    expect(store.undo()?.document.annotations).toEqual([]);
-    expect(store.undo()?.document.symbols).toEqual([]);
-    expect(store.redo()?.document.symbols).toEqual([symbol]);
-    expect(store.redo()?.document.annotations).toEqual([label]);
-    expect(store.redo()?.document.annotations).toEqual([updated]);
-    expect(store.redo()?.document.layers?.map(({ id }) => id)).toEqual(['visible', 'secondary']);
-    expect(store.redo()?.document.layers?.map(({ id }) => id)).toEqual(['secondary', 'visible']);
+  it('rejects null optional arrays and preserves state, history, revision, and redo on rejected replacement', () => {
+    const document = makeDocument({ annotations: [] });
+    expect(() => createCommandStore({ ...document, layers: null } as unknown as FreeformDocument)).toThrow('Layers must be an array.');
+    expect(() => createCommandStore({ ...document, symbols: null } as unknown as FreeformDocument)).toThrow('Symbols must be an array.');
+
+    for (const malformed of [
+      { ...document, layers: null },
+      { ...document, symbols: null },
+    ] as const) {
+      const store = createCommandStore(document);
+      store.apply({ type: 'show.title.set', title: 'changed' });
+      store.undo();
+      const before = store.getState();
+      expect(store.canUndo()).toBe(false);
+      expect(store.canRedo()).toBe(true);
+      expect(() => store.apply({ type: 'document.replace', document: malformed as unknown as FreeformDocument })).toThrow('must be an array');
+      expect(store.getState()).toBe(before);
+      expect(store.getState().revision).toBe(0);
+      expect(store.canUndo()).toBe(false);
+      expect(store.canRedo()).toBe(true);
+      expect(store.redo()?.document.show.title).toBe('changed');
+    }
+  });
+
+  it('uses JSON Schema Unicode code-point limits for M6 layer, label, and symbol strings', () => {
+    const emoji = '😀';
+    expect(() => validateDocumentAnnotations(makeDocument({
+      layers: [{ id: 'visible', name: emoji.repeat(120), visible: true, print: true, locked: false }],
+      symbols: [{ id: 'star', name: emoji.repeat(120), glyph: emoji.repeat(8000) }],
+      annotations: [{
+        id: 'label', kind: 'label', layerId: 'visible', scope: { kind: 'show' }, visibility,
+        text: emoji.repeat(10000), anchor: { x: 100000, y: 50000 },
+      }],
+    }))).not.toThrow();
+    expect(() => validateDocumentAnnotations(makeDocument({
+      symbols: [{ id: 'star', name: 'Star', glyph: emoji.repeat(8001) }],
+    }))).toThrow('Symbol glyph must contain 1 through 8000 characters.');
+  });
+
+  it('rejects each new command type atomically without consuming redo history', () => {
+    const document = makeDocument({ annotations: [], layers: [{ id: 'visible', name: 'Visible', visible: true, print: true, locked: false }], symbols: [] });
+    const store = createCommandStore(document);
+    store.apply({ type: 'show.title.set', title: 'changed' });
+    store.undo();
+    const rejectedCommands = [
+      { type: 'annotation.create', annotation: { id: 'bad-annotation', kind: 'label', layerId: 'missing', scope: { kind: 'show' }, visibility, text: 'Bad', anchor: { x: 1, y: 1 } } },
+      { type: 'annotation.update', annotation: { id: 'missing', kind: 'label', layerId: 'visible', scope: { kind: 'show' }, visibility, text: 'Bad', anchor: { x: 1, y: 1 } } },
+      { type: 'annotation.remove', annotationId: 'missing' },
+      { type: 'layer.create', layer: { id: 'visible', name: 'Duplicate', visible: true, print: true, locked: false } },
+      { type: 'layer.update', layer: { id: 'missing', name: 'Missing', visible: true, print: true, locked: false } },
+      { type: 'layer.reorder', layerId: 'visible', index: 1 },
+      { type: 'layer.remove', layerId: 'missing' },
+      { type: 'symbol.create', symbol: { id: 'bad', name: 'Bad', glyph: '' } },
+      { type: 'symbol.update', symbol: { id: 'missing', name: 'Missing', glyph: 'x' } },
+      { type: 'symbol.remove', symbolId: 'missing' },
+    ] as const;
+
+    for (const command of rejectedCommands) {
+      const before = store.getState();
+      expect(() => store.apply(command)).toThrow();
+      expect(store.getState()).toBe(before);
+      expect(store.canUndo()).toBe(false);
+      expect(store.canRedo()).toBe(true);
+    }
+  });
+
+  it('preserves existing shaped dots, transition motion, notes, and M5 audits through successful M6 commands', () => {
+    const document = makeDocument({
+      annotations: [],
+      transitions: [
+        {
+          id: 'transition-1', fromSetId: 'set-1', toSetId: 'set-2', counts: 16, mode: 'float', notes: 'Keep transition note',
+          collisionOverrides: [{ performerIds: ['p1', 'p2'], warningSignature: `v1-sha256-${'0'.repeat(64)}`, reason: 'Approved spacing', overriddenAt: '2026-10-01T00:00:00Z', authorLabel: 'Writer' }],
+        },
+        { id: 'transition-2', fromSetId: 'set-2', toSetId: 'set-3', counts: 16, mode: 'float' },
+      ],
+    });
+    const preserved = structuredClone({ sets: document.sets, transitions: document.transitions });
+    const store = createCommandStore(document);
+    store.apply({ type: 'symbol.create', symbol: { id: 'dot', name: 'Dot', glyph: 'circle' } });
+    store.apply({ type: 'layer.create', layer: { id: 'secondary', name: 'Secondary', visible: true, print: true, locked: false } });
+    store.apply({
+      type: 'annotation.create',
+      annotation: { id: 'new-label', kind: 'label', layerId: 'secondary', scope: { kind: 'transition', transitionId: 'transition-1' }, visibility, text: 'M6 only', anchor: { x: 100000, y: 50000 } },
+    });
+    expect({ sets: store.getState().document.sets, transitions: store.getState().document.transitions }).toEqual(preserved);
   });
 
   it('enforces locks and rejects linked deletion without mutating unrelated state', () => {
@@ -189,6 +283,8 @@ describe('annotations, layers, and symbols', () => {
       .toEqual(['show-label', 'set-1-label', 'show-symbol', 'locked-label']);
     expect(ids(selectAnnotations(document, { audience: 'editor', context: { kind: 'static-set', setId: 'set-2' } })))
       .toEqual(['show-label', 'show-symbol', 'p1-note', 'locked-label']);
+    expect(ids(selectAnnotations(document, { audience: 'editor', context: { kind: 'static-set', setId: 'set-3' } })))
+      .toEqual(['show-label', 'show-symbol', 'locked-label']);
     expect(ids(selectAnnotations(document, { audience: 'editor', context: { kind: 'active-transition', transitionId: 'transition-1' } })))
       .toEqual(['show-label', 'transition-1-arrow', 'show-symbol', 'p2-note', 'locked-label']);
     expect(ids(selectAnnotations(document, { audience: 'editor', context: { kind: 'active-transition', transitionId: 'transition-2' } })))

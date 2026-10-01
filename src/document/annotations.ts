@@ -35,8 +35,11 @@ export interface AnnotationSelection {
 export function validateDocumentAnnotations(
   document: Pick<FreeformDocument, 'annotations' | 'layers' | 'symbols' | 'performers' | 'sets' | 'transitions'>,
 ): void {
-  const layers = document.layers ?? [];
-  const symbols = document.symbols ?? [];
+  // `layers` and `symbols` are optional for backwards-compatible documents,
+  // but a present value must still be an array.  Do not use `??` here: it
+  // would silently normalize schema-invalid `null` at the canonical boundary.
+  const layers = document.layers === undefined ? [] : document.layers;
+  const symbols = document.symbols === undefined ? [] : document.symbols;
   assertArray(layers, 'Layers');
   assertArray(symbols, 'Symbols');
   assertArray(document.annotations, 'Annotations');
@@ -73,7 +76,7 @@ export function selectAnnotations(
   document: Pick<FreeformDocument, 'annotations' | 'layers' | 'performers' | 'sets' | 'transitions'>,
   selection: AnnotationSelection,
 ): readonly Annotation[] {
-  const layers = document.layers ?? [];
+  const layers = document.layers === undefined ? [] : document.layers;
   const layersById = new Map(layers.map((layer) => [layer.id, layer]));
   const applies = scopeMatcher(document, selection.context);
 
@@ -286,7 +289,10 @@ function assertId(value: unknown, label: string): asserts value is Identifier {
 }
 
 function assertString(value: unknown, minimum: number, maximum: number, label: string): asserts value is string {
-  if (typeof value !== 'string' || value.length < minimum || value.length > maximum) {
+  // JSON Schema's string length is measured in Unicode code points. JavaScript
+  // String.length counts UTF-16 code units, so use the iterable instead.
+  const length = typeof value === 'string' ? Array.from(value).length : 0;
+  if (typeof value !== 'string' || length < minimum || length > maximum) {
     throw new Error(`${label} must contain ${minimum} through ${maximum} characters.`);
   }
 }
