@@ -133,12 +133,12 @@ export function collisionWarningSignature(
   const motion = transition.mode === 'float'
     ? {
       mode: 'float',
-      starts: performerIds.map((id) => from.positions[id]),
-      ends: performerIds.map((id) => to.positions[id]),
+      starts: performerIds.map((id) => canonicalDot(from.positions[id]!)),
+      ends: performerIds.map((id) => canonicalDot(to.positions[id]!)),
     }
     : {
       mode: 'ftl',
-      path: transition.ftl!.path,
+      path: transition.ftl!.path.map(canonicalDot),
       distanceUnits: transition.ftl!.distanceUnits,
       offsets: performerIds.map((id) => transition.ftl!.offsetUnits[id]),
     };
@@ -155,6 +155,14 @@ export function collisionWarningSignature(
 
 export function canonicalPair(pair: readonly [Identifier, Identifier]): readonly [Identifier, Identifier] {
   return pair[0] < pair[1] ? [pair[0], pair[1]] : [pair[1], pair[0]];
+}
+
+/**
+ * JSON object insertion order is not semantic motion data. Hash coordinates as
+ * ordered primitive tuples so reconstructed { y, x } dots retain audit identity.
+ */
+function canonicalDot(dot: Dot): readonly [number, number] {
+  return [dot.x, dot.y];
 }
 
 function validateForCollisionAnalysis(document: FreeformDocument, transition: Transition): void {

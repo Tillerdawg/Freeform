@@ -131,11 +131,19 @@ describe('collision analyzer', () => {
     const expectedPayload = JSON.stringify({
       version: 'collision-warning-v1', transitionId: 'float-1', counts: 2, thresholdUnits: 2880,
       performerIds: ['a', 'b'],
-      motion: { mode: 'float', starts: [{ x: 0, y: 0 }, { x: 14400, y: 0 }], ends: [{ x: 14400, y: 0 }, { x: 0, y: 0 }] },
+      motion: { mode: 'float', starts: [[0, 0], [14400, 0]], ends: [[14400, 0], [0, 0]] },
     });
     expect(signature).toBe(`v1-sha256-${createHash('sha256').update(expectedPayload).digest('hex')}`);
     const reordered: FreeformDocument = { ...source, performers: [...source.performers].reverse() };
     expect(collisionWarningSignature(reordered, onlyTransition(reordered), ['b', 'a'])).toBe(signature);
+    const reconstructedDots: FreeformDocument = {
+      ...source,
+      sets: source.sets.map((set) => ({
+        ...set,
+        positions: Object.fromEntries(Object.entries(set.positions).map(([id, dot]) => [id, { y: dot.y, x: dot.x }])),
+      })),
+    };
+    expect(collisionWarningSignature(reconstructedDots, onlyTransition(reconstructedDots), ['a', 'b'])).toBe(signature);
     const changedMotion: FreeformDocument = {
       ...source,
       sets: source.sets.map((set) => set.id === 'set-2'
@@ -143,6 +151,38 @@ describe('collision analyzer', () => {
         : set),
     };
     expect(collisionWarningSignature(changedMotion, onlyTransition(changedMotion), ['a', 'b'])).not.toBe(signature);
+    const changedY: FreeformDocument = {
+      ...source,
+      sets: source.sets.map((set) => set.id === 'set-2'
+        ? { ...set, positions: { ...set.positions, a: { x: 14400, y: 1 } } }
+        : set),
+    };
+    expect(collisionWarningSignature(changedY, onlyTransition(changedY), ['a', 'b'])).not.toBe(signature);
+    const changedThreshold: FreeformDocument = { ...source, settings: { collisionThresholdUnits: 2881 } };
+    expect(collisionWarningSignature(changedThreshold, onlyTransition(changedThreshold), ['a', 'b'])).not.toBe(signature);
+    expect(collisionWarningSignature(source, { ...onlyTransition(source), counts: 3 }, ['a', 'b'])).not.toBe(signature);
+
+    const ftlDocument = floatDocument({
+      transitions: [{
+        ...onlyTransition(source), id: 'ftl-1', mode: 'ftl',
+        ftl: {
+          leaderId: 'a', followerIds: ['b'], offsetUnits: { a: 0, b: 14400 }, distanceUnits: 14400,
+          path: [{ x: 0, y: 0 }, { x: 7200, y: 0 }, { x: 14400, y: 0 }],
+        },
+      }],
+    });
+    const ftlTransition = onlyTransition(ftlDocument);
+    const ftlSignature = collisionWarningSignature(ftlDocument, ftlTransition, ['a', 'b']);
+    const reorderedPath: FreeformDocument = {
+      ...ftlDocument,
+      transitions: [{ ...ftlTransition, ftl: { ...ftlTransition.ftl!, path: ftlTransition.ftl!.path.map(({ x, y }) => ({ y, x })) } }],
+    };
+    expect(collisionWarningSignature(reorderedPath, onlyTransition(reorderedPath), ['a', 'b'])).toBe(ftlSignature);
+    const changedPath: FreeformDocument = {
+      ...ftlDocument,
+      transitions: [{ ...ftlTransition, ftl: { ...ftlTransition.ftl!, path: [{ x: 0, y: 0 }, { x: 7200, y: 1 }, { x: 14400, y: 0 }] } }],
+    };
+    expect(collisionWarningSignature(changedPath, onlyTransition(changedPath), ['a', 'b'])).not.toBe(ftlSignature);
 
     const store = createCommandStore(source);
     store.apply({ type: 'collision.override.record', transitionId: 'float-1', override: {
@@ -169,5 +209,42 @@ describe('collision analyzer', () => {
     expect(store.canUndo()).toBe(false);
     expect(() => store.apply({ type: 'settings.collision-threshold.set', collisionThresholdUnits: 0 })).toThrow('1 through 28800');
     expect(store.getState()).toBe(before);
+  });
+
+  it('rejects impossible override calendar timestamps on initialization, commands, and replacement', () => {
+    const source = floatDocument();
+    const invalidOverride = {
+      performerIds: ['a', 'b'] as const,
+      warningSignature: `v1-sha256-${'a'.repeat(64)}`,
+      reason: 'The local director accepts this advisory warning.',
+      authorLabel: 'Local director',
+      overriddenAt: '2026-02-31T00:00:00.000Z',
+    };
+    const invalidDocument: FreeformDocument = {
+      ...source,
+      transitions: [{ ...onlyTransition(source), collisionOverrides: [invalidOverride] }],
+    };
+
+    const validDocument: FreeformDocument = {
+      ...source,
+      transitions: [{
+        ...onlyTransition(source),
+        collisionOverrides: [{ ...invalidOverride, overriddenAt: '2024-02-29T23:59:59.1Z' }],
+      }],
+    };
+    expect(() => createCommandStore(validDocument)).not.toThrow();
+    expect(() => createCommandStore(invalidDocument)).toThrow('valid ISO 8601 date-time');
+
+    const store = createCommandStore(source);
+    const before = store.getState();
+    expect(() => store.apply({ type: 'collision.override.record', transitionId: 'float-1', override: invalidOverride }))
+      .toThrow('valid ISO 8601 date-time');
+    expect(store.getState()).toBe(before);
+    expect(store.getUndoCommands()).toEqual([]);
+
+    expect(() => store.apply({ type: 'document.replace', document: invalidDocument }))
+      .toThrow('valid ISO 8601 date-time');
+    expect(store.getState()).toBe(before);
+    expect(store.getUndoCommands()).toEqual([]);
   });
 });
