@@ -61,7 +61,13 @@ export function renderAnnotationEditor(options: AnnotationEditorOptions): HTMLEl
   const symbol = select('annotation-symbol', 'Symbol definition', []);
   const x = input('annotation-x', 'Anchor X (FU)', 'number'); x.min = '0'; x.max = '288000'; x.step = '1';
   const y = input('annotation-y', 'Anchor Y (FU)', 'number'); y.min = '0'; y.max = '153600'; y.step = '1';
-  const hint = text('p', 'annotation-editor__hint', 'Choose where this mark lives. Set-scoped marks are not shown while a transition into or out of that set plays. For a label, symbol, or note, click one field position. For an arrow, drag from tail to head. For freehand, drag a stroke.');
+  const geometry = document.createElement('textarea'); geometry.id = 'annotation-geometry'; geometry.rows = 2;
+  geometry.setAttribute('aria-label', 'Freehand or arrow points in FU');
+  const rotation = input('annotation-rotation', 'Symbol rotation in degrees', 'number'); rotation.min = '0'; rotation.max = '360'; rotation.step = '1';
+  const scale = input('annotation-scale', 'Symbol scale', 'number'); scale.min = '0.01'; scale.step = '0.01';
+  const annotationSave = submit('Save annotation');
+  const annotationLockHint = text('p', '', 'annotation-editor__hint');
+  const hint = text('p', 'Choose where this mark lives. Set-scoped marks are not shown while a transition into or out of that set plays. Enter freehand or arrow points as integer x,y pairs separated by semicolons, or draw them on the preview. For a label, symbol, or note, enter or click one field position.', 'annotation-editor__hint');
   annotationForm.append(
     label(id, 'Annotation ID'), id, label(tool, 'Annotation type'), tool,
     label(layer, 'Layer'), layer, label(scopeKind, 'Scope'), scopeKind, label(scopeTarget, 'Scope target'), scopeTarget,
@@ -69,8 +75,10 @@ export function renderAnnotationEditor(options: AnnotationEditorOptions): HTMLEl
     visibilityEditor.label, visibilityEditor.input, visibilityPrint.label, visibilityPrint.input, visibilityPacket.label, visibilityPacket.input,
     label(textValue, 'Text for labels and notes'), textValue,
     label(symbol, 'Symbol definition'), symbol,
-    label(x, 'Anchor X (FU)'), x, label(y, 'Anchor Y (FU)'), y, hint,
-    submit('Save annotation'),
+    label(x, 'Anchor X (FU)'), x, label(y, 'Anchor Y (FU)'), y,
+    label(geometry, 'Freehand or arrow points (FU: x,y; x,y; …)'), geometry,
+    label(rotation, 'Symbol rotation (degrees)'), rotation, label(scale, 'Symbol scale'), scale,
+    hint, annotationLockHint, annotationSave,
   );
   controls.append(annotationForm);
 
@@ -87,7 +95,7 @@ export function renderAnnotationEditor(options: AnnotationEditorOptions): HTMLEl
   canvas.classList.add('annotation-preview__svg');
   canvas.setAttribute('role', 'application');
   canvas.setAttribute('aria-label', 'Annotation drawing field. The form provides equivalent keyboard entry.');
-  previewPanel.append(label(previewKind, 'Preview context'), previewKind, label(previewFirst, 'Set or range start'), previewFirst, label(previewLast, 'Range end'), previewLast, label(previewTransition, 'Transition'), previewTransition, text('p', 'annotation-editor__hint', 'Transition preview shows whole-show and transition marks only. It never shows marks scoped to either endpoint set.'), canvas);
+  previewPanel.append(label(previewKind, 'Preview context'), previewKind, label(previewFirst, 'Set or range start'), previewFirst, label(previewLast, 'Range end'), previewLast, label(previewTransition, 'Transition'), previewTransition, text('p', 'Transition preview shows whole-show and transition marks only. It never shows marks scoped to either endpoint set.', 'annotation-editor__hint'), canvas);
   controls.append(previewPanel);
   root.append(controls);
 
@@ -163,6 +171,29 @@ export function renderAnnotationEditor(options: AnnotationEditorOptions): HTMLEl
     return anchor;
   }
 
+  function pointsFromFields(): readonly Dot[] {
+    const value = geometry.value.trim();
+    if (!value) throw new Error('Enter at least two integer x,y points in field units.');
+    const points = value.split(';').map((entry) => {
+      const [rawX, rawY, ...extra] = entry.trim().split(',').map((coordinate) => coordinate.trim());
+      if (extra.length || rawX === undefined || rawY === undefined || rawX === '' || rawY === '') {
+        throw new Error('Write points as integer x,y pairs separated by semicolons.');
+      }
+      const point = { x: Number(rawX), y: Number(rawY) };
+      if (!Number.isInteger(point.x) || !Number.isInteger(point.y)) throw new Error('Geometry points must use integer field units.');
+      return point;
+    });
+    if (points.length < 2) throw new Error('Enter at least two points for this annotation.');
+    return points;
+  }
+
+  function optionalNumber(control: HTMLInputElement): number | undefined {
+    if (control.value.trim() === '') return undefined;
+    const value = Number(control.value);
+    if (!Number.isFinite(value)) throw new Error(`${control.getAttribute('aria-label')} must be a number.`);
+    return value;
+  }
+
   function draftAnnotation(geometry?: readonly Dot[]): Annotation {
     const visibility = configuredVisibility();
     const common = { id: id.value.trim(), layerId: layer.value, scope: configuredScope(), visibility };
@@ -171,14 +202,27 @@ export function renderAnnotationEditor(options: AnnotationEditorOptions): HTMLEl
       throw new Error('Choose a performer before marking this for future performer packet output.');
     }
     switch (tool.value as Tool) {
-      case 'freehand':
-        if (!geometry || geometry.length < 2) throw new Error('Draw at least two points for a freehand stroke.');
-        return { ...common, kind: 'freehand', strokes: [geometry], ...(performerId ? { performerId } : {}) };
-      case 'arrow':
-        if (!geometry || geometry.length < 2) throw new Error('Drag from the arrow tail to its head.');
-        return { ...common, kind: 'arrow', points: geometry, ...(performerId ? { performerId } : {}) };
+      case 'freehand': {
+        const points = geometry ?? pointsFromFields();
+        if (points.length < 2) throw new Error('Enter or draw at least two points for a freehand stroke.');
+        return { ...common, kind: 'freehand', strokes: [points], ...(performerId ? { performerId } : {}) };
+      }
+      case 'arrow': {
+        const points = geometry ?? pointsFromFields();
+        if (points.length < 2) throw new Error('Enter or draw an arrow tail and head.');
+        return { ...common, kind: 'arrow', points, ...(performerId ? { performerId } : {}) };
+      }
       case 'label': return { ...common, kind: 'label', text: textValue.value, anchor: anchorFromFields(), ...(performerId ? { performerId } : {}) };
-      case 'symbol': return { ...common, kind: 'symbol', symbolId: symbol.value, anchor: anchorFromFields(), ...(performerId ? { performerId } : {}) };
+      case 'symbol': {
+        const rotationDegrees = optionalNumber(rotation);
+        const symbolScale = optionalNumber(scale);
+        return {
+          ...common, kind: 'symbol', symbolId: symbol.value, anchor: anchorFromFields(),
+          ...(rotationDegrees === undefined ? {} : { rotationDegrees }),
+          ...(symbolScale === undefined ? {} : { scale: symbolScale }),
+          ...(performerId ? { performerId } : {}),
+        };
+      }
       case 'performerNote':
         if (!performerId) throw new Error('Choose a performer for a performer note.');
         return { ...common, kind: 'performerNote', performerId, text: textValue.value, anchor: anchorFromFields() };
@@ -203,7 +247,8 @@ export function renderAnnotationEditor(options: AnnotationEditorOptions): HTMLEl
     try { commit(draftAnnotation()); }
     catch (error) { setStatus(userFacingError(error, 'Could not save annotation.')); }
   });
-  scopeKind.addEventListener('change', () => { refreshOptions(); redraw(); });
+  scopeKind.addEventListener('change', () => { refreshOptions(); syncAnnotationEditability(); redraw(); });
+  layer.addEventListener('change', syncAnnotationEditability);
   previewKind.addEventListener('change', () => { refreshOptions(); redraw(); });
   [previewFirst, previewLast, previewTransition].forEach((control) => control.addEventListener('change', redraw));
 
@@ -314,8 +359,16 @@ export function renderAnnotationEditor(options: AnnotationEditorOptions): HTMLEl
     annotationRows.replaceChildren();
     documentState.annotations.forEach((entry) => {
       const row = document.createElement('div'); row.className = 'annotation-manager__row'; if (entry.id === selectedId) row.classList.add('is-selected');
-      row.append(text('strong', `${entry.kind}: ${entry.id}`), text('span', `${entry.scope.kind} · ${entry.layerId}`), button('Select', () => { selectedId = entry.id; loadAnnotation(entry); refreshRows(); redraw(); }), button('Delete annotation', () => run(() => store.apply({ type: 'annotation.remove', annotationId: entry.id })))); annotationRows.append(row);
+      const selectAnnotation = button('Select', () => { selectedId = entry.id; loadAnnotation(entry); refreshRows(); redraw(); });
+      const deleteAnnotation = button('Delete annotation', () => run(() => store.apply({ type: 'annotation.remove', annotationId: entry.id })));
+      const annotationLayer = documentState.layers?.find((candidate) => candidate.id === entry.layerId);
+      if (annotationLayer?.locked) {
+        deleteAnnotation.disabled = true;
+        row.append(text('span', `Unlock ${annotationLayer.name} to edit or delete its marks.`, 'annotation-editor__hint'));
+      }
+      row.append(text('strong', `${entry.kind}: ${entry.id}`), text('span', `${entry.scope.kind} · ${entry.layerId}`), selectAnnotation, deleteAnnotation); annotationRows.append(row);
     });
+    syncAnnotationEditability();
   }
 
   function loadAnnotation(annotation: Annotation): void {
@@ -325,6 +378,25 @@ export function renderAnnotationEditor(options: AnnotationEditorOptions): HTMLEl
     if ('text' in annotation) textValue.value = annotation.text; if ('symbolId' in annotation) symbol.value = annotation.symbolId;
     const anchor = 'anchor' in annotation ? annotation.anchor : annotation.kind === 'arrow' ? annotation.points[0] : annotation.strokes[0]?.[0];
     if (anchor) { x.value = String(anchor.x); y.value = String(anchor.y); }
+    if (annotation.kind === 'freehand') geometry.value = annotation.strokes[0]?.map((point) => `${point.x},${point.y}`).join('; ') ?? '';
+    if (annotation.kind === 'arrow') geometry.value = annotation.points.map((point) => `${point.x},${point.y}`).join('; ');
+    if (annotation.kind === 'symbol') { rotation.value = annotation.rotationDegrees === undefined ? '' : String(annotation.rotationDegrees); scale.value = annotation.scale === undefined ? '' : String(annotation.scale); }
+    syncAnnotationEditability();
+  }
+
+  function syncAnnotationEditability(): void {
+    const documentState = store.getState().document;
+    const selected = selectedId ? documentState.annotations.find((annotation) => annotation.id === selectedId) : undefined;
+    const selectedLayer = selected ? documentState.layers?.find((entry) => entry.id === selected.layerId) : undefined;
+    const targetLayer = documentState.layers?.find((entry) => entry.id === layer.value);
+    const selectedLocked = Boolean(selectedLayer?.locked);
+    const targetLocked = Boolean(targetLayer?.locked);
+    [id, tool, layer, scopeKind, scopeTarget, performer, visibilityEditor.input, visibilityPrint.input, visibilityPacket.input, textValue, symbol, x, y, geometry, rotation, scale]
+      .forEach((control) => { control.disabled = selectedLocked; });
+    annotationSave.disabled = selectedLocked || targetLocked;
+    if (selectedLocked) annotationLockHint.textContent = `Unlock ${selectedLayer!.name} in the layer manager before editing this annotation.`;
+    else if (targetLocked) annotationLockHint.textContent = `Unlock ${targetLayer!.name} in the layer manager before adding an annotation to it.`;
+    else annotationLockHint.textContent = '';
   }
 
   function refresh(): void { refreshOptions(); refreshRows(); redraw(); }

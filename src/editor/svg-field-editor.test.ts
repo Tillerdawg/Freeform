@@ -343,4 +343,32 @@ describe('SVG field editor', () => {
     expect(store.getState().document).toEqual(before);
     expect(store.getUndoCommands()).toHaveLength(0);
   });
+
+  it('renders show-scoped and active-set-scoped annotations into the real static graphical field', () => {
+    const withAnnotations: FreeformDocument = {
+      ...store.getState().document,
+      layers: [{ id: 'bottom', name: 'Bottom', visible: true, print: true, locked: false }],
+      annotations: [
+        {
+          id: 'show-label', kind: 'label', layerId: 'bottom', scope: { kind: 'show' },
+          visibility: { editor: true, print: true, performerPacket: false }, text: 'Show mark', anchor: { x: 1000, y: 2000 },
+        },
+        {
+          id: 'set-label', kind: 'label', layerId: 'bottom', scope: { kind: 'set', setId: 'set-1' },
+          visibility: { editor: true, print: true, performerPacket: false }, text: 'Set mark', anchor: { x: 3000, y: 4000 },
+        },
+      ],
+    };
+    const annotatedStore = createCommandStore(withAnnotations);
+    const annotatedEditor = renderSvgFieldEditor({
+      store: annotatedStore,
+      setStatus: () => undefined,
+      onCommitted: () => undefined,
+    });
+    const annotatedSvg = annotatedEditor.root.querySelector('svg')!;
+    const ids = [...annotatedSvg.querySelectorAll('[data-annotation-id]')].map((node) => node.getAttribute('data-annotation-id'));
+    expect(ids.sort()).toEqual(['set-label', 'show-label']);
+    // Dot rendering and performer coordinates remain unaffected by the overlay.
+    expect(annotatedSvg.querySelector('[data-performer-id="performer-1"]')).not.toBeNull();
+  });
 });

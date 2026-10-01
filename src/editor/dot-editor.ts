@@ -80,6 +80,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     const state = store.getState();
     const document = state.document;
     root.dataset.support = String(report.supported);
+    const annotationDraft = captureAnnotationDraft(root);
     root.replaceChildren();
 
     const shell = element('section', 'app-shell');
@@ -131,7 +132,13 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
 
     // This panel owns its drafts between its own commits. The document store is
     // still the sole mutation boundary for every annotation/layer/symbol action.
-    editor.append(renderAnnotationEditor({ store, onCommitted: render, setStatus: setMessage }));
+    editor.append(renderAnnotationEditor({
+      store,
+      onCommitted: render,
+      // Annotation errors occur in a sub-editor, but must immediately repaint
+      // the assembled application's existing live status region.
+      setStatus: (nextMessage) => { message = nextMessage; render(); },
+    }));
 
     const controls = element('div', 'editor-controls');
     controls.append(createPerformerForm(render, setMessage), createDotForm(render, setMessage));
@@ -158,6 +165,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
     editor.append(createInspectionTable());
     shell.append(editor);
     root.append(shell);
+    restoreAnnotationDraft(root, annotationDraft);
   };
 
   const timeline = createTimelinePanel(store, render, setMessage);
@@ -407,6 +415,47 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
   };
 
   render();
+}
+
+interface AnnotationDraft {
+  readonly controls: ReadonlyMap<string, { readonly value: string; readonly checked?: boolean }>;
+  readonly focusedId?: string;
+  readonly selectionStart?: number;
+  readonly selectionEnd?: number;
+}
+
+/** Preserve in-progress annotation typing across playback-only root refreshes. */
+function captureAnnotationDraft(root: HTMLElement): AnnotationDraft | undefined {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLInputElement || active instanceof HTMLSelectElement || active instanceof HTMLTextAreaElement)
+    || active.closest('.annotation-editor') === null) return undefined;
+  const controls = new Map<string, { readonly value: string; readonly checked?: boolean }>();
+  root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('.annotation-editor input, .annotation-editor select, .annotation-editor textarea').forEach((control) => {
+    controls.set(control.id, control instanceof HTMLInputElement && control.type === 'checkbox'
+      ? { value: control.value, checked: control.checked }
+      : { value: control.value });
+  });
+  return {
+    controls,
+    focusedId: active.id,
+    ...(active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement
+      ? { selectionStart: active.selectionStart ?? undefined, selectionEnd: active.selectionEnd ?? undefined }
+      : {}),
+  };
+}
+
+function restoreAnnotationDraft(root: HTMLElement, draft: AnnotationDraft | undefined): void {
+  if (!draft) return;
+  draft.controls.forEach((saved, id) => {
+    const candidate = root.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`#${id}`);
+    if (!candidate || candidate.closest('.annotation-editor') === null) return;
+    if (candidate instanceof HTMLInputElement && candidate.type === 'checkbox' && saved.checked !== undefined) candidate.checked = saved.checked;
+    else candidate.value = saved.value;
+  });
+  const focused = draft.focusedId ? root.querySelector<HTMLInputElement | HTMLTextAreaElement>(`#${draft.focusedId}`) : undefined;
+  if (!focused || focused.closest('.annotation-editor') === null) return;
+  focused.focus();
+  if (draft.selectionStart !== undefined && draft.selectionEnd !== undefined) focused.setSelectionRange(draft.selectionStart, draft.selectionEnd);
 }
 
 function rawDistance(distance: { readonly units: number; readonly numeratorUnits: number; readonly denominatorUnits: number }): string {

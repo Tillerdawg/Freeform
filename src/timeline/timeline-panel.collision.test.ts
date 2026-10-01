@@ -107,7 +107,7 @@ describe('collision timeline disclosure', () => {
     expect(panel.render().textContent).toContain('Override recorded for different warning inputs — review.');
   });
 
-  it('keeps focus in collision editing fields instead of replacing their DOM on a playback tick', () => {
+  it('refreshes the visible playback state on a tick even while a collision field has focus', () => {
     const { root, panel, refresh } = render(collisionDocument());
     document.body.append(root);
     const threshold = root.querySelector<HTMLInputElement>('#collision-threshold')!;
@@ -126,7 +126,7 @@ describe('collision timeline disclosure', () => {
       refresh.mockClear();
       tick!();
       expect(document.activeElement).toBe(threshold);
-      expect(refresh).not.toHaveBeenCalled();
+      expect(refresh).toHaveBeenCalledTimes(1);
     } finally {
       if (originalInterval) Object.defineProperty(window, 'setInterval', originalInterval);
       if (originalClear) Object.defineProperty(window, 'clearInterval', originalClear);

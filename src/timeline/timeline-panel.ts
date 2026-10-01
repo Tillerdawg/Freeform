@@ -53,9 +53,9 @@ export function createTimelinePanel(
     timer = window.setInterval(() => {
       const current = controller.next();
       if (!current.isPlaying) clearTimer();
-      // The app-level refresh replaces the timeline DOM. Do not destroy focus
-      // from an in-progress threshold/override edit just to paint a playback tick.
-      if (!isDraftEditorFocused()) refresh();
+      // Dot-editor refresh preserves an in-progress annotation draft and focus,
+      // so playback continues to update visible count/context on every tick.
+      refresh();
     }, 500);
   };
 
@@ -441,15 +441,4 @@ function parseFtlPath(value: string): readonly Dot[] {
   });
   if (points.length < 2) throw new Error('An FTL path needs at least two x,y points.');
   return points;
-}
-
-function isDraftEditorFocused(): boolean {
-  if (typeof document === 'undefined') return false;
-  const active = document.activeElement;
-  return active instanceof HTMLElement && (
-    active.id === 'collision-threshold'
-    || active.id.startsWith('override-actor-')
-    || active.id.startsWith('override-reason-')
-    || active.closest('.annotation-editor') !== null
-  );
 }

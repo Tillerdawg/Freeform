@@ -2,6 +2,7 @@ import type { CommandStore, Dot, FreeformDocument, Identifier } from '../documen
 import { snapToQuarterStepGrid } from '../geometry/coordinate-builder';
 import { FU_PER_STEP, inspectCoordinate, isValidDot, NFHS_11_PLAYER_FIELD } from '../geometry/nfhs';
 import { createFieldTransform, type FieldTransform, type PixelPoint } from './field-geometry';
+import { renderAnnotationOverlay } from './annotation-renderer';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -250,6 +251,12 @@ export function renderSvgFieldEditor(options: SvgFieldEditorOptions): SvgFieldEd
         if (!dot) continue;
         svg.append(createDotElement(performer.id, performer.rankCode, dot));
       }
+      // This is a static-set context: show-scoped marks plus marks for this
+      // exact set render over the same field without changing dot coordinates.
+      renderAnnotationOverlay(svg, documentState, {
+        audience: 'editor',
+        context: { kind: 'static-set', setId: set.id },
+      });
     }
   }
 
