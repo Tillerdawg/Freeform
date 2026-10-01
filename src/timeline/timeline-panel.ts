@@ -1,6 +1,7 @@
 import type { CommandStore, Dot, Identifier, Transition } from '../document/types';
 import { calculatePairDistance, calculateTransitionStepStatuses } from './float';
 import { calculateFtlStepSizeStatus, deriveFtlOffsets, samplePolyline, validateFtlTransition } from './ftl';
+import { analyzeTransitionCollisions, type CollisionWarning } from './collision';
 import { createPlaybackController, type PlaybackController } from './playback';
 
 export interface TimelinePanel {
@@ -17,6 +18,7 @@ export function createTimelinePanel(
   let playback: PlaybackController | undefined;
   let playbackRevision = -1;
   let timer: number | undefined;
+  let overridePairKey: string | undefined;
 
   const clearTimer = (): void => {
     if (timer !== undefined) window.clearInterval(timer);
@@ -50,7 +52,9 @@ export function createTimelinePanel(
     timer = window.setInterval(() => {
       const current = controller.next();
       if (!current.isPlaying) clearTimer();
-      refresh();
+      // The app-level refresh replaces the timeline DOM. Do not destroy focus
+      // from an in-progress threshold/override edit just to paint a playback tick.
+      if (!isCollisionEditorFocused()) refresh();
     }, 500);
   };
 
@@ -89,6 +93,7 @@ export function createTimelinePanel(
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Invalid FTL transition.';
           panel.append(text('p', `FTL playback blocked: ${message}`));
+          panel.append(createCollisionDisclosure(currentDocument, transition));
           return panel;
         }
       }
@@ -137,6 +142,7 @@ export function createTimelinePanel(
       sampleTable.append(sampleBody);
       panel.append(sampleTable);
       if (transition.mode === 'ftl') panel.append(createFtlInspection(transition));
+      panel.append(createCollisionDisclosure(currentDocument, transition));
       panel.append(createPairDistanceForm(state.sample.positions));
       return panel;
     },
@@ -284,6 +290,113 @@ export function createTimelinePanel(
     return section;
   }
 
+  function createCollisionDisclosure(currentDocument: ReturnType<CommandStore['getState']>['document'], transition: Transition): HTMLElement {
+    const details = element('details', 'collision-panel');
+    details.open = true;
+    const totalPairs = currentDocument.performers.length * (currentDocument.performers.length - 1) / 2;
+    try {
+      const analysis = analyzeTransitionCollisions(currentDocument, transition);
+      details.append(text('summary', `Collision warnings — ${analysis.warnings.length} of ${totalPairs} pairs`));
+      details.append(text('p', 'Collision analysis is advisory sampled detection. A warning is not a claim that a collision was prevented.'));
+      details.append(createCollisionThresholdForm());
+      if (analysis.warnings.length === 0) {
+        details.append(text('p', 'No collision warnings were found on the required sampled grid.'));
+        return details;
+      }
+      const table = element('table', 'inspection-table collision-table');
+      const caption = text('caption', `Collision warnings for ${transition.id}; threshold ${currentDocument.settings.collisionThresholdUnits} FU.`);
+      table.append(caption, tableHead(['Pair', 'Closest sampled approach', 'Status', 'Override']));
+      const body = document.createElement('tbody');
+      const rankCodes = new Map(currentDocument.performers.map(({ id, rankCode }) => [id, rankCode]));
+      analysis.warnings.forEach((warning) => body.append(createCollisionWarningRow(warning, transition, rankCodes)));
+      table.append(body); details.append(table);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown collision-analysis failure.';
+      details.append(text('summary', `Collision warnings — analysis unavailable for ${transition.id}`));
+      details.append(text('p', `Collision analysis unavailable: ${message}`));
+    }
+    return details;
+  }
+
+  function createCollisionThresholdForm(): HTMLFormElement {
+    const form = element('form', 'editor-form');
+    const threshold = input('collision-threshold', 'Collision warning threshold (FU)', 'number');
+    threshold.min = '1'; threshold.max = '28800'; threshold.step = '1';
+    threshold.value = String(store.getState().document.settings.collisionThresholdUnits);
+    const hint = text('p', 'Default 2880 FU (one yard). This threshold applies to the whole document.');
+    hint.id = 'collision-threshold-hint'; threshold.setAttribute('aria-describedby', hint.id);
+    form.append(label(threshold, 'Collision warning threshold (FU)'), threshold, hint, submit('Apply threshold'));
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        store.apply({ type: 'settings.collision-threshold.set', collisionThresholdUnits: Number(threshold.value) });
+        setStatus('Updated the document collision warning threshold.');
+      } catch (error) { setStatus(error instanceof Error ? error.message : 'Could not update collision threshold.'); }
+      refresh();
+    });
+    return form;
+  }
+
+  function createCollisionWarningRow(
+    warning: CollisionWarning,
+    transition: Transition,
+    rankCodes: ReadonlyMap<string, string>,
+  ): HTMLTableRowElement {
+    const row = document.createElement('tr');
+    const pairKey = warning.performerIds.join(':');
+    const pair = text('th', `${rankCodes.get(warning.performerIds[0]) ?? warning.performerIds[0]} × ${rankCodes.get(warning.performerIds[1]) ?? warning.performerIds[1]}`);
+    pair.scope = 'row'; pair.title = warning.performerIds.join(', ');
+    const approach = text('td', `${warning.closestDistanceFU.toFixed(3)} FU at count ${warning.sampleCount.toFixed(3)} (t=${warning.t.toFixed(4)}).`);
+    const status = text('td', warning.overridden ? '⚠ Warning — override recorded' : '⚠ Warning');
+    status.className = 'collision-status collision-status--warning';
+    const overrideCell = document.createElement('td');
+    const staleOverride = transition.collisionOverrides?.find((override) => (
+      override.performerIds[0] === warning.performerIds[0]
+      && override.performerIds[1] === warning.performerIds[1]
+      && override.warningSignature !== warning.warningSignature
+    ));
+    if (warning.override) {
+      overrideCell.append(text('p', `Override recorded by ${warning.override.authorLabel} at ${warning.override.overriddenAt}.`));
+      overrideCell.append(text('p', `Reason: ${warning.override.reason}`));
+      const revise = button('Override recorded — revise', () => { overridePairKey = pairKey; refresh(); });
+      overrideCell.append(revise);
+    } else {
+      if (staleOverride) overrideCell.append(text('p', 'Override recorded for different warning inputs — review.'));
+      overrideCell.append(button(staleOverride ? 'Record replacement override' : 'Record override', () => { overridePairKey = pairKey; refresh(); }));
+    }
+    if (overridePairKey === pairKey) overrideCell.append(createCollisionOverrideForm(warning, transition));
+    row.append(pair, approach, status, overrideCell);
+    return row;
+  }
+
+  function createCollisionOverrideForm(warning: CollisionWarning, transition: Transition): HTMLFormElement {
+    const form = element('form', 'editor-form');
+    const key = warning.performerIds.join('-');
+    const actor = input(`override-actor-${key}`, 'Your name', 'text'); actor.required = true; actor.maxLength = 120;
+    const reason = document.createElement('textarea'); reason.id = `override-reason-${key}`; reason.required = true; reason.rows = 2; reason.maxLength = 1000;
+    form.append(
+      label(actor, 'Your name (local actor label)'), actor,
+      label(reason, 'Reason for override'), reason,
+      submit('Record override'),
+    );
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        store.apply({ type: 'collision.override.record', transitionId: transition.id, override: {
+          performerIds: warning.performerIds,
+          warningSignature: warning.warningSignature,
+          reason: reason.value,
+          authorLabel: actor.value,
+          overriddenAt: new Date().toISOString(),
+        } });
+        overridePairKey = undefined;
+        setStatus(`Recorded an advisory collision-warning override for ${warning.performerIds.join(' and ')}.`);
+      } catch (error) { setStatus(error instanceof Error ? error.message : 'Could not record collision override.'); }
+      refresh();
+    });
+    return form;
+  }
+
   function createPairDistanceForm(positions: Readonly<Record<Identifier, { readonly x: number; readonly y: number }>>): HTMLFormElement {
     const currentDocument = store.getState().document;
     const form = element('form', 'editor-form');
@@ -322,4 +435,14 @@ function parseFtlPath(value: string): readonly Dot[] {
   });
   if (points.length < 2) throw new Error('An FTL path needs at least two x,y points.');
   return points;
+}
+
+function isCollisionEditorFocused(): boolean {
+  if (typeof document === 'undefined') return false;
+  const active = document.activeElement;
+  return active instanceof HTMLElement && (
+    active.id === 'collision-threshold'
+    || active.id.startsWith('override-actor-')
+    || active.id.startsWith('override-reason-')
+  );
 }

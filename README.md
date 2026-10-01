@@ -4,7 +4,7 @@ Freeform is an open-source, browser-based drill-design project for marching band
 
 ## Status
 
-This repository contains the product specification, the file-format schema and fixtures, documentation-test tooling, and implemented application milestones M1 through M4 plus M9: an app shell and immutable document command store; canonical NFHS geometry and a DOM dot editor with coordinate inspection; set and float-transition playback tools; FTL path/order authoring with derived-end validation; and a first-run setup wizard paired with a post-wizard roster editor. The setup wizard collects the drill file name and a section roster (with rank-code prefix suggestions per instrument/equipment) and generates the first laid-out set from a sequence of performer-creation commands. The roster editor then lets the writer add a late arrival to an existing numeric rank-code prefix, remove a departed performer (with an FTL-impact disclosure when the removal would block an existing follow-the-leader transition), and assign display names to the whole roster as one atomic command. It does not yet contain the later planned collision analyzer, annotation editor, persistence, PDF export, accessibility hardening, cross-browser hardening, or performance validation. Anyone starting implementation work should read `docs/freeform-mvp-spec-v1.md`, the implementation-ready MVP specification, and the decision records in `decisions/`, which capture the accepted product and technical choices behind it.
+This repository contains the product specification, the file-format schema and fixtures, documentation-test tooling, and implemented application milestones M1 through M5 plus M9: an app shell and immutable document command store; canonical NFHS geometry and a DOM dot editor with coordinate inspection; set and float-transition playback tools; FTL path/order authoring with derived-end validation; deterministic advisory collision analysis per transition with auditable overrides in the in-memory document model; and a first-run setup wizard paired with a post-wizard roster editor. The setup wizard collects the drill file name and a section roster (with rank-code prefix suggestions per instrument/equipment) and generates the first laid-out set from a sequence of performer-creation commands. The roster editor then lets the writer add a late arrival to an existing numeric rank-code prefix, remove a departed performer (with an FTL-impact disclosure when the removal would block an existing follow-the-leader transition), and assign display names to the whole roster as one atomic command. The collision disclosure samples each transition deterministically, reports warnings rather than prevention, keeps overridden warnings visible, and records a local actor, timestamp, reason, pair, and motion/threshold signature in that in-memory model. It does not yet contain the annotation editor, persistence, PDF export, accessibility hardening, cross-browser hardening, or performance validation. Anyone starting implementation work should read `docs/freeform-mvp-spec-v1.md`, the implementation-ready MVP specification, and the decision records in `decisions/`, which capture the accepted product and technical choices behind it.
 
 ## What the MVP specifies
 
@@ -35,7 +35,8 @@ src/                                 Application source (TypeScript).
                                       (setup-wizard.ts), and the post-wizard roster editor (roster-editor.ts).
   geometry/                          Canonical NFHS 11-player field geometry and coordinate derivation.
   platform/                          Browser feature detection.
-  timeline/                          Set and float/FTL transition authoring, sampling, playback, and status tools.
+  timeline/                          Set and float/FTL transition authoring, sampling, playback, status tools,
+                                      and sampled collision-warning analysis.
   main.ts                            Application entry point: renders the setup wizard on a fresh document,
                                       then hands off to the dot editor (which includes the roster editor).
   styles.css                         Application styles.
@@ -94,6 +95,10 @@ npm run dev -- --host 127.0.0.1
 
 This starts the Vite development server. Open `http://127.0.0.1:5173/` in a browser. Stop the server with Ctrl+C on both platforms.
 
+### Collision warnings
+
+Open the **Collision warnings** disclosure in the transition timeline to see each warned pair's rank codes, closest sampled distance, count/sample, and the editable whole-FU document threshold (default 2880 FU, one yard). A pair at or under the threshold has a text warning; analysis is advisory sampled detection, never continuous collision prevention. Recording an override requires a local actor label and reason, then retains the computed warning and audit record in the in-memory document model. If the warning's pair motion or threshold changes, a stale audit is visibly marked as not applying; it is never silently inherited. Invalid FTL geometry or a transition exceeding the 100,000-sample analysis bound produces an actionable analysis failure, not a safe result.
+
 ## Running the tests
 
 Two independent test suites cover this repository, and both are part of the release gate:
@@ -102,7 +107,7 @@ Two independent test suites cover this repository, and both are part of the rele
 npm test
 ```
 
-Runs the application's Vitest suite (`src/**/*.test.ts` and `scripts/**/*.test.mjs`): the document command store and set validation, NFHS geometry and coordinate derivation, float/FTL transitions, timeline playback, browser feature detection, and the cross-platform docs-test launcher.
+Runs the application's Vitest suite (`src/**/*.test.ts` and `scripts/**/*.test.mjs`): the document command store and set validation, NFHS geometry and coordinate derivation, float/FTL transitions, collision sampling/override audit, timeline playback/disclosure, browser feature detection, and the cross-platform docs-test launcher.
 
 ```
 npm run test:docs
@@ -111,7 +116,7 @@ npm run test:docs
 Runs the specification/fixture validation gate (`docs/validate_fixture.py`), which:
 
 - Validates the positive fixture (`docs/fixtures/freeform-1.0-example.freeform`) against the JSON Schema using a genuine Draft 2020-12 validator (Ajv, invoked as a Node subprocess).
-- Checks semantic invariants the schema alone can't express: unique IDs, in-field dot placement, FTL start/path/end equations, annotation scope references, and related rules.
+- Checks semantic invariants the schema alone can't express: unique IDs, in-field dot placement, FTL start/path/end equations, collision-override audit metadata, annotation scope references, and related rules.
 - Runs every named fixture in `docs/fixtures/positive/` and `docs/fixtures/negative/`, confirming each is accepted or rejected as the spec requires.
 - Imports and runs `docs/algorithm_edge_tests.py` (coordinate-grammar labeling, FTL projection tie-break, collision sampling, and spec/grammar agreement), so `npm run test:docs` is the single command that exercises the whole documentation gate.
 
@@ -146,7 +151,7 @@ Open `http://127.0.0.1:5173/` to confirm the app loads, then stop the dev server
 - **Windows:** GitHub Actions CI has previously run the full automated workflow natively on `windows-latest`. [Run 36722149551](https://github.com/Tillerdawg/Freeform/actions/runs/36722149551) is historical evidence from commit `ce5d083a261a88ececa12f6d31dac75412a47cbb`: its `windows-latest / Node 22.x / Python 3.13` job installed both dependency sets, ran `npm test`, built the application, and ran `npm run test:docs`. It verifies those automated install, test, build, and documentation-validation commands on a native Windows runner for that commit; it is not a claim about whichever commit is currently `main`. It does not by itself demonstrate manual interactive or visual behavior on a physical end-user Windows machine.
 - Intel (x86_64) Macs have not been separately verified; no architecture-specific code exists in this repository, so the same commands are expected to work, but this has not been tested on Intel hardware.
 - No packaged desktop build or installer exists; "running the app" means the Vite dev server (development) or serving the static `dist/` bundle from any static file host (production-equivalent), not a native executable.
-- The specification's ordered implementation milestones (M1 through M12) are listed in `docs/freeform-mvp-spec-v1.md` §8. M1-M4 and M9 are implemented and covered by the commands above: M1 provides the app shell, feature detection, and immutable command store; M2 provides canonical NFHS geometry, the dot editor, and coordinate derivation; M3 provides ordered sets, float transitions, step-size status, pair-distance calculation, and keyboard playback; M4 provides FTL path/order authoring and derived-end validation; M9 provides the first-run setup wizard and the post-wizard roster editor. M5-M8 and M10-M12 remain future work; in particular, collision analysis, annotations, persistence, PDF export, accessibility hardening, cross-browser hardening, and performance validation are not implemented.
+- The specification's ordered implementation milestones (M1 through M12) are listed in `docs/freeform-mvp-spec-v1.md` §8. M1-M5 and M9 are implemented and covered by the commands above: M1 provides the app shell, feature detection, and immutable command store; M2 provides canonical NFHS geometry, the dot editor, and coordinate derivation; M3 provides ordered sets, float transitions, step-size status, pair-distance calculation, and keyboard playback; M4 provides FTL path/order authoring and derived-end validation; M5 provides deterministic advisory collision warnings at the required sample grid (including FTL path-corner samples), adaptive <=720-FU movement sampling, an editable document threshold, and auditable local overrides that never suppress a computed warning; M9 provides the first-run setup wizard and the post-wizard roster editor. M6-M8 and M10-M12 remain future work; in particular, annotations, persistence, PDF export, accessibility hardening, cross-browser hardening, and performance validation are not implemented. Collision analysis is sampled advisory detection, not continuous collision prevention; an invalid FTL transition or a transition exceeding the documented 100,000-sample bound reports an actionable analysis failure rather than a safe result.
 
 ## License
 

@@ -15,6 +15,7 @@ independently runnable (`python3 docs/algorithm_edge_tests.py` still works stand
 """
 import json
 import math
+import re
 import subprocess
 from pathlib import Path
 from typing import NoReturn
@@ -249,6 +250,28 @@ def validate_semantics(schema, doc):
             fail(f"{tid}: nonpositive count length")
         if sets[transition["toSetId"]]["startCount"] - sets[transition["fromSetId"]]["startCount"] != transition["counts"]:
             fail(f"{tid}: count topology mismatch")
+        collision_overrides = transition.get("collisionOverrides", [])
+        if not isinstance(collision_overrides, list):
+            fail(f"{tid}: collisionOverrides must be an array")
+        seen_overrides = set()
+        for override in collision_overrides:
+            keys(override, {"performerIds", "warningSignature", "reason", "overriddenAt", "authorLabel"},
+                 {"performerIds", "warningSignature", "reason", "overriddenAt", "authorLabel"}, f"{tid}.collisionOverride")
+            pair = override["performerIds"]
+            if not isinstance(pair, list) or len(pair) != 2 or pair[0] >= pair[1] or any(member not in performer_ids for member in pair):
+                fail(f"{tid}: collision override pair must contain two known performer IDs in canonical lexical order")
+            if not isinstance(override["warningSignature"], str) or not re.fullmatch(r"v1-sha256-[a-f0-9]{64}", override["warningSignature"]):
+                fail(f"{tid}: collision override has malformed warning signature")
+            if not isinstance(override["reason"], str) or not (1 <= len(override["reason"].strip()) <= 1000):
+                fail(f"{tid}: collision override reason must be nonblank and <=1000 characters")
+            if not isinstance(override["authorLabel"], str) or not (1 <= len(override["authorLabel"].strip()) <= 120):
+                fail(f"{tid}: collision override author label must be nonblank and <=120 characters")
+            if not isinstance(override["overriddenAt"], str) or not re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?Z", override["overriddenAt"]):
+                fail(f"{tid}: collision override timestamp must be ISO 8601 UTC")
+            key = tuple(pair) + (override["warningSignature"],)
+            if key in seen_overrides:
+                fail(f"{tid}: duplicate collision override")
+            seen_overrides.add(key)
         if transition.get("mode") != "ftl":
             continue
         if "ftl" not in transition:
@@ -311,6 +334,8 @@ def validate(schema, doc):
         fail("schema format contract changed")
     if schema["properties"]["field"]["properties"]["unitsPerYard"]["const"] != 2880:
         fail("schema FU contract changed")
+    if schema["properties"]["transitions"]["items"]["properties"]["collisionOverrides"]["items"]["properties"]["warningSignature"]["pattern"] != "^v1-sha256-[a-f0-9]{64}$":
+        fail("schema collision override signature contract changed")
     try:
         validate_semantics(schema, doc)
     except ValidationError:
@@ -581,6 +606,22 @@ def test_positive_annotation_scopes(doc):
         fail(f"positive fixture must exercise annotations on at least two distinct sets, got {sorted(set_ids)}")
 
 
+def test_collision_override_audit_shape(schema, doc):
+    """Exercise the persisted M5 audit shape and the semantic canonical-pair rule."""
+    audited = loads(json.dumps(doc))
+    audited["transitions"][0]["collisionOverrides"] = [{
+        "performerIds": ["a", "b"],
+        "warningSignature": "v1-sha256-" + "0" * 64,
+        "reason": "Documented local review.",
+        "overriddenAt": "2026-10-01T00:00:00.000Z",
+        "authorLabel": "Local director",
+    }]
+    validate_semantics(schema, audited)
+    malformed = loads(json.dumps(audited))
+    malformed["transitions"][0]["collisionOverrides"][0]["performerIds"] = ["b", "a"]
+    require_semantic_rejection(schema, malformed, "canonical lexical order")
+
+
 if __name__ == "__main__":
     schema_doc = load(SCHEMA)
     fixture_doc = load(FIXTURE)
@@ -592,6 +633,8 @@ if __name__ == "__main__":
     print("PASS: canonical NFHS constants and derived FTL endpoints match fixture")
     test_positive_annotation_scopes(fixture_doc)
     print("PASS: annotation fixture covers set-1/set-2, transition, and show scopes")
+    test_collision_override_audit_shape(schema_doc, fixture_doc)
+    print("PASS: collision override audit shape and canonical-pair semantic rejection")
     test_step_size_bands()
     print("PASS: step-size band classification (worked vectors, boundaries, stationary, regression)")
     test_coordinate_edge_cases()

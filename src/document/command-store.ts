@@ -6,6 +6,8 @@ import type {
 } from './types';
 import { assertValidDot } from '../geometry/nfhs';
 import {
+  validateCollisionOverride,
+  validateCollisionThreshold,
   validateDocumentSetsAndTransitions,
   validateTransition,
   validateOrderedSets,
@@ -92,6 +94,10 @@ function reduce(document: FreeformDocument, command: DocumentCommand): FreeformD
       return addTransition(document, command.transition);
     case 'transition.remove':
       return removeTransition(document, command.transitionId);
+    case 'settings.collision-threshold.set':
+      return setCollisionThreshold(document, command.collisionThresholdUnits);
+    case 'collision.override.record':
+      return recordCollisionOverride(document, command.transitionId, command.override);
     case 'document.replace':
       return command.document;
   }
@@ -181,6 +187,40 @@ function removeTransition(document: FreeformDocument, transitionId: string): Fre
     throw new Error(`Unknown transition: ${transitionId}`);
   }
   return { ...document, transitions: document.transitions.filter((transition) => transition.id !== transitionId) };
+}
+
+function setCollisionThreshold(document: FreeformDocument, collisionThresholdUnits: number): FreeformDocument {
+  validateCollisionThreshold(collisionThresholdUnits);
+  return { ...document, settings: { ...document.settings, collisionThresholdUnits } };
+}
+
+function recordCollisionOverride(
+  document: FreeformDocument,
+  transitionId: string,
+  override: Extract<DocumentCommand, { readonly type: 'collision.override.record' }>['override'],
+): FreeformDocument {
+  validateCollisionOverride(document.performers, override);
+  const transition = document.transitions.find(({ id }) => id === transitionId);
+  if (!transition) throw new Error(`Unknown transition: ${transitionId}`);
+  const normalized = {
+    ...override,
+    reason: override.reason.trim(),
+    authorLabel: override.authorLabel.trim(),
+  };
+  const collisionOverrides = [
+    ...(transition.collisionOverrides ?? []).filter((existing) => !(
+      existing.performerIds[0] === normalized.performerIds[0]
+      && existing.performerIds[1] === normalized.performerIds[1]
+      && existing.warningSignature === normalized.warningSignature
+    )),
+    normalized,
+  ];
+  return {
+    ...document,
+    transitions: document.transitions.map((candidate) => candidate.id === transitionId
+      ? { ...candidate, collisionOverrides }
+      : candidate),
+  };
 }
 
 function addPerformer(

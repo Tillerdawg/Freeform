@@ -88,7 +88,7 @@
               "required": ["performerIds", "warningSignature", "reason", "overriddenAt", "authorLabel"],
               "properties": {
                 "performerIds": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
-                "warningSignature": {"type": "string", "minLength": 1, "maxLength": 128},
+                "warningSignature": {"type": "string", "pattern": "^v1-sha256-[a-f0-9]{64}$", "maxLength": 128},
                 "reason": {"type": "string", "minLength": 1, "maxLength": 1000},
                 "overriddenAt": {"type": "string", "format": "date-time"},
                 "authorLabel": {"type": "string", "minLength": 1, "maxLength": 120}

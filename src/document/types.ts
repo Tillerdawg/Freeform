@@ -29,6 +29,17 @@ export interface FtlDefinition {
   readonly expectedEndPositions?: Readonly<Record<Identifier, Dot>>;
 }
 
+/** A self-attested local record that acknowledges one computed warning. */
+export interface CollisionOverride {
+  /** Lexically canonical performer-ID pair, matching the warning's unordered pair. */
+  readonly performerIds: readonly [Identifier, Identifier];
+  readonly warningSignature: string;
+  readonly reason: string;
+  readonly overriddenAt: string;
+  /** User-entered local actor label; Freeform has no account identity. */
+  readonly authorLabel: string;
+}
+
 export interface Transition {
   readonly id: Identifier;
   readonly fromSetId: Identifier;
@@ -37,6 +48,7 @@ export interface Transition {
   readonly mode: 'float' | 'ftl';
   readonly ftl?: FtlDefinition;
   readonly notes?: string;
+  readonly collisionOverrides?: readonly CollisionOverride[];
 }
 
 export interface FreeformDocument {
@@ -117,6 +129,12 @@ export type DocumentCommand =
   }
   | { readonly type: 'transition.create'; readonly transition: Transition }
   | { readonly type: 'transition.remove'; readonly transitionId: Identifier }
+  | { readonly type: 'settings.collision-threshold.set'; readonly collisionThresholdUnits: number }
+  | {
+    readonly type: 'collision.override.record';
+    readonly transitionId: Identifier;
+    readonly override: CollisionOverride;
+  }
   | { readonly type: 'document.replace'; readonly document: FreeformDocument };
 
 export interface CommandStore {
