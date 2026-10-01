@@ -14,6 +14,7 @@ import {
   validateOrderedSets,
   validateSetCoverage,
 } from './sets';
+import { validateDocumentForCommandStore } from '../persistence/freeform-file';
 
 interface HistoryEntry {
   readonly command: DocumentCommand;
@@ -479,8 +480,11 @@ function makeState(document: FreeformDocument, revision: number): DocumentState 
   // This is the canonical-state boundary. Every successful initialization,
   // replacement, command application, undo, and redo exposes a fully covered
   // ordered set graph rather than a document that callers must validate later.
+  // Preserve established semantic diagnostics before adding persistence's
+  // complete structural-schema gate for external replacement documents.
   validateDocumentSetsAndTransitions(document);
   validateDocumentAnnotations(document);
+  validateDocumentForCommandStore(document);
   return freeze({ document: clone(document), revision });
 }
 

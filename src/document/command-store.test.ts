@@ -82,6 +82,45 @@ describe('document command store', () => {
     expect(store.getState()).toBe(initial);
   });
 
+  it('rejects malformed root, show, and performer structures at construction', () => {
+    const source = makeDocument();
+    const invalidDocuments = [
+      { ...source, format: 'not-freeform' },
+      { ...source, show: { ...source.show, id: 'BAD ID' } },
+      { ...source, performers: [{ ...source.performers[0]!, rankCode: '@bad' }] },
+      { ...source, extra: true },
+      { ...source, performers: [{ ...source.performers[0]! }, { id: 'performer-2', rankCode: 'p1', displayName: 'Duplicate' }], sets: source.sets.map((set) => ({ ...set, positions: { ...set.positions, 'performer-2': { x: 1, y: 1 } } })) },
+    ];
+
+    for (const document of invalidDocuments) {
+      expect(() => createCommandStore(document as unknown as FreeformDocument)).toThrow();
+    }
+  });
+
+  it('rejects malformed replacement atomically without disturbing undo or redo history', () => {
+    const store = createCommandStore(makeDocument());
+    store.apply({ type: 'show.title.set', title: 'Draft title' });
+    const before = store.undo()!;
+    const source = makeDocument();
+    const invalidDocuments = [
+      { ...source, show: { ...source.show, id: 'BAD ID' } },
+      { ...source, performers: [{ ...source.performers[0]!, rankCode: '@bad' }] },
+      { ...source, extra: true },
+      { ...source, performers: [{ ...source.performers[0]! }, { id: 'performer-2', rankCode: 'p1', displayName: 'Duplicate' }], sets: source.sets.map((set) => ({ ...set, positions: { ...set.positions, 'performer-2': { x: 1, y: 1 } } })) },
+    ];
+
+    expect(store.canUndo()).toBe(false);
+    expect(store.canRedo()).toBe(true);
+    for (const document of invalidDocuments) {
+      expect(() => store.apply({ type: 'document.replace', document: document as unknown as FreeformDocument })).toThrow();
+      expect(store.getState()).toBe(before);
+      expect(store.getState().revision).toBe(before.revision);
+      expect(store.canUndo()).toBe(false);
+      expect(store.canRedo()).toBe(true);
+    }
+    expect(store.redo()?.document.show.title).toBe('Draft title');
+  });
+
   it('creates a manual rank-coded performer with complete set coverage atomically', () => {
     const store = createCommandStore(makeDocument());
     store.apply({

@@ -78,6 +78,26 @@ export function importIntoStore(store: CommandStore, bytes: Uint8Array): DecodeR
 
 /** The runtime equivalent of the normative schema plus cross-document semantics. */
 export function validateCurrentDocument(value: unknown): asserts value is FreeformDocument {
+  const typed = validateDocument(value, false);
+
+  // Command-store validation deliberately permits stale missing FTL members as
+  // an editable, playback-blocked draft after roster removal. A file snapshot
+  // has no such draft status, so its FTL graph must be strict.
+  for (const transition of typed.transitions) if (transition.mode === 'ftl') validateFtlTransition(typed, transition);
+}
+
+/**
+ * Validates the entire current structural schema and ordinary authoring
+ * semantics at the command-store boundary. It intentionally retains the
+ * established stale-FTL draft exception and the pre-setup empty roster/set
+ * state; `validateCurrentDocument` rejects both and adds the stricter
+ * persistence-only FTL playback check before bytes are written.
+ */
+export function validateDocumentForCommandStore(value: unknown): FreeformDocument {
+  return validateDocument(value, true);
+}
+
+function validateDocument(value: unknown, allowEmptyAuthoringRoster: boolean): FreeformDocument {
   const document = requireRecord(value, 'root');
   exactKeys(document, ['$schema', 'format', 'formatVersion', 'show', 'field', 'settings', 'performers', 'sets', 'transitions', 'annotations', 'layers', 'symbols', 'extensions'],
     ['format', 'formatVersion', 'show', 'field', 'settings', 'performers', 'sets', 'transitions', 'annotations']);
@@ -87,8 +107,8 @@ export function validateCurrentDocument(value: unknown): asserts value is Freefo
   validateShow(document.show);
   validateField(document.field);
   validateSettings(document.settings);
-  validatePerformers(document.performers);
-  validateSets(document.sets);
+  validatePerformers(document.performers, allowEmptyAuthoringRoster);
+  validateSets(document.sets, allowEmptyAuthoringRoster);
   validateTransitionsStructure(document.transitions);
   validateAnnotationsStructure(document.annotations);
   if (document.layers !== undefined) validateLayers(document.layers);
@@ -100,12 +120,9 @@ export function validateCurrentDocument(value: unknown): asserts value is Freefo
   const typed = document as unknown as FreeformDocument;
   validateDocumentSetsAndTransitions(typed);
   validateDocumentAnnotations(typed);
-  // Command-store validation deliberately permits stale missing FTL members as
-  // an editable, playback-blocked draft after roster removal. A file snapshot
-  // has no such draft status, so its FTL graph must be strict.
-  for (const transition of typed.transitions) if (transition.mode === 'ftl') validateFtlTransition(typed, transition);
   unique(typed.performers.map(({ id }) => id), 'performer IDs');
   unique(typed.performers.map(({ rankCode }) => rankCode.toLocaleLowerCase('en-US')), 'performer rank codes (case-insensitively)');
+  return typed;
 }
 
 function validateShow(value: unknown): void {
@@ -129,8 +146,8 @@ function validateSettings(value: unknown): void {
   integer(settings.collisionThresholdUnits, 1, 28800, 'settings.collisionThresholdUnits');
 }
 
-function validatePerformers(value: unknown): void {
-  const performers = array(value, 'performers', 1);
+function validatePerformers(value: unknown, allowEmpty: boolean): void {
+  const performers = array(value, 'performers', allowEmpty ? 0 : 1);
   for (const performerValue of performers) {
     const performer = requireRecord(performerValue, 'performer');
     exactKeys(performer, ['id', 'rankCode', 'displayName', 'section', 'notes'], ['id', 'rankCode', 'displayName']);
@@ -142,14 +159,14 @@ function validatePerformers(value: unknown): void {
   }
 }
 
-function validateSets(value: unknown): void {
-  const sets = array(value, 'sets', 1);
+function validateSets(value: unknown, allowEmptyPositions: boolean): void {
+  const sets = array(value, 'sets', allowEmptyPositions ? 0 : 1);
   for (const setValue of sets) {
     const set = requireRecord(setValue, 'set');
     exactKeys(set, ['id', 'name', 'startCount', 'positions'], ['id', 'name', 'startCount', 'positions']);
     id(set.id, 'set.id'); string(set.name, 1, 120, 'set.name'); integer(set.startCount, 0, undefined, 'set.startCount');
     const positions = requireRecord(set.positions, 'set.positions');
-    if (Object.keys(positions).length === 0) throw fileError('SCHEMA', 'set.positions must not be empty.');
+    if (!allowEmptyPositions && Object.keys(positions).length === 0) throw fileError('SCHEMA', 'set.positions must not be empty.');
     for (const [performerId, dotValue] of Object.entries(positions)) { id(performerId, 'set.position performer ID'); dot(dotValue, 'set.position'); }
   }
 }
@@ -210,8 +227,9 @@ function validateAnnotationsStructure(value: unknown): void {
     const annotation = requireRecord(annotationValue, 'annotation');
     const common = ['id', 'kind', 'layerId', 'scope', 'visibility', 'performerId'];
     const extras: Record<string, readonly string[]> = { freehand: ['strokes'], arrow: ['points'], symbol: ['symbolId', 'anchor', 'rotationDegrees', 'scale'], label: ['text', 'anchor'], performerNote: ['text', 'anchor'] };
+    const requiredExtras: Record<string, readonly string[]> = { freehand: ['strokes'], arrow: ['points'], symbol: ['symbolId', 'anchor'], label: ['text', 'anchor'], performerNote: ['text', 'anchor'] };
     if (typeof annotation.kind !== 'string' || !(annotation.kind in extras)) throw fileError('SCHEMA', 'annotation.kind is invalid.');
-    exactKeys(annotation, [...common, ...extras[annotation.kind]!], ['id', 'kind', 'layerId', 'scope', 'visibility', ...extras[annotation.kind]!]);
+    exactKeys(annotation, [...common, ...extras[annotation.kind]!], ['id', 'kind', 'layerId', 'scope', 'visibility', ...requiredExtras[annotation.kind]!]);
     id(annotation.id, 'annotation.id'); id(annotation.layerId, 'annotation.layerId'); if (annotation.performerId !== undefined) id(annotation.performerId, 'annotation.performerId');
     scope(annotation.scope); visibility(annotation.visibility);
     if ((annotation.visibility as Record<string, unknown>).performerPacket === true && annotation.performerId === undefined) throw fileError('SCHEMA', 'performerPacket annotations require performerId.');
@@ -240,11 +258,32 @@ function requireRecord(value: unknown, label: string): Record<string, unknown> {
 function array(value: unknown, label: string, min = 0): unknown[] { if (!Array.isArray(value) || value.length < min) throw fileError('SCHEMA', `${label} must be an array with at least ${min} item(s).`); return value; }
 function exactKeys(value: Record<string, unknown>, allowed: readonly string[], required: readonly string[]): void { for (const key of Object.keys(value)) if (!allowed.includes(key)) throw fileError('SCHEMA', `Unexpected property: ${key}.`); for (const key of required) if (!(key in value)) throw fileError('SCHEMA', `Missing required property: ${key}.`); }
 function id(value: unknown, label: string): void { if (typeof value !== 'string' || !/^[a-z][a-z0-9_-]{0,63}$/.test(value)) throw fileError('SCHEMA', `${label} is not a valid identifier.`); }
-function string(value: unknown, min: number, max: number | undefined, label: string): void { if (typeof value !== 'string' || value.length < min || (max !== undefined && value.length > max)) throw fileError('SCHEMA', `${label} must be a string${min > 0 ? ` with at least ${min} character(s)` : ''}.`); }
+function string(value: unknown, min: number, max: number | undefined, label: string): void { const length = typeof value === 'string' ? Array.from(value).length : 0; if (typeof value !== 'string' || length < min || (max !== undefined && length > max)) throw fileError('SCHEMA', `${label} must be a string${min > 0 ? ` with at least ${min} character(s)` : ''}.`); }
 function integer(value: unknown, min: number, max: number | undefined, label: string): void { if (!Number.isInteger(value) || (value as number) < min || (max !== undefined && (value as number) > max)) throw fileError('SCHEMA', `${label} must be an integer in range.`); }
 function number(value: unknown, min: number, max: number | undefined, exclusiveMin: boolean, label: string): void { if (typeof value !== 'number' || !Number.isFinite(value) || (exclusiveMin ? value <= min : value < min) || (max !== undefined && value >= max)) throw fileError('SCHEMA', `${label} is out of range.`); }
 function boolean(value: unknown, label: string): void { if (typeof value !== 'boolean') throw fileError('SCHEMA', `${label} must be a boolean.`); }
-function isoDate(value: unknown, label: string): void { if (typeof value !== 'string' || !/^[0-9]{4}-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9](?:[.][0-9]+)?(?:Z|[+-][0-9][0-9]:[0-9][0-9])$/.test(value) || Number.isNaN(Date.parse(value))) throw fileError('SCHEMA', `${label} must be an ISO date-time.`); }
+function isoDate(value: unknown, label: string): void {
+  if (typeof value !== 'string') throw fileError('SCHEMA', `${label} must be an ISO date-time.`);
+  // Match Ajv's RFC3339 date-time behavior, including lower-case separators,
+  // arbitrary fractional precision, offsets, and a legal leap second. Native
+  // Date.parse cannot be the authority here because it normalizes bad dates.
+  const match = /^(\d{4})-(\d\d)-(\d\d)[Tt ](\d\d):(\d\d):(\d\d)(?:[.](\d+))?([Zz]|[+-](\d\d):(\d\d))$/.exec(value);
+  if (!match) throw fileError('SCHEMA', `${label} must be an ISO date-time.`);
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, , zone, zoneHourText, zoneMinuteText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const zoneHour = zone === 'Z' || zone === 'z' ? 0 : Number(zoneHourText);
+  const zoneMinute = zone === 'Z' || zone === 'z' ? 0 : Number(zoneMinuteText);
+  const daysInMonth = month === 2 ? (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28) : ([4, 6, 9, 11].includes(month) ? 30 : 31);
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth || hour > 23 || minute > 59 || second > 60
+    || (second === 60 && (hour !== 23 || minute !== 59)) || zoneHour > 23 || zoneMinute > 59) {
+    throw fileError('SCHEMA', `${label} must be an ISO date-time.`);
+  }
+}
 function uri(value: unknown, label: string): void { if (typeof value !== 'string') throw fileError('SCHEMA', `${label} must be a URI.`); try { new URL(value); } catch { throw fileError('SCHEMA', `${label} must be a URI.`); } }
 function unique(values: readonly string[], label: string): void { if (new Set(values).size !== values.length) throw fileError('SEMANTIC', `Duplicate ${label}.`); }
 function requireSemver(value: unknown, label: string): readonly [number, number, number] { if (typeof value !== 'string') throw fileError('INVALID_VERSION', `${label} must be a semantic version.`); const match = /^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)$/.exec(value); if (!match) throw fileError('INVALID_VERSION', `${label} must be a semantic version without prerelease metadata.`); return [Number(match[1]), Number(match[2]), Number(match[3])]; }

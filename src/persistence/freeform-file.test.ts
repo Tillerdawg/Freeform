@@ -1,4 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { createCommandStore } from '../document/command-store';
 import type { FreeformDocument } from '../document/types';
 import { decodeDocument, encodeDocument, FreeformFileError, importIntoStore, validateCurrentDocument } from './freeform-file';
@@ -25,6 +29,25 @@ function documentWithM6Data(): FreeformDocument {
 
 function bytes(value: unknown): Uint8Array { return new TextEncoder().encode(JSON.stringify(value)); }
 
+/** Runs the published Draft 2020-12 schema through its real, docs-scoped Ajv
+ * validator. This is test-only: browser code remains dependency-free. */
+function schemaAccepts(value: unknown): boolean {
+  const directory = mkdtempSync(join(tmpdir(), 'freeform-schema-parity-'));
+  const documentPath = join(directory, 'candidate.freeform');
+  try {
+    writeFileSync(documentPath, JSON.stringify(value), 'utf8');
+    const result = spawnSync(process.execPath, [
+      join(process.cwd(), 'docs', 'ajv_validate.mjs'),
+      join(process.cwd(), 'docs', 'freeform-1.0.schema.json'),
+      documentPath,
+    ], { encoding: 'utf8' });
+    expect(result.status).toBe(0);
+    return (JSON.parse(result.stdout) as { valid: boolean }).valid;
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
 function writableHandle(permission: PermissionState = 'granted'): { handle: SaveFileHandle; written: Uint8Array[]; closed: boolean } {
   const written: Uint8Array[] = [];
   let closed = false;
@@ -48,6 +71,68 @@ describe('Freeform file codec and validation', () => {
     if (decoded.kind === 'editable') {
       expect(decoded.document).toEqual(source);
       expect(decoded.originalBytes).toEqual(encoded);
+    }
+  });
+
+  it('preserves optional symbol transforms when either or both are absent', () => {
+    const source = documentWithM6Data();
+    const annotation = source.annotations[0]! as Extract<FreeformDocument['annotations'][number], { kind: 'symbol' }>;
+    const { rotationDegrees, scale, ...withoutTransforms } = annotation;
+    const { rotationDegrees: ignoredRotation, ...withoutRotation } = annotation;
+    const { scale: ignoredScale, ...withoutScale } = annotation;
+    const variants = [
+      withoutTransforms,
+      withoutScale,
+      withoutRotation,
+      annotation,
+    ];
+
+    for (const variant of variants) {
+      const document = { ...source, annotations: [variant] } as FreeformDocument;
+      expect(schemaAccepts(document)).toBe(true);
+      const decoded = decodeDocument(encodeDocument(document));
+      expect(decoded).toMatchObject({ kind: 'editable', document });
+    }
+    for (const invalid of [
+      { ...annotation, rotationDegrees: 360 },
+      { ...annotation, scale: 0 },
+    ]) {
+      expect(schemaAccepts({ ...source, annotations: [invalid] })).toBe(false);
+      expect(() => encodeDocument({ ...source, annotations: [invalid] } as FreeformDocument)).toThrow(FreeformFileError);
+      expect(() => decodeDocument(bytes({ ...source, annotations: [invalid] }))).toThrow(FreeformFileError);
+    }
+  });
+
+  it('measures schema strings in Unicode code points and validates calendar-aware RFC3339 dates', () => {
+    const source = documentWithM6Data();
+    const symbolAnnotation = source.annotations[0]! as Extract<FreeformDocument['annotations'][number], { kind: 'symbol' }>;
+    const { symbolId, rotationDegrees, scale, ...labelBase } = symbolAnnotation;
+    const boundary = '\ud83d\ude00'.repeat(200);
+    const stringCases: Array<{ readonly document: FreeformDocument; readonly valid: boolean }> = [
+      { document: { ...source, show: { ...source.show, title: boundary } }, valid: true },
+      { document: { ...source, show: { ...source.show, title: `${boundary}\ud83d\ude00` } }, valid: false },
+      { document: { ...source, performers: [{ ...source.performers[0]!, displayName: '\ud83d\ude00'.repeat(120) }, source.performers[1]! ] }, valid: true },
+      { document: { ...source, performers: [{ ...source.performers[0]!, section: '\ud83d\ude00'.repeat(80), notes: '\ud83d\ude00'.repeat(10000) }, source.performers[1]! ] }, valid: true },
+      { document: { ...source, sets: [{ ...source.sets[0]!, name: '\ud83d\ude00'.repeat(120) }, source.sets[1]! ] }, valid: true },
+      { document: { ...source, symbols: [{ ...source.symbols![0]!, name: '\ud83d\ude00'.repeat(120) }] }, valid: true },
+      { document: { ...source, symbols: [{ ...source.symbols![0]!, glyph: '\ud83d\ude00'.repeat(8000) }] }, valid: true },
+      { document: { ...source, annotations: [{ ...labelBase, kind: 'label', text: '\ud83d\ude00'.repeat(10000), anchor: { x: 100, y: 100 } }] } as FreeformDocument, valid: true },
+    ];
+    for (const { document, valid } of stringCases) {
+      expect(schemaAccepts(document)).toBe(valid);
+      if (valid) expect(() => encodeDocument(document)).not.toThrow();
+      else expect(() => encodeDocument(document)).toThrow(FreeformFileError);
+    }
+
+    for (const createdAt of ['2024-02-29T23:59:59Z', '2024-02-29t23:59:59.123456+05:30', '2024-02-29 23:59:60Z']) {
+      const document = { ...source, show: { ...source.show, createdAt } };
+      expect(schemaAccepts(document)).toBe(true);
+      expect(() => encodeDocument(document)).not.toThrow();
+    }
+    for (const createdAt of ['2026-02-30T12:00:00Z', '2023-02-29T12:00:00Z', '2024-04-31T12:00:00Z', '2024-02-29T24:00:00Z', '2024-02-29T12:58:60Z']) {
+      const document = { ...source, show: { ...source.show, createdAt } };
+      expect(schemaAccepts(document)).toBe(false);
+      expect(() => encodeDocument(document)).toThrow(FreeformFileError);
     }
   });
 
@@ -84,12 +169,18 @@ describe('Freeform file codec and validation', () => {
   it('makes invalid imports atomic for document state and history', () => {
     const store = createCommandStore(documentWithM6Data());
     store.apply({ type: 'show.title.set', title: 'Saved working state' });
-    const before = store.getState();
+    const before = store.undo()!;
     const history = store.getUndoCommands();
-    const malformed = { ...documentWithM6Data(), formatVersion: 'not-a-version' };
-    expect(() => importIntoStore(store, bytes(malformed))).toThrow(FreeformFileError);
+    const malformed = [
+      { ...documentWithM6Data(), formatVersion: 'not-a-version' },
+      { ...documentWithM6Data(), extra: true },
+    ];
+    for (const document of malformed) expect(() => importIntoStore(store, bytes(document))).toThrow(FreeformFileError);
     expect(store.getState()).toBe(before);
+    expect(store.getState().revision).toBe(before.revision);
     expect(store.getUndoCommands()).toEqual(history);
+    expect(store.canRedo()).toBe(true);
+    expect(store.redo()?.document.show.title).toBe('Saved working state');
   });
 
   it('opens future-major bytes read-only without attempting schema validation or migration', () => {
