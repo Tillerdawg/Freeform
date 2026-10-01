@@ -124,10 +124,10 @@ export function validateCollisionOverride(
   if (!/^v1-sha256-[a-f0-9]{64}$/.test(override.warningSignature)) {
     throw new Error('Collision override warning signature must be a v1 SHA-256 signature.');
   }
-  if (override.reason.trim().length === 0 || override.reason.length > 1000) {
+  if (override.reason.trim().length === 0 || Array.from(override.reason).length > 1000) {
     throw new Error('Collision override reason must contain 1 through 1000 characters.');
   }
-  if (override.authorLabel.trim().length === 0 || override.authorLabel.length > 120) {
+  if (override.authorLabel.trim().length === 0 || Array.from(override.authorLabel).length > 120) {
     throw new Error('Collision override local actor label must contain 1 through 120 characters.');
   }
   if (!isAjvRfc3339DateTime(override.overriddenAt)) {

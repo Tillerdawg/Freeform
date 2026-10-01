@@ -136,6 +136,59 @@ describe('Freeform file codec and validation', () => {
     }
   });
 
+  it('matches collision audit Unicode boundaries through schema, codec, and atomic store boundaries', () => {
+    const source = documentWithM6Data();
+    const transition = source.transitions[0]!;
+    const audit = transition.collisionOverrides![0]!;
+    const withAuditValue = (field: 'reason' | 'authorLabel', value: string): FreeformDocument => ({
+      ...source,
+      transitions: [{ ...transition, collisionOverrides: [{ ...audit, [field]: value }] }],
+    });
+    const cases: Array<{ readonly document: FreeformDocument; readonly schemaValid: boolean; readonly valid: boolean }> = [
+      { document: withAuditValue('reason', '😀'.repeat(1000)), schemaValid: true, valid: true },
+      { document: withAuditValue('reason', `${'x'.repeat(999)}😀`), schemaValid: true, valid: true },
+      { document: withAuditValue('reason', '😀'.repeat(1001)), schemaValid: false, valid: false },
+      // The schema permits whitespace, but M5 semantics require a nonblank audit record.
+      { document: withAuditValue('reason', ' '), schemaValid: true, valid: false },
+      { document: withAuditValue('authorLabel', '😀'.repeat(120)), schemaValid: true, valid: true },
+      { document: withAuditValue('authorLabel', `${'x'.repeat(119)}😀`), schemaValid: true, valid: true },
+      { document: withAuditValue('authorLabel', '😀'.repeat(121)), schemaValid: false, valid: false },
+      { document: withAuditValue('authorLabel', ' '), schemaValid: true, valid: false },
+    ];
+
+    for (const { document, schemaValid, valid } of cases) {
+      expect(schemaAccepts(document)).toBe(schemaValid);
+      if (valid) {
+        const decoded = decodeDocument(encodeDocument(document));
+        expect(decoded).toMatchObject({ kind: 'editable', document });
+        expect(() => createCommandStore(document)).not.toThrow();
+
+        const store = createCommandStore(source);
+        const replaced = store.apply({ type: 'document.replace', document });
+        expect(replaced.document).toEqual(document);
+
+        const importStore = createCommandStore(source);
+        const imported = importIntoStore(importStore, encodeDocument(document));
+        expect(imported).toMatchObject({ kind: 'editable', document });
+        expect(importStore.getState().document).toEqual(document);
+      } else {
+        expect(() => encodeDocument(document)).toThrow();
+        expect(() => decodeDocument(bytes(document))).toThrow();
+
+        const store = createCommandStore(source);
+        store.apply({ type: 'show.title.set', title: 'Working draft' });
+        const before = store.undo()!;
+        const history = store.getUndoCommands();
+        expect(() => store.apply({ type: 'document.replace', document })).toThrow();
+        expect(() => importIntoStore(store, bytes(document))).toThrow();
+        expect(store.getState()).toBe(before);
+        expect(store.getUndoCommands()).toEqual(history);
+        expect(store.canRedo()).toBe(true);
+        expect(store.redo()?.document.show.title).toBe('Working draft');
+      }
+    }
+  });
+
   it('matches the published Ajv date-time and URI formats at codec and command-store boundaries', () => {
     const source = documentWithM6Data();
     const withTimestamp = (key: 'createdAt' | 'updatedAt' | 'overriddenAt', value: string): FreeformDocument => {
