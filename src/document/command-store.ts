@@ -5,6 +5,7 @@ import type {
   FreeformDocument,
 } from './types';
 import { assertValidDot } from '../geometry/nfhs';
+import { validateDocumentAnnotations } from './annotations';
 import {
   validateCollisionOverride,
   validateCollisionThreshold,
@@ -98,6 +99,26 @@ function reduce(document: FreeformDocument, command: DocumentCommand): FreeformD
       return setCollisionThreshold(document, command.collisionThresholdUnits);
     case 'collision.override.record':
       return recordCollisionOverride(document, command.transitionId, command.override);
+    case 'annotation.create':
+      return createAnnotation(document, command.annotation);
+    case 'annotation.update':
+      return updateAnnotation(document, command.annotation);
+    case 'annotation.remove':
+      return removeAnnotation(document, command.annotationId);
+    case 'layer.create':
+      return createLayer(document, command.layer);
+    case 'layer.update':
+      return updateLayer(document, command.layer);
+    case 'layer.reorder':
+      return reorderLayer(document, command.layerId, command.index);
+    case 'layer.remove':
+      return removeLayer(document, command.layerId);
+    case 'symbol.create':
+      return createSymbol(document, command.symbol);
+    case 'symbol.update':
+      return updateSymbol(document, command.symbol);
+    case 'symbol.remove':
+      return removeSymbol(document, command.symbolId);
     case 'document.replace':
       return command.document;
   }
@@ -118,6 +139,9 @@ function removeSet(document: FreeformDocument, setId: string): FreeformDocument 
   if (document.sets.length === 1) throw new Error('A document must retain at least one set.');
   if (document.transitions.some((transition) => transition.fromSetId === setId || transition.toSetId === setId)) {
     throw new Error(`Remove transitions connected to set ${setId} before removing it.`);
+  }
+  if (document.annotations.some((annotation) => annotation.scope.kind === 'set' && annotation.scope.setId === setId)) {
+    throw new Error(`Remove annotations scoped to set ${setId} before removing it.`);
   }
   return { ...document, sets: document.sets.filter((set) => set.id !== setId) };
 }
@@ -183,8 +207,18 @@ function addTransition(document: FreeformDocument, transition: FreeformDocument[
 }
 
 function removeTransition(document: FreeformDocument, transitionId: string): FreeformDocument {
-  if (!document.transitions.some((transition) => transition.id === transitionId)) {
+  const transition = document.transitions.find((candidate) => candidate.id === transitionId);
+  if (!transition) {
     throw new Error(`Unknown transition: ${transitionId}`);
+  }
+  if (document.annotations.some((annotation) => annotation.scope.kind === 'transition' && annotation.scope.transitionId === transitionId)) {
+    throw new Error(`Remove annotations scoped to transition ${transitionId} before removing it.`);
+  }
+  if (transition.notes !== undefined && transition.notes.length > 0) {
+    throw new Error(`Transition ${transitionId} has notes; remove them explicitly before removing the transition.`);
+  }
+  if ((transition.collisionOverrides?.length ?? 0) > 0) {
+    throw new Error(`Transition ${transitionId} has collision overrides; remove them explicitly before removing the transition.`);
   }
   return { ...document, transitions: document.transitions.filter((transition) => transition.id !== transitionId) };
 }
@@ -267,6 +301,9 @@ function removePerformer(document: FreeformDocument, performerId: string): Freef
   if (!document.performers.some((performer) => performer.id === performerId)) {
     throw new Error(`Unknown performer: ${performerId}`);
   }
+  if (document.annotations.some((annotation) => annotation.performerId === performerId)) {
+    throw new Error(`Remove annotations associated with performer ${performerId} before removing the performer.`);
+  }
   return {
     ...document,
     performers: document.performers.filter((performer) => performer.id !== performerId),
@@ -297,6 +334,116 @@ function batchSetPerformerDisplayNames(
         : performer
     )),
   };
+}
+
+function createAnnotation(
+  document: FreeformDocument,
+  annotation: FreeformDocument['annotations'][number],
+): FreeformDocument {
+  if (document.annotations.some((candidate) => candidate.id === annotation.id)) {
+    throw new Error(`Annotation ID already exists: ${annotation.id}`);
+  }
+  assertLayerUnlocked(document, annotation.layerId);
+  return { ...document, annotations: [...document.annotations, annotation] };
+}
+
+function updateAnnotation(
+  document: FreeformDocument,
+  annotation: FreeformDocument['annotations'][number],
+): FreeformDocument {
+  const existing = document.annotations.find((candidate) => candidate.id === annotation.id);
+  if (!existing) throw new Error(`Unknown annotation: ${annotation.id}`);
+  assertLayerUnlocked(document, existing.layerId);
+  assertLayerUnlocked(document, annotation.layerId);
+  return {
+    ...document,
+    annotations: document.annotations.map((candidate) => candidate.id === annotation.id ? annotation : candidate),
+  };
+}
+
+function removeAnnotation(document: FreeformDocument, annotationId: string): FreeformDocument {
+  const annotation = document.annotations.find((candidate) => candidate.id === annotationId);
+  if (!annotation) throw new Error(`Unknown annotation: ${annotationId}`);
+  assertLayerUnlocked(document, annotation.layerId);
+  return { ...document, annotations: document.annotations.filter((candidate) => candidate.id !== annotationId) };
+}
+
+function createLayer(document: FreeformDocument, layer: NonNullable<FreeformDocument['layers']>[number]): FreeformDocument {
+  const layers = document.layers ?? [];
+  if (layers.some((candidate) => candidate.id === layer.id)) throw new Error(`Layer ID already exists: ${layer.id}`);
+  return { ...document, layers: [...layers, layer] };
+}
+
+function updateLayer(document: FreeformDocument, layer: NonNullable<FreeformDocument['layers']>[number]): FreeformDocument {
+  const layers = document.layers ?? [];
+  const existing = layers.find((candidate) => candidate.id === layer.id);
+  if (!existing) throw new Error(`Unknown layer: ${layer.id}`);
+  if (existing.locked && !isOnlyUnlock(existing, layer)) {
+    throw new Error(`Layer ${layer.id} is locked; unlock it before editing its properties.`);
+  }
+  return { ...document, layers: layers.map((candidate) => candidate.id === layer.id ? layer : candidate) };
+}
+
+function reorderLayer(document: FreeformDocument, layerId: string, index: number): FreeformDocument {
+  const layers = document.layers ?? [];
+  const currentIndex = layers.findIndex((candidate) => candidate.id === layerId);
+  if (currentIndex < 0) throw new Error(`Unknown layer: ${layerId}`);
+  assertLayerUnlocked(document, layerId);
+  if (!Number.isInteger(index) || index < 0 || index >= layers.length) {
+    throw new Error('Layer reorder index must name an existing layer position.');
+  }
+  const reordered = [...layers];
+  const [layer] = reordered.splice(currentIndex, 1);
+  reordered.splice(index, 0, layer!);
+  return { ...document, layers: reordered };
+}
+
+function removeLayer(document: FreeformDocument, layerId: string): FreeformDocument {
+  const layers = document.layers ?? [];
+  if (!layers.some((candidate) => candidate.id === layerId)) throw new Error(`Unknown layer: ${layerId}`);
+  assertLayerUnlocked(document, layerId);
+  if (document.annotations.some((annotation) => annotation.layerId === layerId)) {
+    throw new Error(`Remove annotations from layer ${layerId} before removing the layer.`);
+  }
+  return { ...document, layers: layers.filter((candidate) => candidate.id !== layerId) };
+}
+
+function createSymbol(document: FreeformDocument, symbol: NonNullable<FreeformDocument['symbols']>[number]): FreeformDocument {
+  const symbols = document.symbols ?? [];
+  if (symbols.some((candidate) => candidate.id === symbol.id)) throw new Error(`Symbol ID already exists: ${symbol.id}`);
+  return { ...document, symbols: [...symbols, symbol] };
+}
+
+function updateSymbol(document: FreeformDocument, symbol: NonNullable<FreeformDocument['symbols']>[number]): FreeformDocument {
+  const symbols = document.symbols ?? [];
+  if (!symbols.some((candidate) => candidate.id === symbol.id)) throw new Error(`Unknown symbol: ${symbol.id}`);
+  return { ...document, symbols: symbols.map((candidate) => candidate.id === symbol.id ? symbol : candidate) };
+}
+
+function removeSymbol(document: FreeformDocument, symbolId: string): FreeformDocument {
+  const symbols = document.symbols ?? [];
+  if (!symbols.some((candidate) => candidate.id === symbolId)) throw new Error(`Unknown symbol: ${symbolId}`);
+  if (document.annotations.some((annotation) => annotation.kind === 'symbol' && annotation.symbolId === symbolId)) {
+    throw new Error(`Remove symbol annotations using ${symbolId} before removing the symbol.`);
+  }
+  return { ...document, symbols: symbols.filter((candidate) => candidate.id !== symbolId) };
+}
+
+function assertLayerUnlocked(document: FreeformDocument, layerId: string): void {
+  const layer = (document.layers ?? []).find((candidate) => candidate.id === layerId);
+  if (!layer) throw new Error(`Unknown layer: ${layerId}`);
+  if (layer.locked) throw new Error(`Layer ${layerId} is locked.`);
+}
+
+function isOnlyUnlock(
+  existing: NonNullable<FreeformDocument['layers']>[number],
+  replacement: NonNullable<FreeformDocument['layers']>[number],
+): boolean {
+  return replacement.locked === false
+    && existing.id === replacement.id
+    && existing.name === replacement.name
+    && existing.visible === replacement.visible
+    && existing.print === replacement.print;
 }
 
 function placeDot(
@@ -333,6 +480,7 @@ function makeState(document: FreeformDocument, revision: number): DocumentState 
   // replacement, command application, undo, and redo exposes a fully covered
   // ordered set graph rather than a document that callers must validate later.
   validateDocumentSetsAndTransitions(document);
+  validateDocumentAnnotations(document);
   return freeze({ document: clone(document), revision });
 }
 

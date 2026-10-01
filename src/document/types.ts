@@ -51,6 +51,79 @@ export interface Transition {
   readonly collisionOverrides?: readonly CollisionOverride[];
 }
 
+/** Exactly one persisted location owns each annotation; no active-page fallback exists. */
+export type AnnotationScope =
+  | Readonly<{ kind: 'set'; setId: Identifier }>
+  | Readonly<{ kind: 'transition'; transitionId: Identifier }>
+  | Readonly<{ kind: 'show' }>;
+
+/** Schema names are preserved deliberately: layer `print` is not `printEnabled`. */
+export interface AnnotationVisibility {
+  readonly editor: boolean;
+  readonly print: boolean;
+  readonly performerPacket: boolean;
+}
+
+interface AnnotationBase {
+  readonly id: Identifier;
+  readonly layerId: Identifier;
+  readonly scope: AnnotationScope;
+  readonly visibility: AnnotationVisibility;
+  readonly performerId?: Identifier;
+}
+
+export interface FreehandAnnotation extends AnnotationBase {
+  readonly kind: 'freehand';
+  readonly strokes: readonly (readonly Dot[])[];
+}
+
+export interface ArrowAnnotation extends AnnotationBase {
+  readonly kind: 'arrow';
+  readonly points: readonly Dot[];
+}
+
+export interface SymbolAnnotation extends AnnotationBase {
+  readonly kind: 'symbol';
+  readonly symbolId: Identifier;
+  readonly anchor: Dot;
+  readonly rotationDegrees?: number;
+  readonly scale?: number;
+}
+
+export interface LabelAnnotation extends AnnotationBase {
+  readonly kind: 'label';
+  readonly text: string;
+  readonly anchor: Dot;
+}
+
+export interface PerformerNoteAnnotation extends AnnotationBase {
+  readonly kind: 'performerNote';
+  readonly performerId: Identifier;
+  readonly text: string;
+  readonly anchor: Dot;
+}
+
+export type Annotation =
+  | FreehandAnnotation
+  | ArrowAnnotation
+  | SymbolAnnotation
+  | LabelAnnotation
+  | PerformerNoteAnnotation;
+
+export interface AnnotationLayer {
+  readonly id: Identifier;
+  readonly name: string;
+  readonly visible: boolean;
+  readonly print: boolean;
+  readonly locked: boolean;
+}
+
+export interface SymbolDefinition {
+  readonly id: Identifier;
+  readonly name: string;
+  readonly glyph: string;
+}
+
 export interface FreeformDocument {
   readonly format: 'freeform';
   readonly formatVersion: '1.0.0';
@@ -73,9 +146,9 @@ export interface FreeformDocument {
   readonly performers: readonly Performer[];
   readonly sets: readonly SetPage[];
   readonly transitions: readonly Transition[];
-  readonly annotations: readonly unknown[];
-  readonly symbols?: readonly unknown[];
-  readonly layers?: readonly unknown[];
+  readonly annotations: readonly Annotation[];
+  readonly symbols?: readonly SymbolDefinition[];
+  readonly layers?: readonly AnnotationLayer[];
   readonly extensions?: Readonly<Record<string, unknown>>;
 }
 
@@ -135,6 +208,17 @@ export type DocumentCommand =
     readonly transitionId: Identifier;
     readonly override: CollisionOverride;
   }
+  | { readonly type: 'annotation.create'; readonly annotation: Annotation }
+  /** Replacement preserves the annotation ID; partial patches would weaken validation. */
+  | { readonly type: 'annotation.update'; readonly annotation: Annotation }
+  | { readonly type: 'annotation.remove'; readonly annotationId: Identifier }
+  | { readonly type: 'layer.create'; readonly layer: AnnotationLayer }
+  | { readonly type: 'layer.update'; readonly layer: AnnotationLayer }
+  | { readonly type: 'layer.reorder'; readonly layerId: Identifier; readonly index: number }
+  | { readonly type: 'layer.remove'; readonly layerId: Identifier }
+  | { readonly type: 'symbol.create'; readonly symbol: SymbolDefinition }
+  | { readonly type: 'symbol.update'; readonly symbol: SymbolDefinition }
+  | { readonly type: 'symbol.remove'; readonly symbolId: Identifier }
   | { readonly type: 'document.replace'; readonly document: FreeformDocument };
 
 export interface CommandStore {

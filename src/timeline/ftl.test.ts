@@ -144,6 +144,10 @@ describe('FTL validation', () => {
     };
     const document: FreeformDocument = {
       ...fixture,
+      // M6 referential integrity requires author-owned performer annotations
+      // to be explicitly removed before their performer. This leaves this
+      // test focused on the independent FTL-member blocked state.
+      annotations: fixture.annotations.filter((annotation) => annotation.performerId !== 'e'),
       sets: [
         ...fixture.sets,
         { id: 'set-3', name: 'Set 3', startCount: 32, positions: structuredClone(fixture.sets[1]!.positions) },
