@@ -174,7 +174,10 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     titleInput.disabled = Boolean(readOnly);
     titleInput.addEventListener('change', () => {
       const title = titleInput.value.trim();
-      if (title !== '' && title !== documentState.document.show.title) observed.apply({ type: 'show.title.set', title });
+      // refreshControls deliberately retains this input while other document
+      // commands commit, so this listener must not compare against the render-
+      // time state captured above. Always target the currently open document.
+      if (title !== '' && title !== observed.getState().document.show.title) observed.apply({ type: 'show.title.set', title });
     });
 
     const controls = element('div', 'persistence-controls__buttons');
@@ -232,9 +235,15 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
       if (titleInput && document.activeElement !== titleInput) titleInput.value = observed.getState().document.show.title;
       const chip = old.querySelector<HTMLElement>('#persistence-state');
       if (chip) {
-        chip.className = `persistence-state persistence-state--${localState}`;
-        chip.textContent = stateLabel();
-        chip.title = stateTooltip();
+        const nextClassName = `persistence-state persistence-state--${localState}`;
+        const nextLabel = stateLabel();
+        const nextTooltip = stateTooltip();
+        // A polite live region is not a repaint target. Avoid writing the same
+        // semantic state on every editor refresh so assistive technology only
+        // receives a mutation when status has actually changed.
+        if (chip.className !== nextClassName) chip.className = nextClassName;
+        if (chip.textContent !== nextLabel) chip.textContent = nextLabel;
+        if (chip.title !== nextTooltip) chip.title = nextTooltip;
       }
       const messageNode = old.querySelector<HTMLElement>('#persistence-message');
       if (messageNode) {

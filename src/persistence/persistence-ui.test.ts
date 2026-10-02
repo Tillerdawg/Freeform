@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import 'fake-indexeddb/auto';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCommandStore } from '../document/command-store';
 import { createEmptyDocument } from '../editor/setup-wizard';
+import { decodeDocument, encodeDocument } from './freeform-file';
 import { createPersistenceUi } from './persistence-ui';
 
 const report = {
@@ -80,6 +81,93 @@ describe('createPersistenceUi', () => {
     expect(title.selectionEnd).toBe(14);
     ui.dispose();
   });
+
+  it('commits repeated rename-back values to the current document and preserves history, saved/dirty status, and export bytes', async () => {
+    const root = document.createElement('main');
+    document.body.append(root);
+    const ui = createPersistenceUi(root, createCommandStore(createEmptyDocument()), report);
+    ui.start();
+    completeSetup(root);
+
+    const title = root.querySelector<HTMLInputElement>('#document-title')!;
+    const initialRevision = ui.store.getState().revision;
+    rename(title, 'First rename');
+    rename(title, 'Second rename');
+    rename(title, 'Persistence Test');
+
+    expect(ui.store.getState().document.show.title).toBe('Persistence Test');
+    expect(ui.store.getState().revision).toBe(initialRevision + 3);
+    expect(ui.store.getUndoCommands().slice(-3)).toEqual([
+      { type: 'show.title.set', title: 'First rename' },
+      { type: 'show.title.set', title: 'Second rename' },
+      { type: 'show.title.set', title: 'Persistence Test' },
+    ]);
+    expect(root.querySelector('#persistence-state')?.textContent).toBe('Unsaved changes');
+
+    expect(ui.store.undo()?.document.show.title).toBe('Second rename');
+    expect(ui.store.redo()?.document.show.title).toBe('Persistence Test');
+    const exported = decodeDocument(encodeDocument(ui.store.getState().document));
+    expect(exported).toMatchObject({ kind: 'editable', document: { show: { title: 'Persistence Test' } } });
+    const download = vi.fn();
+    vi.stubGlobal('URL', { createObjectURL: download.mockReturnValue('blob:freeform-test'), revokeObjectURL: vi.fn() });
+    root.querySelector<HTMLButtonElement>('.persistence-controls__buttons button')!.click();
+    await vi.waitFor(() => expect(root.querySelector('#persistence-state')?.textContent).toBe('Saved'));
+    expect(download).toHaveBeenCalledOnce();
+    vi.unstubAllGlobals();
+
+    const previousDocument = ui.store.getState().document;
+    ui.store.apply({
+      type: 'document.replace',
+      document: { ...previousDocument, show: { ...previousDocument.show, id: 'switched-document', title: 'Switched document' } },
+    });
+    expect(root.querySelector('#document-title')).toBe(title);
+    rename(title, 'Switched document renamed');
+    expect(ui.store.getState().document.show).toMatchObject({ id: 'switched-document', title: 'Switched document renamed' });
+    expect(previousDocument.show.title).toBe('Persistence Test');
+    ui.dispose();
+  });
+
+  it('does not mutate an unchanged live status during committed editor refreshes', async () => {
+    const root = document.createElement('main');
+    document.body.append(root);
+    const ui = createPersistenceUi(root, createCommandStore(createEmptyDocument()), report);
+    ui.start();
+    completeSetup(root);
+
+    const chip = root.querySelector<HTMLElement>('#persistence-state')!;
+    const mutations: MutationRecord[] = [];
+    const observer = new MutationObserver((records) => mutations.push(...records));
+    observer.observe(chip, { attributes: true, attributeFilter: ['class', 'title'], childList: true, characterData: true, subtree: true });
+    ui.store.apply({ type: 'show.title.set', title: 'Refresh one' });
+    ui.store.apply({ type: 'show.title.set', title: 'Refresh two' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(chip.textContent).toBe('Unsaved changes');
+    expect(mutations).toEqual([]);
+    observer.disconnect();
+    ui.dispose();
+  });
+
+  it('mutates the live status when local backup meaningfully fails', async () => {
+    const open = vi.spyOn(indexedDB, 'open').mockImplementation(() => { throw new Error('IndexedDB unavailable'); });
+    const root = document.createElement('main');
+    document.body.append(root);
+    const ui = createPersistenceUi(root, createCommandStore(createEmptyDocument()), report);
+    ui.start();
+    completeSetup(root);
+
+    const chip = root.querySelector<HTMLElement>('#persistence-state')!;
+    const mutations: MutationRecord[] = [];
+    const observer = new MutationObserver((records) => mutations.push(...records));
+    observer.observe(chip, { attributes: true, attributeFilter: ['class', 'title'], childList: true, characterData: true, subtree: true });
+    await vi.waitFor(() => expect(chip.textContent).toBe('Local backup failed'));
+
+    expect(mutations.length).toBeGreaterThan(0);
+    expect(chip.className).toContain('persistence-state--failed');
+    observer.disconnect();
+    ui.dispose();
+    open.mockRestore();
+  });
 });
 
 function fill(root: HTMLElement, selector: string, value: string): void {
@@ -94,4 +182,9 @@ function completeSetup(root: HTMLElement): void {
   fill(root, '#setup-count-1', '1');
   fill(root, '#setup-prefix-1', 'T');
   root.querySelector<HTMLFormElement>('.setup-wizard')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+}
+
+function rename(input: HTMLInputElement, value: string): void {
+  input.value = value;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
 }
