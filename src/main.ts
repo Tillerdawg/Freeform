@@ -1,8 +1,8 @@
 import './styles.css';
 import { createCommandStore } from './document/command-store';
-import { renderDotEditor } from './editor/dot-editor';
-import { createEmptyDocument, renderSetupWizard } from './editor/setup-wizard';
+import { createEmptyDocument } from './editor/setup-wizard';
 import { detectFeatures } from './platform/features';
+import { createPersistenceUi } from './persistence/persistence-ui';
 
 const store = createCommandStore(createEmptyDocument());
 const report = detectFeatures();
@@ -12,7 +12,4 @@ if (!app) {
   throw new Error('Freeform app root is missing.');
 }
 
-renderSetupWizard(app, {
-  store,
-  onComplete: () => renderDotEditor(app, { store, report }),
-});
+createPersistenceUi(app, store, report).start();

@@ -123,6 +123,21 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px s
 .collision-status { font-weight: 700; }
 .collision-status--warning { color: #f2d580; }
 .editor-message { color: #b9e7ce; }
+.persistence-controls { display: grid; gap: 0.75rem; }
+.persistence-controls h3 { margin: 0.5rem 0 0; font-size: 1rem; }
+.persistence-controls > label { color: #b7c5d7; font-size: 0.85rem; }
+.persistence-controls__buttons { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.persistence-state { margin: 0; font-weight: 700; }
+.persistence-state--saved { color: #b9e7ce; }
+.persistence-state--dirty { color: #f2d580; }
+.persistence-state--saving { color: #90bdea; }
+.persistence-state--failed { color: #f1a59c; }
+.persistence-shortcuts summary { cursor: pointer; font-weight: 700; }
+.persistence-shortcuts p { color: #b7c5d7; font-size: 0.9rem; }
+.recovery-panel, .backup-prompt { display: grid; gap: 0.75rem; }
+.recovery-panel__row, .version-history__row { display: grid; gap: 0.55rem; padding: 0.75rem; border: 1px solid #3b4a5e; border-radius: 0.5rem; }
+.persistence-dialog { position: fixed; z-index: 10; inset: 10vh auto auto 50%; width: min(38rem, calc(100% - 2rem)); transform: translateX(-50%); padding: 1.25rem; border: 1px solid #90bdea; border-radius: 0.75rem; background: #152133; box-shadow: 0 1rem 4rem rgb(0 0 0 / 55%); }
+.persistence-dialog button { margin-right: 0.55rem; margin-top: 0.5rem; }
 .inspection-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .inspection-table caption { padding: 0 0 0.75rem; text-align: left; color: #b7c5d7; }
 .inspection-table th, .inspection-table td { padding: 0.55rem; border-top: 1px solid #3b4a5e; text-align: left; vertical-align: top; }

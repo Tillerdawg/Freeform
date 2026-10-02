@@ -15,6 +15,9 @@ import { renderRosterEditor } from './roster-editor';
 export interface DotEditorOptions {
   readonly store: CommandStore;
   readonly report: FeatureReport;
+  /** Optional application-shell controls rendered before editor-specific UI.
+   * The document editor still owns all document mutations. */
+  readonly renderPersistenceControls?: () => HTMLElement;
 }
 
 /** The string and checkbox values collected by the structured dot form. */
@@ -66,7 +69,7 @@ export function buildDotFromEditorValues(values: DotEditorCoordinateValues): Dot
  * A small DOM-only M2 editor. It deliberately exposes canonical FU entry rather
  * than a pixel coordinate so every placement crosses the document-command boundary.
  */
-export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorOptions): void {
+export function renderDotEditor(root: HTMLElement, { store, report, renderPersistenceControls }: DotEditorOptions): void {
   let message = '';
   const setMessage = (nextMessage: string): void => { message = nextMessage; };
 
@@ -91,6 +94,7 @@ export function renderDotEditor(root: HTMLElement, { store, report }: DotEditorO
       textElement('p', 'subtitle', 'Canonical NFHS coordinates, complete sets, and count-by-count float or FTL playback.'),
     );
     shell.append(header);
+    if (renderPersistenceControls) shell.append(renderPersistenceControls());
 
     const capability = element('section', `capability ${report.supported ? 'capability--ready' : 'capability--blocked'}`);
     capability.setAttribute('aria-labelledby', 'capability-title');

@@ -36,7 +36,13 @@ const DEFAULT_DEADLINE_MS = 30000;
 export function createAutosaveScheduler(options: AutosaveSchedulerOptions): AutosaveScheduler {
   const idleMs = options.idleMs ?? DEFAULT_IDLE_MS;
   const deadlineMs = options.deadlineMs ?? DEFAULT_DEADLINE_MS;
-  const timers: AutosaveTimers = options.timers ?? { setTimeout, clearTimeout };
+  // Browser timer methods require their Window receiver in some engines. Wrap
+  // rather than storing unbound host methods, so real-browser autosave does
+  // not throw "Illegal invocation" on the first committed edit.
+  const timers: AutosaveTimers = options.timers ?? {
+    setTimeout: (handler, ms) => setTimeout(handler, ms),
+    clearTimeout: (handle) => clearTimeout(handle),
+  };
 
   let idleHandle: ReturnType<typeof setTimeout> | undefined;
   let deadlineHandle: ReturnType<typeof setTimeout> | undefined;
