@@ -191,10 +191,13 @@ describe('quarter-step snapping', () => {
     expect(inspectCoordinate(snapped).notation).toBe(notation);
   });
 
+  // This deliberately exercises every one of the 153,601 canonical y values.
+  // Keep the timeout scoped: it is exhaustive correctness coverage, not the
+  // normal interactive snap path.
   it('is idempotent for every canonical y coordinate on the 50-yard line', () => {
     for (let y = 0; y <= 153600; y += 1) {
       const snapped = snapToQuarterStepGrid({ x: 144000, y });
       expect(snapToQuarterStepGrid(snapped)).toEqual(snapped);
     }
-  });
+  }, 10_000);
 });

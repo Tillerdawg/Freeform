@@ -103,6 +103,8 @@ describe('Freeform file codec and validation', () => {
     }
   });
 
+  // Each parity case invokes the real docs-scoped Ajv validator in its own
+  // subprocess. Keep the timeout scoped so this corpus remains exhaustive.
   it('measures schema strings in Unicode code points and validates calendar-aware RFC3339 dates', () => {
     const source = documentWithM6Data();
     const symbolAnnotation = source.annotations[0]! as Extract<FreeformDocument['annotations'][number], { kind: 'symbol' }>;
@@ -134,7 +136,7 @@ describe('Freeform file codec and validation', () => {
       expect(schemaAccepts(document)).toBe(false);
       expect(() => encodeDocument(document)).toThrow(FreeformFileError);
     }
-  });
+  }, 10_000);
 
   it('matches collision audit Unicode boundaries through schema, codec, and atomic store boundaries', () => {
     const source = documentWithM6Data();
