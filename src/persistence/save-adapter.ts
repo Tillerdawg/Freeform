@@ -31,7 +31,7 @@ export type SaveRequest = Readonly<{
 export type SaveResult =
   | Readonly<{ ok: true; method: 'file-system-access'; handle: SaveFileHandle; bytes: Uint8Array; filename: string }>
   | Readonly<{ ok: true; method: 'download'; bytes: Uint8Array; filename: string }>
-  | Readonly<{ ok: false; reason: 'permission-denied' | 'cancelled' | 'write-failed' | 'download-failed'; message: string }>;
+  | Readonly<{ ok: false; reason: 'permission-denied' | 'cancelled' | 'write-failed' | 'download-failed' | 'encode-failed'; message: string }>;
 
 /**
  * A user-gesture boundary calls this function. It validates and creates bytes
@@ -44,7 +44,12 @@ export async function saveExplicitSnapshot(
   request: SaveRequest,
   environment: SaveAdapterEnvironment = defaultSaveEnvironment(),
 ): Promise<SaveResult> {
-  const bytes = encodeDocument(document);
+  let bytes: Uint8Array;
+  try {
+    bytes = encodeDocument(document);
+  } catch (error) {
+    return failure('encode-failed', error);
+  }
   const filename = freeformFilename(request.title);
 
   if (request.operation === 'save' && request.activeHandle) {

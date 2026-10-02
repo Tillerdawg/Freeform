@@ -18,6 +18,8 @@ export interface DotEditorOptions {
   /** Optional application-shell controls rendered before editor-specific UI.
    * The document editor still owns all document mutations. */
   readonly renderPersistenceControls?: () => HTMLElement;
+  /** Optional persistence guard for existing multi-set destructive actions. */
+  readonly beforeDestructiveOperation?: () => Promise<string | undefined>;
 }
 
 /** The string and checkbox values collected by the structured dot form. */
@@ -69,7 +71,7 @@ export function buildDotFromEditorValues(values: DotEditorCoordinateValues): Dot
  * A small DOM-only M2 editor. It deliberately exposes canonical FU entry rather
  * than a pixel coordinate so every placement crosses the document-command boundary.
  */
-export function renderDotEditor(root: HTMLElement, { store, report, renderPersistenceControls }: DotEditorOptions): void {
+export function renderDotEditor(root: HTMLElement, { store, report, renderPersistenceControls, beforeDestructiveOperation }: DotEditorOptions): void {
   let message = '';
   const setMessage = (nextMessage: string): void => { message = nextMessage; };
 
@@ -84,6 +86,12 @@ export function renderDotEditor(root: HTMLElement, { store, report, renderPersis
     const document = state.document;
     root.dataset.support = String(report.supported);
     const annotationDraft = captureAnnotationDraft(root);
+    const persistenceTitleDraft = capturePersistenceTitleDraft(root);
+    // Persistence controls own independent title typing and async status. Keep
+    // their DOM identity through editor-only redraws rather than recreating a
+    // focused input for an unrelated command.
+    const persistenceControls = root.querySelector<HTMLElement>('#persistence-controls');
+    persistenceControls?.remove();
     root.replaceChildren();
 
     const shell = element('section', 'app-shell');
@@ -94,7 +102,7 @@ export function renderDotEditor(root: HTMLElement, { store, report, renderPersis
       textElement('p', 'subtitle', 'Canonical NFHS coordinates, complete sets, and count-by-count float or FTL playback.'),
     );
     shell.append(header);
-    if (renderPersistenceControls) shell.append(renderPersistenceControls());
+    if (renderPersistenceControls) shell.append(persistenceControls ?? renderPersistenceControls());
 
     const capability = element('section', `capability ${report.supported ? 'capability--ready' : 'capability--blocked'}`);
     capability.setAttribute('aria-labelledby', 'capability-title');
@@ -132,7 +140,12 @@ export function renderDotEditor(root: HTMLElement, { store, report, renderPersis
       fieldEditor.root,
     );
     editor.append(fieldSection);
-    editor.append(renderRosterEditor({ store, onCommitted: render, setStatus: setMessage }));
+    editor.append(renderRosterEditor({
+      store,
+      onCommitted: render,
+      setStatus: (nextMessage) => { setMessage(nextMessage); render(); },
+      beforeDestructiveOperation,
+    }));
 
     // This panel owns its drafts between its own commits. The document store is
     // still the sole mutation boundary for every annotation/layer/symbol action.
@@ -170,6 +183,7 @@ export function renderDotEditor(root: HTMLElement, { store, report, renderPersis
     shell.append(editor);
     root.append(shell);
     restoreAnnotationDraft(root, annotationDraft);
+    restorePersistenceTitleDraft(root, persistenceTitleDraft);
   };
 
   const timeline = createTimelinePanel(store, render, setMessage);
@@ -460,6 +474,29 @@ function restoreAnnotationDraft(root: HTMLElement, draft: AnnotationDraft | unde
   if (!focused || focused.closest('.annotation-editor') === null) return;
   focused.focus();
   if (draft.selectionStart !== undefined && draft.selectionEnd !== undefined) focused.setSelectionRange(draft.selectionStart, draft.selectionEnd);
+}
+
+interface PersistenceTitleDraft {
+  readonly value: string;
+  readonly selectionStart: number;
+  readonly selectionEnd: number;
+}
+
+/** The shell rerenders after editor commands; title typing belongs to the
+ * persistence control and must survive that unrelated redraw. */
+function capturePersistenceTitleDraft(root: HTMLElement): PersistenceTitleDraft | undefined {
+  const input = root.querySelector<HTMLInputElement>('#document-title');
+  if (!input || document.activeElement !== input) return undefined;
+  return { value: input.value, selectionStart: input.selectionStart ?? input.value.length, selectionEnd: input.selectionEnd ?? input.value.length };
+}
+
+function restorePersistenceTitleDraft(root: HTMLElement, draft: PersistenceTitleDraft | undefined): void {
+  if (!draft) return;
+  const input = root.querySelector<HTMLInputElement>('#document-title');
+  if (!input) return;
+  input.value = draft.value;
+  input.focus();
+  input.setSelectionRange(draft.selectionStart, draft.selectionEnd);
 }
 
 function rawDistance(distance: { readonly units: number; readonly numeratorUnits: number; readonly denominatorUnits: number }): string {

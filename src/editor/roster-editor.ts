@@ -12,6 +12,9 @@ export interface RosterEditorOptions {
   readonly store: CommandStore;
   readonly onCommitted: () => void;
   readonly setStatus: (message: string) => void;
+  /** Required by the assembled persistence shell before an existing performer
+   * removal deletes that performer's positions across every set. */
+  readonly beforeDestructiveOperation?: () => Promise<string | undefined>;
 }
 
 /**
@@ -89,7 +92,7 @@ export function ftlTransitionsAffectedByRemoval(document: FreeformDocument, perf
 }
 
 /** Renders the incremental roster editor used after setup has generated the first roster. */
-export function renderRosterEditor({ store, onCommitted, setStatus }: RosterEditorOptions): HTMLElement {
+export function renderRosterEditor({ store, onCommitted, setStatus, beforeDestructiveOperation }: RosterEditorOptions): HTMLElement {
   const currentDocument = store.getState().document;
   const panel = element('section', 'roster-editor');
   panel.setAttribute('aria-labelledby', 'roster-editor-title');
@@ -169,16 +172,30 @@ export function renderRosterEditor({ store, onCommitted, setStatus }: RosterEdit
           ? ` ${affectedTransitions.length === 1 ? 'Transition' : 'Transitions'} ${affectedTransitions.join(', ')} ${affectedTransitions.length === 1 ? 'uses' : 'use'} it in FTL playback and will become blocked until repaired.`
           : ' This removes its dot from every set and cannot preserve FTL membership.';
         if (!window.confirm(`Remove ${performer.rankCode}?${ftlWarning}`)) return;
-        try {
-          store.apply({ type: 'performer.remove', performerId: performer.id });
-          const ftlNotice = affectedTransitions.length > 0
-            ? ` FTL playback is blocked for transition${affectedTransitions.length === 1 ? '' : 's'} ${affectedTransitions.join(', ')}; see the Transition timeline to repair it.`
-            : '';
-          setStatus(`Removed ${performer.rankCode} and its dots from every set.${ftlNotice}`);
-          onCommitted();
-        } catch (error) {
-          setStatus(error instanceof Error ? error.message : 'Could not remove performer.');
+        const commitRemoval = (): void => {
+          try {
+            store.apply({ type: 'performer.remove', performerId: performer.id });
+            const ftlNotice = affectedTransitions.length > 0
+              ? ` FTL playback is blocked for transition${affectedTransitions.length === 1 ? '' : 's'} ${affectedTransitions.join(', ')}; see the Transition timeline to repair it.`
+              : '';
+            setStatus(`Removed ${performer.rankCode} and its dots from every set.${ftlNotice}`);
+            onCommitted();
+          } catch (error) {
+            setStatus(error instanceof Error ? error.message : 'Could not remove performer.');
+          }
+        };
+        if (!beforeDestructiveOperation) {
+          commitRemoval();
+          return;
         }
+        void (async () => {
+          const checkpointFailure = await beforeDestructiveOperation();
+          if (checkpointFailure) {
+            setStatus(checkpointFailure);
+            return;
+          }
+          commitRemoval();
+        })();
       });
       remove.className = 'roster-remove';
       remove.dataset.performerId = performer.id;

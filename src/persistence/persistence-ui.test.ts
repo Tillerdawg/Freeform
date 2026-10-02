@@ -56,10 +56,42 @@ describe('createPersistenceUi', () => {
     expect(ui.store.getState().document.show.title).toBe('Untitled Show');
     ui.dispose();
   });
+
+  it('keeps the focused document-title element and its uncommitted draft through an unrelated control refresh', () => {
+    const root = document.createElement('main');
+    document.body.append(root);
+    const ui = createPersistenceUi(root, createCommandStore(createEmptyDocument()), report);
+    ui.start();
+    completeSetup(root);
+
+    const title = root.querySelector<HTMLInputElement>('#document-title')!;
+    title.focus();
+    title.value = 'Typing without committing';
+    title.setSelectionRange(7, 14);
+    ui.store.apply({ type: 'show.title.set', title: 'Committed elsewhere' });
+    root.querySelector<HTMLInputElement>('#rank-code')!.value = 'T2';
+    root.querySelector<HTMLInputElement>('#display-name')!.value = 'Two';
+    root.querySelector<HTMLFormElement>('form.editor-form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    expect(root.querySelector('#document-title')).toBe(title);
+    expect(document.activeElement).toBe(title);
+    expect(title.value).toBe('Typing without committing');
+    expect(title.selectionStart).toBe(7);
+    expect(title.selectionEnd).toBe(14);
+    ui.dispose();
+  });
 });
 
 function fill(root: HTMLElement, selector: string, value: string): void {
   const input = root.querySelector<HTMLInputElement>(selector)!;
   input.value = value;
   input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function completeSetup(root: HTMLElement): void {
+  fill(root, '#setup-title', 'Persistence Test');
+  fill(root, '#setup-instrument-1', 'Trumpet');
+  fill(root, '#setup-count-1', '1');
+  fill(root, '#setup-prefix-1', 'T');
+  root.querySelector<HTMLFormElement>('.setup-wizard')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
 }

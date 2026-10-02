@@ -115,6 +115,36 @@ describe('backup writing', () => {
     expect(download).not.toHaveBeenCalled();
   });
 
+  it('rechecks a revoked cached directory grant and uses download without writing or pruning', async () => {
+    const service = createBackupService(fakeClock(1));
+    const directory = fakeDirectory(['a-show.freeform-backup-0.freeform']);
+    const getFileHandle = vi.spyOn(directory, 'getFileHandle');
+    const removeEntry = vi.spyOn(directory, 'removeEntry');
+    directory.queryPermission = async () => 'denied';
+    const download = vi.fn();
+
+    const result = await service.writeBackup(makeDocument(), directory, download);
+
+    expect(result).toMatchObject({ ok: true, method: 'download' });
+    expect(download).toHaveBeenCalledTimes(1);
+    expect(getFileHandle).not.toHaveBeenCalled();
+    expect(removeEntry).not.toHaveBeenCalled();
+  });
+
+  it('rechecks again before retention and never deletes when a grant is revoked after writing', async () => {
+    const service = createBackupService(fakeClock(1));
+    const directory = fakeDirectory(['a-show.freeform-backup-0.freeform']);
+    const removeEntry = vi.spyOn(directory, 'removeEntry');
+    let checks = 0;
+    directory.queryPermission = async () => (++checks === 1 ? 'granted' : 'denied');
+
+    const result = await service.writeBackup(makeDocument(), directory, vi.fn());
+
+    expect(result).toMatchObject({ ok: true, method: 'filesystem' });
+    expect(checks).toBe(2);
+    expect(removeEntry).not.toHaveBeenCalled();
+  });
+
   it('retains only the last 10 owned backups for this document title, deleting the oldest first', async () => {
     const clock = fakeClock(0);
     const service = createBackupService(clock);

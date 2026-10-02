@@ -12,7 +12,7 @@ import { FreeformFileError, decodeDocument, type DecodeResult } from './freeform
 import { openPersistenceAdapter, type PersistenceAdapter } from './idb-adapter';
 import { createRecoveryService, type RecoveryCandidate, type RecoveryService } from './recovery-service';
 import { createVersionHistoryStore, type CheckpointRecord, type VersionHistoryStore } from './version-history-store';
-import { writeWorkingCopy, type WriteOutcome } from './working-copy-store';
+import { readWorkingCopy, writeWorkingCopy, type WriteOutcome } from './working-copy-store';
 
 export interface PersistenceUi {
   readonly store: CommandStore;
@@ -31,7 +31,8 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
   let ancestry: AncestryStore | undefined;
   let history: VersionHistoryStore | undefined;
   let recovery: RecoveryService | undefined;
-  let backup: BackupService | undefined;
+  // Explicit download backup remains useful when IndexedDB cannot start.
+  let backup: BackupService | undefined = createBackupService({ now: Date.now });
   let scheduler: AutosaveScheduler | undefined;
   let activeHandle: SaveFileHandle | undefined;
   let backupDestination: BackupDirectoryHandle | undefined;
@@ -46,6 +47,11 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
   let candidates: readonly RecoveryCandidate[] = [];
   let checkpoints: readonly CheckpointRecord[] = [];
   let reminder: BackupReminderState = { documentId: currentDocumentId };
+  // Command-store revisions reset in a fresh app session. Working-copy
+  // revisions are therefore independently monotonic per document ID.
+  const workingRevisions = new Map<string, number>();
+  const workingRevisionLoads = new Map<string, Promise<number>>();
+  let reminderTimer: ReturnType<typeof setInterval> | undefined;
   let disposed = false;
 
 
@@ -64,6 +70,7 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
   function start(): void {
     root.addEventListener('keydown', handleShortcut);
     renderSetup();
+    reminderTimer = setInterval(() => refreshControls(), 60_000);
     void initialisePersistence();
   }
 
@@ -71,6 +78,7 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     disposed = true;
     root.removeEventListener('keydown', handleShortcut);
     scheduler?.dispose();
+    if (reminderTimer) clearInterval(reminderTimer);
     adapter?.close();
   }
 
@@ -99,8 +107,8 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
       ancestry = createAncestryStore(adapter);
       history = createVersionHistoryStore(adapter, { now: Date.now });
       recovery = createRecoveryService(adapter, ancestry);
-      backup = createBackupService({ now: Date.now });
       scheduler = createAutosaveScheduler({ onFlush: () => { void flushWorkingCopy(); } });
+      reminder = loadReminder(currentDocumentId);
       await refreshCandidates();
     } catch (error) {
       if (disposed) return;
@@ -121,7 +129,18 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
       renderReadOnly();
       return;
     }
-    renderDotEditor(root, { store: observed, report, renderPersistenceControls });
+    renderDotEditor(root, {
+      store: observed,
+      report,
+      renderPersistenceControls,
+      beforeDestructiveOperation: checkpointExistingDestructiveOperation,
+    });
+  }
+
+  async function checkpointExistingDestructiveOperation(): Promise<string | undefined> {
+    if (!history) return 'Freeform could not make a safety backup before removing this performer. Your document is unchanged and still open.';
+    const checkpoint = await runWithDestructiveCheckpoint(observed, currentDocumentId, history, () => undefined);
+    return checkpoint.ok ? undefined : `Freeform couldn't make a safety backup before removing this performer (${checkpoint.message}). Your document is unchanged and still open.`;
   }
 
   function renderReadOnly(): void {
@@ -132,7 +151,7 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     const banner = element('section', 'persistence-read-only');
     banner.append(
       text('h1', 'Read-only: newer file format'),
-      text('p', `This show was saved with Freeform format ${state.formatVersion}, which is newer than this app understands. Nothing here can be edited or saved. You can export the original file exactly as it is.`),
+      text('p', `This show was saved with Freeform format ${state.formatVersion}, which is newer than this app understands. You can export the original file exactly as it is, but you can't view, edit, or save it in this app.`),
       button('Export original file', () => {
         browserDownload(state.bytes, 'freeform-original.freeform');
         setMessage('Downloaded freeform-original.freeform.');
@@ -169,10 +188,14 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     controls.append(saveControl, saveAs, open, newShow, historyButton);
 
     const chip = text('p', `persistence-state persistence-state--${localState}`, stateLabel());
+    chip.id = 'persistence-state';
     chip.title = stateTooltip();
     chip.setAttribute('aria-live', 'polite');
     section.append(text('h3', 'Document'), label(titleInput, 'Document name'), titleInput, controls, chip);
-    if (message) section.append(text('p', 'editor-message persistence-message', message));
+    const messageNode = text('p', 'editor-message persistence-message', message);
+    messageNode.id = 'persistence-message';
+    messageNode.hidden = message === '';
+    section.append(messageNode);
 
     const backupControls = element('div', 'persistence-controls__buttons');
     const chooseFolder = button('Choose backup folder…', () => { void chooseBackupFolder(); });
@@ -183,7 +206,10 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
       text('p', 'muted', 'Optional. Without a folder, Back Up Now downloads a file instead.'),
       backupControls,
     );
-    if (backupDestination) section.append(text('p', 'muted', 'Freeform keeps your 10 most recent backups for this show in this folder and deletes older ones with the same name automatically. If you rename the show, older backups under the old name are left alone — you\'ll need to clean those up yourself.'));
+    const retention = text('p', 'muted', 'Freeform keeps your 10 most recent backups for this show in this folder and deletes older ones with the same name automatically. If you rename the show, older backups under the old name are left alone — you\'ll need to clean those up yourself.');
+    retention.id = 'backup-retention-disclosure';
+    retention.hidden = !backupDestination;
+    section.append(retention);
     const shortcuts = element('details', 'persistence-shortcuts');
     shortcuts.append(text('summary', 'Keyboard shortcuts'));
     shortcuts.append(
@@ -192,15 +218,41 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
       text('p', 'Ctrl+Y or Ctrl+Shift+Z (Windows/Linux) · Cmd+Shift+Z (Mac): Redoes the last thing you undid. Like Undo, this doesn\'t apply while you\'re typing in a text field — your browser handles redo there.'),
     );
     section.append(shortcuts);
-    if (backup?.shouldPromptForBackup(reminder)) section.append(renderBackupPrompt());
-    if (candidates.length > 0) section.append(renderRecoveryPanel());
+    const dynamic = element('div');
+    dynamic.id = 'persistence-dynamic';
+    populateDynamicControls(dynamic);
+    section.append(dynamic);
     return section;
   }
 
   function refreshControls(): void {
     const old = root.querySelector<HTMLElement>('#persistence-controls');
-    if (old) old.replaceWith(renderPersistenceControls());
+    if (old) {
+      const titleInput = old.querySelector<HTMLInputElement>('#document-title');
+      if (titleInput && document.activeElement !== titleInput) titleInput.value = observed.getState().document.show.title;
+      const chip = old.querySelector<HTMLElement>('#persistence-state');
+      if (chip) {
+        chip.className = `persistence-state persistence-state--${localState}`;
+        chip.textContent = stateLabel();
+        chip.title = stateTooltip();
+      }
+      const messageNode = old.querySelector<HTMLElement>('#persistence-message');
+      if (messageNode) {
+        messageNode.textContent = message;
+        messageNode.hidden = message === '';
+      }
+      const retention = old.querySelector<HTMLElement>('#backup-retention-disclosure');
+      if (retention) retention.hidden = !backupDestination;
+      const dynamic = old.querySelector<HTMLElement>('#persistence-dynamic');
+      if (dynamic) populateDynamicControls(dynamic);
+    }
     else if (!readOnly && root.querySelector('.setup-wizard') === null) renderEditor();
+  }
+
+  function populateDynamicControls(container: HTMLElement): void {
+    container.replaceChildren();
+    if (backup?.shouldPromptForBackup(reminder)) container.append(renderBackupPrompt());
+    if (candidates.length > 0) container.append(renderRecoveryPanel());
   }
 
   function stateLabel(): string {
@@ -212,11 +264,11 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
   }
 
   function stateTooltip(): string {
-    if (readOnly) return 'This show was saved by a newer version of Freeform. You can look around and export the original file, but you can\'t edit or save changes.';
+    if (readOnly) return 'This show was saved by a newer version of Freeform. You can export the original file, but you can\'t view, edit, or save it in this app.';
     if (localState === 'saving') return 'Freeform is copying your latest edits to this browser\'s local storage. This isn\'t the same as saving your file.';
     if (localState === 'failed') return localFailure;
     if (savedRevision === observed.getState().revision) return 'Your document matches the last file you saved.';
-    return 'Press Ctrl+S (Cmd+S on Mac) to save your file. Freeform also keeps a local backup automatically.';
+    return 'Press Ctrl+S (Cmd+S on Mac) to save your file. Freeform also copies your edits to this browser\'s local storage within a couple of seconds, but that copy is lost if you clear browsing data, switch browser profiles, or close a private/incognito window — only Save keeps your file safe for certain.';
   }
 
   async function flushWorkingCopy(): Promise<void> {
@@ -224,9 +276,31 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     localState = 'saving';
     refreshControls();
     const state = observed.getState();
-    const outcome = await writeWorkingCopy(adapter, state.document.show.id, state.revision, state.document, Date.now());
+    const documentId = state.document.show.id;
+    // `DocumentState.revision` is session-local. Allocate a persisted revision
+    // after reading any existing record so a reload cannot make a real edit
+    // look stale merely because the new command store starts at revision 0.
+    const persistedRevision = await nextWorkingRevision(documentId, state.revision);
+    const outcome = await writeWorkingCopy(adapter, documentId, persistedRevision, state.document, Date.now());
     applyWorkingOutcome(outcome);
     await refreshCandidates();
+  }
+
+  async function nextWorkingRevision(documentId: string, sessionRevision: number): Promise<number> {
+    let loaded = workingRevisionLoads.get(documentId);
+    if (!loaded) {
+      loaded = (async () => {
+        const existing = adapter ? await readWorkingCopy(adapter, documentId) : undefined;
+        const revision = existing?.revision ?? 0;
+        workingRevisions.set(documentId, revision);
+        return revision;
+      })();
+      workingRevisionLoads.set(documentId, loaded);
+    }
+    const existingRevision = await loaded;
+    const next = Math.max(workingRevisions.get(documentId) ?? existingRevision, sessionRevision) + 1;
+    workingRevisions.set(documentId, next);
+    return next;
   }
 
   function applyWorkingOutcome(outcome: WriteOutcome): void {
@@ -247,10 +321,21 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
 
   async function save(operation: 'save' | 'save-as'): Promise<boolean> {
     if (readOnly) return false;
-    const document = observed.getState().document;
-    const result = await saveExplicitSnapshot(document, { operation, title: document.show.title, activeHandle }, undefined);
+    const snapshot = observed.getState();
+    const document = snapshot.document;
+    const documentId = document.show.id;
+    let result: Awaited<ReturnType<typeof saveExplicitSnapshot>>;
+    try {
+      result = await saveExplicitSnapshot(document, { operation, title: document.show.title, activeHandle }, undefined);
+    } catch (error) {
+      message = `Freeform can't save this show as it stands (${errorMessage(error)}). Fix the problem above, or undo the recent change, then try saving again. Your document is unchanged and still open.`;
+      refreshControls();
+      return false;
+    }
     if (!result.ok) {
-      message = result.reason === 'permission-denied'
+      message = result.reason === 'encode-failed'
+        ? `Freeform can't save this show as it stands (${result.message}). Fix the problem above, or undo the recent change, then try saving again. Your document is unchanged and still open.`
+        : result.reason === 'permission-denied'
         ? `Freeform couldn\'t get permission to save to ${freeformFilename(document.show.title)}. Use Save As to pick a file you can grant access to. Your document is unchanged and still open.`
         : result.reason === 'cancelled'
           ? 'Save cancelled.'
@@ -261,21 +346,38 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
       return false;
     }
     activeHandle = result.method === 'file-system-access' ? result.handle : undefined;
-    savedRevision = observed.getState().revision;
-    localState = 'saved';
+    // A save result belongs only to the snapshot that produced its bytes. An
+    // edit while a picker/write/close is pending must remain visibly dirty.
+    const snapshotStillCurrent = observed.getState().document.show.id === documentId
+      && observed.getState().revision === snapshot.revision;
+    if (snapshotStillCurrent) {
+      savedRevision = snapshot.revision;
+      localState = 'saved';
+    } else {
+      localState = 'dirty';
+    }
     message = result.method === 'file-system-access'
       ? 'Saved.'
       : operation === 'save'
         ? `Downloaded ${result.filename}. Your browser doesn't have permission to overwrite files directly, so each save creates a new download.`
         : `Downloaded ${result.filename} to your browser's downloads folder.`;
     try {
-      await history?.recordCheckpoint(currentDocumentId, document, 'explicit-save');
-      await ancestry?.setBaseline({ documentId: currentDocumentId, title: document.show.title, source: result.method === 'download' ? 'download' : 'file-system-access', timestamp: Date.now(), schemaVersion: document.formatVersion });
+      await history?.recordCheckpoint(documentId, document, 'explicit-save');
+      await ancestry?.setBaseline({ documentId, title: document.show.title, source: result.method === 'download' ? 'download' : 'file-system-access', timestamp: Date.now(), schemaVersion: document.formatVersion });
     } catch (error) {
       message = `Saved, but Freeform couldn't update local version history (${errorMessage(error)}).`;
     }
     await flushWorkingCopy();
-    return true;
+    // Compound Save-and-Open/New is allowed to proceed only when the exact
+    // snapshot it saved is still the current state. Otherwise it would turn a
+    // successful earlier write into consent to discard a later edit.
+    const saveStillRepresentsCurrent = observed.getState().document.show.id === documentId
+      && observed.getState().revision === snapshot.revision;
+    if (!saveStillRepresentsCurrent) {
+      localState = 'dirty';
+      refreshControls();
+    }
+    return saveStillRepresentsCurrent;
   }
 
   function chooseOpen(): void {
@@ -320,22 +422,22 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
   function requestNew(): void {
     if (isDirty()) {
       showSwitchDialog('new', async () => {
-        await replaceDocument(createEmptyDocument(), 'import');
+        if (!await replaceDocument(createEmptyDocument(), 'import')) return;
         savedRevision = undefined;
         renderSetup();
       });
       return;
     }
-    void replaceDocument(createEmptyDocument(), 'import').then(() => renderSetup());
+    void replaceDocument(createEmptyDocument(), 'import').then((replaced) => { if (replaced) renderSetup(); });
   }
 
-  async function replaceDocument(documentToOpen: FreeformDocument, source: 'import' | 'recovery', originalBytes?: Uint8Array): Promise<void> {
+  async function replaceDocument(documentToOpen: FreeformDocument, source: 'import' | 'recovery', originalBytes?: Uint8Array): Promise<boolean> {
     if (history && isDirty()) {
       const checkpoint = await runWithDestructiveCheckpoint(observed, currentDocumentId, history, () => observed.apply({ type: 'document.replace', document: documentToOpen }));
       if (!checkpoint.ok) {
         message = `Freeform couldn't make a safety backup before replacing the document (${checkpoint.message}). Your document is unchanged and still open.`;
         refreshControls();
-        return;
+        return false;
       }
     } else {
       observed.apply({ type: 'document.replace', document: documentToOpen });
@@ -344,7 +446,7 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     activeHandle = undefined;
     savedRevision = source === 'import' ? observed.getState().revision : undefined;
     localState = source === 'import' ? 'saved' : 'dirty';
-    reminder = { documentId: currentDocumentId };
+    reminder = loadReminder(currentDocumentId);
     if (source === 'import') {
       try {
         await history?.recordCheckpoint(currentDocumentId, documentToOpen, 'import');
@@ -357,17 +459,18 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     await flushWorkingCopy();
     message = source === 'import' ? `Opened ${documentToOpen.show.title}.` : `Opened ${documentToOpen.show.title} as a copy.`;
     renderEditor();
+    return true;
   }
 
   function isDirty(): boolean {
     return savedRevision !== observed.getState().revision;
   }
 
-  function showSwitchDialog(kind: 'open' | 'new', proceed: () => Promise<void>): void {
+  function showSwitchDialog(kind: 'open' | 'new' | 'recovery', proceed: () => Promise<void>): void {
     const title = observed.getState().document.show.title;
-    const noun = kind === 'open' ? 'Opening a different file' : 'Starting a new show';
-    const destructive = kind === 'open' ? 'Discard and Open' : 'Discard and Start New';
-    const saveThen = kind === 'open' ? 'Save and Open' : 'Save and Start New';
+    const noun = kind === 'new' ? 'Starting a new show' : kind === 'recovery' ? 'Opening this local backup' : 'Opening a different file';
+    const destructive = kind === 'new' ? 'Discard and Start New' : 'Discard and Open';
+    const saveThen = kind === 'new' ? 'Save and Start New' : 'Save and Open';
     const dialog = dialogElement('Save your changes first?', `“${title}” has unsaved changes. ${noun} without saving will lose them.`);
     dialog.append(button('Cancel', () => dialog.remove()));
     dialog.append(button(destructive, () => { dialog.remove(); void proceed(); }));
@@ -404,9 +507,20 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
   }
 
   async function openRecoveryCopy(candidate: RecoveryCandidate): Promise<void> {
+    if (isDirty()) {
+      showSwitchDialog('recovery', async () => openRecoveryCopyAfterSwitch(candidate));
+      return;
+    }
+    await openRecoveryCopyAfterSwitch(candidate);
+  }
+
+  async function openRecoveryCopyAfterSwitch(candidate: RecoveryCandidate): Promise<void> {
     const result = await recovery?.loadCandidate(candidate.documentId);
     if (!result || !result.ok) return recoveryFailure(result);
-    await replaceDocument(result.document, 'recovery');
+    // Recovery candidates remain source records. A separately identified copy
+    // prevents subsequent working-copy writes from overwriting the evidence
+    // that the user has not chosen to discard.
+    await replaceDocument(withFreshDocumentId(result.document), 'recovery');
   }
 
   function showRecoveryReplace(candidate: RecoveryCandidate): void {
@@ -472,7 +586,7 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
         try {
           const decoded = decodeDocument(checkpoint.bytes);
           if (decoded.kind !== 'editable') throw new Error('The selected version is read-only.');
-          await replaceDocument(decoded.document, 'recovery');
+          if (!await replaceDocument(decoded.document, 'recovery')) return;
           message = 'Restored the selected version. The original version remains in version history.';
           refreshControls();
         } catch (error) {
@@ -508,15 +622,24 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
 
   async function writeBackup(): Promise<void> {
     if (!backup) return;
-    const result = await backup.writeBackup(observed.getState().document, backupDestination, browserDownload);
+    let result: Awaited<ReturnType<BackupService['writeBackup']>>;
+    try {
+      result = await backup.writeBackup(observed.getState().document, backupDestination, browserDownload);
+    } catch (error) {
+      message = `Freeform can't back up this show as it stands (${errorMessage(error)}). Fix the problem above, or undo the recent change, then try backing up again.`;
+      refreshControls();
+      return;
+    }
     if (result.ok) {
       message = result.method === 'filesystem'
         ? `Backup saved as ${result.filename} in your chosen folder.`
         : `Backup downloaded as ${result.filename}. Choose a backup folder to skip the download step next time.`;
+    } else if (result.reason === 'encode-failed') {
+      message = `Freeform can't back up this show as it stands (${result.message}). Fix the problem above, or undo the recent change, then try backing up again.`;
     } else {
       message = `Freeform couldn't write a backup to your chosen folder (${result.message}). Try again, or back up using a download instead.`;
     }
-    reminder = { ...reminder, lastPromptedAt: Date.now() };
+    reminder = rememberPrompt({ ...reminder, lastPromptedAt: Date.now() });
     refreshControls();
   }
 
@@ -524,8 +647,10 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     const prompt = element('section', 'backup-prompt');
     prompt.append(
       text('h4', 'Back up your show?'),
-      text('p', 'It\'s been a day since your last backup prompt. Want to back up a copy now? Freeform only checks this while the app is open in this tab — it doesn\'t back up on a background schedule.'),
-      button('Remind me tomorrow', () => { reminder = { ...reminder, lastPromptedAt: Date.now() }; refreshControls(); }),
+      text('p', reminder.lastPromptedAt === undefined
+        ? 'You\'ve got unsaved edits. Want to back up a copy now? Freeform only checks this while the app is open in this tab — it doesn\'t back up on a background schedule.'
+        : 'It\'s been a day since your last backup prompt. Want to back up a copy now? Freeform only checks this while the app is open in this tab — it doesn\'t back up on a background schedule.'),
+      button('Remind me tomorrow', () => { reminder = rememberPrompt({ ...reminder, lastPromptedAt: Date.now() }); refreshControls(); }),
       button('Back up now', () => { void writeBackup(); }),
     );
     return prompt;
@@ -547,7 +672,7 @@ function fileErrorCopy(error: unknown): string {
     case 'WRONG_FORMAT': return 'This doesn\'t look like a Freeform show file. Freeform couldn\'t open it, and your currently open document hasn\'t changed.';
     case 'INVALID_VERSION': return 'Freeform couldn\'t tell what format version this file uses, so it can\'t be opened safely. Your currently open document hasn\'t changed.';
     case 'UNSUPPORTED_MAJOR': return `This file uses a format version older than Freeform can open directly (${message}). Your currently open document hasn\'t changed.`;
-    case 'UNSUPPORTED_MINOR': return `This file uses a newer Freeform format that this app version can\'t update automatically yet. Your currently open document hasn\'t changed. Open it with the Freeform version that created it, or check for an app update.`;
+    case 'UNSUPPORTED_MINOR': return `This file uses a newer Freeform format (${formatVersionFromError(message)}) that this app version can\'t update automatically yet. Your currently open document hasn\'t changed. Open it with the Freeform version that created it, or check for an app update.`;
     case 'SEMANTIC': return `This file's contents don't add up — for example a duplicate ID or a reference to something that doesn't exist (${message}). Freeform won't open it as-is. Your currently open document hasn't changed.`;
     default: return `This file has a problem Freeform can't fix automatically (${message}). Your currently open document hasn't changed.`;
   }
@@ -573,6 +698,38 @@ function knownDocumentIds(current: string): readonly string[] {
   }
 }
 
+const BACKUP_REMINDER_STORAGE_KEY = 'freeform-backup-reminders';
+function loadReminder(documentId: string): BackupReminderState {
+  try {
+    const values = JSON.parse(localStorage.getItem(BACKUP_REMINDER_STORAGE_KEY) ?? '{}') as Record<string, unknown>;
+    const lastPromptedAt = values[documentId];
+    return typeof lastPromptedAt === 'number' && Number.isFinite(lastPromptedAt)
+      ? { documentId, lastPromptedAt }
+      : { documentId };
+  } catch {
+    return { documentId };
+  }
+}
+
+function rememberPrompt(reminder: BackupReminderState): BackupReminderState {
+  try {
+    const values = JSON.parse(localStorage.getItem(BACKUP_REMINDER_STORAGE_KEY) ?? '{}') as Record<string, number>;
+    if (reminder.lastPromptedAt !== undefined) values[reminder.documentId] = reminder.lastPromptedAt;
+    localStorage.setItem(BACKUP_REMINDER_STORAGE_KEY, JSON.stringify(values));
+  } catch {
+    // A denied localStorage write must not prevent the backup action itself.
+  }
+  return reminder;
+}
+
+let recoveryCopySequence = 0;
+function withFreshDocumentId(document: FreeformDocument): FreeformDocument {
+  recoveryCopySequence += 1;
+  const random = globalThis.crypto?.randomUUID?.().replace(/-/g, '')
+    ?? `${Date.now().toString(36)}${recoveryCopySequence.toString(36)}`;
+  return { ...document, show: { ...document.show, id: `recovery-${random}`.slice(0, 64) } };
+}
+
 function isTextEditing(target: EventTarget | null): boolean {
   return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement
     || (target instanceof HTMLElement && target.isContentEditable);
@@ -588,6 +745,9 @@ function checkpointLabel(source: CheckpointRecord['source']): string {
 function formatTime(timestamp: number): string { return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(timestamp); }
 function formatBytes(bytes: number): string { return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.ceil(bytes / 1024))} KB`; }
 function errorMessage(error: unknown): string { return error instanceof Error ? error.message : String(error); }
+function formatVersionFromError(message: string): string {
+  return /(?:format version|Freeform)\s+([0-9]+\.[0-9]+\.[0-9]+)/i.exec(message)?.[1] ?? 'unknown';
+}
 function element<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string): HTMLElementTagNameMap[K] { const node = document.createElement(tag); if (className) node.className = className; return node; }
 function text<K extends keyof HTMLElementTagNameMap>(tag: K, classNameOrValue: string | undefined, value?: string): HTMLElementTagNameMap[K] {
   const className = value === undefined ? undefined : classNameOrValue;

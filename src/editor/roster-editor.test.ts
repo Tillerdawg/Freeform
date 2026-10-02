@@ -237,4 +237,24 @@ describe('post-wizard roster editor', () => {
     expect(store.getState().document.transitions).toEqual(before.document.transitions);
     expect(store.getUndoCommands()).toEqual([]);
   });
+
+  it('does not remove a multi-set performer when the persistence checkpoint rejects the operation', async () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    const store = createCommandStore(ftlDocument());
+    const before = store.getState();
+    window.confirm = () => true;
+    renderDotEditor(root, {
+      store,
+      report: supportedReport,
+      beforeDestructiveOperation: async () => 'Freeform could not make a safety backup before removing this performer.',
+    });
+
+    root.querySelector<HTMLButtonElement>('button[data-performer-id="b"]')!.click();
+    await Promise.resolve();
+
+    expect(store.getState()).toBe(before);
+    expect(store.getUndoCommands()).toEqual([]);
+    expect(root.textContent).toContain('could not make a safety backup before removing this performer');
+  });
 });
