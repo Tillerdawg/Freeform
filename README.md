@@ -4,7 +4,7 @@ Freeform is an open-source, browser-based drill-design project for marching band
 
 ## Status
 
-This repository contains the product specification, the file-format schema and fixtures, documentation-test tooling, and implemented application milestones M1 through M6 plus M9: an app shell and immutable document command store; canonical NFHS geometry and a DOM dot editor with coordinate inspection; set and float-transition playback tools; FTL path/order authoring with derived-end validation; deterministic advisory collision analysis per transition with auditable overrides in the in-memory document model; freehand, structured-label, arrow, reusable-symbol, and performer-note annotations on reorderable layers, each scoped to one set, one transition, or the whole show and rendered correctly for whichever editor context is active; and a first-run setup wizard paired with a post-wizard roster editor. The setup wizard collects the drill file name and a section roster (with rank-code prefix suggestions per instrument/equipment) and generates the first laid-out set from a sequence of performer-creation commands. The roster editor then lets the writer add a late arrival to an existing numeric rank-code prefix, remove a departed performer (with an FTL-impact disclosure when the removal would block an existing follow-the-leader transition), and assign display names to the whole roster as one atomic command. The collision disclosure samples each transition deterministically, reports warnings rather than prevention, keeps overridden warnings visible, and records a local actor, timestamp, reason, pair, and motion/threshold signature in that in-memory model. It does not yet contain persistence (save/open, autosave, version history, backup/recovery), PDF export, accessibility hardening, cross-browser hardening, or performance validation. Anyone starting implementation work should read `docs/freeform-mvp-spec-v1.md`, the implementation-ready MVP specification, and the decision records in `decisions/`, which capture the accepted product and technical choices behind it.
+This repository contains the product specification, the file-format schema and fixtures, documentation-test tooling, and implemented application milestones M1 through M7 plus M9: an app shell and immutable document command store; canonical NFHS geometry and a DOM dot editor with coordinate inspection; set and float-transition playback tools; FTL path/order authoring with derived-end validation; deterministic advisory collision analysis per transition with auditable overrides in the in-memory document model; freehand, structured-label, arrow, reusable-symbol, and performer-note annotations on reorderable layers, each scoped to one set, one transition, or the whole show and rendered correctly for whichever editor context is active; a first-run setup wizard paired with a post-wizard roster editor; and save/open, automatic local recovery, version history, and backup for the `.freeform` file format. The setup wizard collects the drill file name and a section roster (with rank-code prefix suggestions per instrument/equipment) and generates the first laid-out set from a sequence of performer-creation commands. The roster editor then lets the writer add a late arrival to an existing numeric rank-code prefix, remove a departed performer (with an FTL-impact disclosure when the removal would block an existing follow-the-leader transition), and assign display names to the whole roster as one atomic command. The collision disclosure samples each transition deterministically, reports warnings rather than prevention, keeps overridden warnings visible, and records a local actor, timestamp, reason, pair, and motion/threshold signature in that in-memory model. The **Save, open, and backup** section below explains exactly what Freeform protects automatically versus what still requires an explicit Save. PDF export (M8), accessibility hardening, cross-browser hardening, and performance validation are not yet implemented. Anyone starting implementation work should read `docs/freeform-mvp-spec-v1.md`, the implementation-ready MVP specification, and the decision records in `decisions/`, which capture the accepted product and technical choices behind it.
 
 ## What the MVP specifies
 
@@ -18,6 +18,8 @@ Per `docs/freeform-mvp-spec-v1.md`, the MVP is a static, local-first browser app
 - Freehand, structured, and symbol-based annotations scoped to a set, a transition, or the whole show.
 - Director-perspective and individual performer-packet PDF export (US Letter).
 - Undo/redo, keyboard access, accessibility (WCAG 2.2 AA), autosave, version history, and backup/recovery, all running offline after initial load.
+
+Save/open, autosave, version history, and backup/recovery are implemented (M7, see **Save, open, and backup** below). PDF export (M8) and the accessibility/cross-browser/performance hardening milestones remain future work.
 
 Deferred, not partially supported: native iOS/Android performer apps, custom/basketball surfaces, music synchronization, accounts/collaboration/cloud sync, automatic PDF note placement, NCAA/NFL field presets, and any Pyware/UDB import, export, or reverse engineering.
 
@@ -39,6 +41,10 @@ src/                                 Application source (TypeScript).
                                       that both the editor and timeline playback use to draw annotations
                                       (annotation-renderer.ts).
   geometry/                          Canonical NFHS 11-player field geometry and coordinate derivation.
+  persistence/                       Save/open (File System Access with a download fallback), the browser's
+                                      local-storage working copy and its 2s/30s autosave scheduler, version
+                                      history, startup recovery, backup, and the Save/Open/recovery/backup
+                                      controls (persistence-ui.ts) wired into the dot editor.
   platform/                          Browser feature detection.
   timeline/                          Set and float/FTL transition authoring, sampling, playback, status tools,
                                       sampled collision-warning analysis, and the read-only annotation context
@@ -123,7 +129,68 @@ The **Layer manager** creates, reorders, and deletes layers, each with its own v
 
 The **Annotation list** shows every mark with its kind, ID, scope, and layer, and lets you select one to load its exact values back into the form for editing, or delete it outright. All annotation, layer, and symbol commands go through the same undo/redo history as every other document edit.
 
-Annotations, layers, and symbols live only in the in-memory document model for this session. There is no save, open, autosave, or recovery yet (M7), so a reload loses this work exactly as it loses any other unsaved document change.
+Annotations, layers, and symbols go through the same command store as every other document edit, so they're included automatically in Save, in the local backup autosave keeps in this browser, and in version history — see **Save, open, and backup** below for what that does and doesn't protect against.
+
+## Save, open, and backup
+
+A show lives in a `.freeform` file (see **What the MVP specifies** above for the format). Freeform distinguishes three separate kinds of copy, and only one of them is a file you control:
+
+- **Your `.freeform` file** — created by Save, Save As, or Open. This is the only copy that survives closing the browser, switching computers, or sharing the show with someone else.
+- **The local backup** — an automatic copy Freeform keeps in this browser's own storage while you work. It exists so a crash or an accidental tab close doesn't lose your last few edits, but it is not a substitute for saving: it's cleared if you clear this browser's browsing data, switch browser profiles, or close a private/incognito window, and it never leaves this browser.
+- **Version history and backups** — see their own sections below.
+
+### Save, Save As, and the filename
+
+**Save** (`Ctrl+S`, or `Cmd+S` on Mac) and **Save As…** both write a `.freeform` file. If your browser supports the File System Access API and you've granted it permission to a file, Save writes directly to that file and the status chip reads **Saved**. If not, both controls fall back to a normal browser download; you don't have to choose which path runs; the confirmation message tells you ("Downloaded `<name>.freeform`…") when that happened, and after that, Save keeps producing a new download each time rather than silently overwriting the one in your downloads folder, because the browser hasn't granted Freeform permission to do that. Save As opens your browser's native save picker when one is available, so you can choose where the file goes.
+
+The filename comes from the show's title (the **Document name** field above the editor), lowercased where needed and with characters a filesystem can't use replaced by a dash; an untitled show saves as `untitled-show.freeform`.
+
+If a save can't complete — permission was denied, the write failed, or your show currently has a problem Freeform can't save as-is (for example, an unresolved follow-the-leader reference) — Freeform tells you so in a message under the title field and leaves your open document exactly as it was. It never reports success for a save that didn't happen.
+
+### The status chip
+
+Next to the title field, one label always shows the current save state:
+
+- **Saved** — this document matches the file you last saved or opened.
+- **Unsaved changes** — you have edits since the last save. Freeform is also copying them to the local backup, normally within a couple of seconds, but only Save protects them for certain.
+- **Saving local backup…** — a brief, transient state while that local-backup copy is being written.
+- **Local backup failed** — the local backup couldn't be written (browser storage is full, unavailable, such as in a private window, or hit an unexpected storage error). Your document is still open and editable; save your file now rather than relying on autosave until this clears.
+- **Read-only — newer file format** — see **Opening a file saved by a newer version** below.
+
+### Opening a file, and what happens to unsaved work
+
+**Open…** reads a `.freeform` file you choose. If your current document has unsaved changes, Freeform asks first: **Cancel**, **Discard and Open**, or **Save and Open** — it never discards unsaved work without asking. The same three-way prompt appears before **New show** and before opening a recovered local backup as a copy (below).
+
+If the file can't be opened, Freeform says exactly why and leaves your current document untouched: the file isn't valid Freeform JSON, isn't a Freeform show file at all, uses a format version Freeform can't read, or has a structural or logical problem (such as a duplicate ID) that Freeform won't silently repair.
+
+### Opening a file saved by a newer version
+
+If a `.freeform` file was saved by a newer version of Freeform than the one you're running, Freeform opens it read-only: a banner explains that the file's format is newer than this app understands, and offers **Export original file**, which downloads the file's exact original bytes unchanged. There is no way to view or edit its contents in this app, and no inspector for looking inside it; the banner only confirms you can get the bytes back out safely.
+
+### Recovering unsaved work after a crash or closed tab
+
+Freeform checks on startup whether this browser holds a local backup newer than the file it belongs to. When it finds one, a **Recover unsaved work?** panel lists it with its name, timestamp, and format version, and offers four choices per entry:
+
+- **Open as a copy** — opens the local backup as a separate document (a new, independent copy), so you can look it over without touching the original. Follows the same unsaved-work prompt as Open if you currently have other changes pending.
+- **Replace current with this** — asks you to confirm, then replaces your current document with the local backup. This can't be undone.
+- **Export backup** — downloads the local backup as a `.freeform` file without changing anything else.
+- **Discard** — deletes the local backup. Your actual file, if you have one, is untouched.
+
+A local backup that's gone corrupt in browser storage is reported, not silently loaded; you can still discard it to clear the prompt.
+
+### Version history
+
+Every explicit save, every file you open, and a safety checkpoint taken just before any destructive replacement (opening a different file, starting a new show, or restoring an older version) all add an entry to **Version history**, reachable from its own button in the controls. Each entry shows when it was taken and its size; **Restore this version** makes it your current working document. Restoring doesn't delete the version you're moving away from, so if you change your mind you can restore it right back; but anything in your current document that isn't already saved or backed up is lost in the meantime. If Freeform can't safely take that one last snapshot of your current document first (for example, local storage is unavailable), the restore doesn't happen at all and says so, rather than replacing your document without a way back.
+
+Freeform keeps a document's version history only as long as it's useful: a version is kept if it's both among the 50 most recent for that document and no older than 30 days. A version can age out at 30 days even if it's one of the newest 50, and a version can be pruned by the 50-entry limit even if it's less than 30 days old — the two limits both have to be satisfied, not just one.
+
+### Backup
+
+Backup is separate from both the local-backup autosave and version history: it's a `.freeform` file you create on purpose, meant to leave this browser. **Back up now** writes one immediately. **Choose backup folder…** lets you grant Freeform write access to a folder (where your browser supports it) so backups land there automatically; without a chosen folder, Back Up Now downloads a file instead, exactly like Save's fallback.
+
+When a folder is chosen, Freeform keeps your 10 most recent backups for this show in that folder and deletes older ones with the same name automatically. If you rename the show, older backups filed under the previous name are left alone; you'll need to clean those up yourself.
+
+Freeform also periodically asks if you'd like to back up: once the first time you have unsaved edits in a session, and then roughly once a day after that while you keep working, with a **Remind me tomorrow** option. This check only happens while the app is open in this tab; Freeform never backs up on a hidden schedule in the background. Backup stays available by download even if the local-backup storage in this browser has a problem — the two are independent, so a local-backup failure never takes away your ability to make an explicit backup.
 
 ## Running the tests
 
@@ -177,7 +244,8 @@ Open `http://127.0.0.1:5173/` to confirm the app loads, then stop the dev server
 - **Windows:** GitHub Actions CI has previously run the full automated workflow natively on `windows-latest`. [Run 36722149551](https://github.com/Tillerdawg/Freeform/actions/runs/36722149551) is historical evidence from commit `ce5d083a261a88ececa12f6d31dac75412a47cbb`: its `windows-latest / Node 22.x / Python 3.13` job installed both dependency sets, ran `npm test`, built the application, and ran `npm run test:docs`. It verifies those automated install, test, build, and documentation-validation commands on a native Windows runner for that commit; it is not a claim about whichever commit is currently `main`. It does not by itself demonstrate manual interactive or visual behavior on a physical end-user Windows machine.
 - Intel (x86_64) Macs have not been separately verified; no architecture-specific code exists in this repository, so the same commands are expected to work, but this has not been tested on Intel hardware.
 - No packaged desktop build or installer exists; "running the app" means the Vite dev server (development) or serving the static `dist/` bundle from any static file host (production-equivalent), not a native executable.
-- The specification's ordered implementation milestones (M1 through M12) are listed in `docs/freeform-mvp-spec-v1.md` §8. M1-M6 and M9 are implemented and covered by the commands above: M1 provides the app shell, feature detection, and immutable command store; M2 provides canonical NFHS geometry, the dot editor, and coordinate derivation; M3 provides ordered sets, float transitions, step-size status, pair-distance calculation, and keyboard playback; M4 provides FTL path/order authoring and derived-end validation; M5 provides deterministic advisory collision warnings at the required sample grid (including FTL path-corner samples), adaptive <=720-FU movement sampling, an editable document threshold, and auditable local overrides that never suppress a computed warning; M6 provides the annotation, layer, and symbol editor described above, including set/transition/show scope filtering, per-mark editor/print/performer-packet visibility flags, locked-layer protection, and performer-note association; M9 provides the first-run setup wizard and the post-wizard roster editor. M7, M8, and M10-M12 remain future work; in particular, persistence (save/open, autosave, version history, backup/recovery), PDF export, accessibility hardening, cross-browser hardening, and performance validation are not implemented. Collision analysis is sampled advisory detection, not continuous collision prevention; an invalid FTL transition or a transition exceeding the documented 100,000-sample bound reports an actionable analysis failure rather than a safe result.
+- The specification's ordered implementation milestones (M1 through M12) are listed in `docs/freeform-mvp-spec-v1.md` §8. M1-M7 and M9 are implemented and covered by the commands above: M1 provides the app shell, feature detection, and immutable command store; M2 provides canonical NFHS geometry, the dot editor, and coordinate derivation; M3 provides ordered sets, float transitions, step-size status, pair-distance calculation, and keyboard playback; M4 provides FTL path/order authoring and derived-end validation; M5 provides deterministic advisory collision warnings at the required sample grid (including FTL path-corner samples), adaptive <=720-FU movement sampling, an editable document threshold, and auditable local overrides that never suppress a computed warning; M6 provides the annotation, layer, and symbol editor described above, including set/transition/show scope filtering, per-mark editor/print/performer-packet visibility flags, locked-layer protection, and performer-note association; M7 provides save/open with the File System Access API and a download fallback, a local-storage working copy with a 2s-idle/30s-deadline autosave scheduler, startup recovery of unsaved local copies, version history with 50-entry/30-day retention, user-triggered backup with a 10-file retention policy and a periodic reminder, and read-only handling of files saved by a newer format version; M9 provides the first-run setup wizard and the post-wizard roster editor. M8 and M10-M12 remain future work; in particular, PDF export, accessibility hardening, cross-browser hardening, and performance validation are not implemented. Collision analysis is sampled advisory detection, not continuous collision prevention; an invalid FTL transition or a transition exceeding the documented 100,000-sample bound reports an actionable analysis failure rather than a safe result.
+- **Persistence verification scope.** M7's services (autosave timing, version-history retention, recovery, backup) were independently reviewed and are covered by the Vitest suite above using `fake-indexeddb` and fake timers, plus real-browser exercise of the save/open/recovery/backup UI flows (`persistence-ui.ts`), including the download fallback and injected permission/write failures. The native OS file/folder picker (an actual File System Access grant from a real user gesture) has not been exercised; only the code paths around a granted or simulated handle have been. Manual screen-reader validation of the persistence status chip and dialogs has not been performed; only DOM live-region mutations have been measured.
 
 ## License
 
