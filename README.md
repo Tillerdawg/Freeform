@@ -129,21 +129,21 @@ The **Layer manager** creates, reorders, and deletes layers, each with its own v
 
 The **Annotation list** shows every mark with its kind, ID, scope, and layer, and lets you select one to load its exact values back into the form for editing, or delete it outright. All annotation, layer, and symbol commands go through the same undo/redo history as every other document edit.
 
-Annotations, layers, and symbols go through the same command store as every other document edit, so they're included automatically in Save, in the local backup autosave keeps in this browser, and in version history — see **Save, open, and backup** below for what that does and doesn't protect against.
+Annotations, layers, and symbols go through the same command store as every other document edit, so they're included automatically in Save, in the local working copy Freeform keeps in this browser, and in version history — see **Save, open, and backup** below for what that does and doesn't protect against.
 
 ## Save, open, and backup
 
-A show lives in a `.freeform` file (see **What the MVP specifies** above for the format). Freeform distinguishes three separate kinds of copy, and only one of them is a file you control:
+A show lives in a `.freeform` file (see **What the MVP specifies** above for the format). Freeform distinguishes three kinds of copy:
 
-- **Your `.freeform` file** — created by Save, Save As, or Open. This is the only copy that survives closing the browser, switching computers, or sharing the show with someone else.
-- **The local backup** — an automatic copy Freeform keeps in this browser's own storage while you work. It exists so a crash or an accidental tab close doesn't lose your last few edits, but it is not a substitute for saving: it's cleared if you clear this browser's browsing data, switch browser profiles, or close a private/incognito window, and it never leaves this browser.
-- **Version history and backups** — see their own sections below.
+- **Your `.freeform` file** — written by Save or Save As, and read back by Open. This is the copy you control directly: you choose where it lives, and it's the one you'd move to another computer or send to someone else.
+- **The local working copy** — an automatic copy Freeform keeps in this browser's own storage (tied to this browser profile and this site) while you work. It survives an ordinary browser restart; it's exactly what startup recovery checks for and offers to restore (see **Recovering unsaved work** below). It is not a durable backup, though: it's gone if you clear this browser's browsing data, this browser evicts its own storage under pressure, or you close a private/incognito window, and it never leaves this browser. Opening the show from a different browser or OS profile won't find it either — the data isn't deleted, it's just invisible from anywhere but the profile that wrote it.
+- **Version history and backups** — see their own sections below. Explicit backups are also files you control, written on purpose to a destination you choose.
 
 ### Save, Save As, and the filename
 
 **Save** (`Ctrl+S`, or `Cmd+S` on Mac) and **Save As…** both write a `.freeform` file. If your browser supports the File System Access API and you've granted it permission to a file, Save writes directly to that file and the status chip reads **Saved**. If not, both controls fall back to a normal browser download; you don't have to choose which path runs; the confirmation message tells you ("Downloaded `<name>.freeform`…") when that happened, and after that, Save keeps producing a new download each time rather than silently overwriting the one in your downloads folder, because the browser hasn't granted Freeform permission to do that. Save As opens your browser's native save picker when one is available, so you can choose where the file goes.
 
-The filename comes from the show's title (the **Document name** field above the editor), lowercased where needed and with characters a filesystem can't use replaced by a dash; an untitled show saves as `untitled-show.freeform`.
+The filename comes from the show's title (the **Document name** field above the editor), case preserved, with characters a filesystem can't use replaced by a dash; an untitled show saves as `untitled-show.freeform`. For example, a show titled "My Show: Finale" saves as `My Show- Finale.freeform`.
 
 If a save can't complete — permission was denied, the write failed, or your show currently has a problem Freeform can't save as-is (for example, an unresolved follow-the-leader reference) — Freeform tells you so in a message under the title field and leaves your open document exactly as it was. It never reports success for a save that didn't happen.
 
@@ -163,9 +163,12 @@ Next to the title field, one label always shows the current save state:
 
 If the file can't be opened, Freeform says exactly why and leaves your current document untouched: the file isn't valid Freeform JSON, isn't a Freeform show file at all, uses a format version Freeform can't read, or has a structural or logical problem (such as a duplicate ID) that Freeform won't silently repair.
 
-### Opening a file saved by a newer version
+### File format versions you can't open normally
 
-If a `.freeform` file was saved by a newer version of Freeform than the one you're running, Freeform opens it read-only: a banner explains that the file's format is newer than this app understands, and offers **Export original file**, which downloads the file's exact original bytes unchanged. There is no way to view or edit its contents in this app, and no inspector for looking inside it; the banner only confirms you can get the bytes back out safely.
+The `.freeform` file format has its own version number, separate from the app version. Two situations stop a normal open, and Freeform tells you which one applies:
+
+- **A newer major format version** (for example, a 2.x file in an app that only knows format 1.x) opens read-only. A banner explains that the file's format is newer than this app understands and offers **Export original file**, which downloads the file's exact original bytes unchanged. There's no way to view or edit its contents in this app and no inspector for looking inside it; the banner only confirms you can get the bytes back out safely.
+- **Any other format version this app doesn't recognize** (a newer minor or patch version, or an older major version with no defined migration) is rejected outright: Freeform tells you the format version it found and that it has no defined upgrade path, and leaves your current document untouched. There's no automatic migration for these — open the file with the Freeform version that created it, or check for an app update.
 
 ### Recovering unsaved work after a crash or closed tab
 
@@ -180,7 +183,7 @@ A local backup that's gone corrupt in browser storage is reported, not silently 
 
 ### Version history
 
-Every explicit save, every file you open, and a safety checkpoint taken just before any destructive replacement (opening a different file, starting a new show, or restoring an older version) all add an entry to **Version history**, reachable from its own button in the controls. Each entry shows when it was taken and its size; **Restore this version** makes it your current working document. Restoring doesn't delete the version you're moving away from, so if you change your mind you can restore it right back; but anything in your current document that isn't already saved or backed up is lost in the meantime. If Freeform can't safely take that one last snapshot of your current document first (for example, local storage is unavailable), the restore doesn't happen at all and says so, rather than replacing your document without a way back.
+Every explicit save, every file you open, and (local storage permitting) a safety checkpoint taken just before any destructive replacement of a dirty document (opening a different file, starting a new show, or restoring an older version) add an entry to **Version history**, reachable from its own button in the controls. Each entry shows when it was taken and its size; **Restore this version** makes it your current working document. Restoring doesn't delete the version you're moving away from, so if you change your mind you can restore it right back. A save itself always goes through even if recording its history entry fails (Freeform tells you so rather than pretending the history is complete); opening a newer-major-format file read-only doesn't get a history entry at all, since there's nothing editable to check in. If Freeform can't safely take that one last snapshot before a destructive replacement (for example, local storage is unavailable), the replacement doesn't happen at all and says so, rather than proceeding without a way back. When the checkpoint does succeed, anything you hadn't already saved is replaced in your current editor but recoverable from version history, subject to the retention limits below — it isn't simply lost.
 
 Freeform keeps a document's version history only as long as it's useful: a version is kept if it's both among the 50 most recent for that document and no older than 30 days. A version can age out at 30 days even if it's one of the newest 50, and a version can be pruned by the 50-entry limit even if it's less than 30 days old — the two limits both have to be satisfied, not just one.
 
@@ -190,7 +193,7 @@ Backup is separate from both the local-backup autosave and version history: it's
 
 When a folder is chosen, Freeform keeps your 10 most recent backups for this show in that folder and deletes older ones with the same name automatically. If you rename the show, older backups filed under the previous name are left alone; you'll need to clean those up yourself.
 
-Freeform also periodically asks if you'd like to back up: once the first time you have unsaved edits in a session, and then roughly once a day after that while you keep working, with a **Remind me tomorrow** option. This check only happens while the app is open in this tab; Freeform never backs up on a hidden schedule in the background. Backup stays available by download even if the local-backup storage in this browser has a problem — the two are independent, so a local-backup failure never takes away your ability to make an explicit backup.
+Freeform also periodically asks if you'd like to back up: the first time you have unsaved edits with no recorded prompt for this show, and then again no sooner than 24 hours after the last time you dismissed or acted on that prompt, with a **Remind me tomorrow** option. That 24-hour clock is tied to the show, not to the browser session, so reopening the show the same day it last prompted you won't trigger another prompt; this check only happens while the app is open in this tab, and Freeform never backs up on a hidden schedule in the background. Choosing a backup folder only affects where a user-triggered backup (the reminder's **Back up now**, or the toolbar's) writes to — it doesn't start an automatic, scheduled backup on its own. Backup stays available by download even if the local working copy's storage in this browser has a problem — the two are independent, so a local-storage failure never takes away your ability to make an explicit backup.
 
 ## Running the tests
 
