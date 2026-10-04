@@ -1,0 +1,27 @@
+{
+  "changedSincePriorReview": [
+    "src/document/export-snapshot-validation.ts",
+    "src/pdf/pdf-export.test.ts",
+    "src/pdf/pdf-export.ts"
+  ],
+  "newSources": [
+    "src/document/uri.ts",
+    "src/persistence/freeform-file.ts"
+  ],
+  "pureTransitiveGraph": [
+    "src/document/annotations.ts",
+    "src/document/export-snapshot-validation.ts",
+    "src/document/rfc3339.ts",
+    "src/document/sets.ts",
+    "src/document/types.ts",
+    "src/document/uri.ts",
+    "src/geometry/nfhs.ts",
+    "src/pdf/assets.ts",
+    "src/pdf/contracts.ts",
+    "src/pdf/download.ts",
+    "src/pdf/geometry.ts",
+    "src/pdf/pdf-export.ts",
+    "src/timeline/ftl.ts"
+  ],
+  "violations": []
+}

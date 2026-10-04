@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "m8.2",
+  "contentFingerprint": "8916b42ede778d605c8276fd0cec6d41ca1311349b694a6b385878b30d58d4db",
+  "request": {
+    "kind": "director",
+    "scope": {
+      "kind": "inclusive-set-range",
+      "firstSetId": "set-1",
+      "lastSetId": "set-2"
+    },
+    "transitionFrames": [
+      {
+        "transitionId": "move-1",
+        "counts": [
+          16,
+          0,
+          8
+        ]
+      }
+    ]
+  },
+  "pages": [
+    {
+      "kind": "director",
+      "width": 792,
+      "height": 612,
+      "context": {
+        "kind": "static-set",
+        "setId": "set-1"
+      },
+      "setIds": [
+        "set-1"
+      ],
+      "annotationIds": []
+    },
+    {
+      "kind": "director",
+      "width": 792,
+      "height": 612,
+      "context": {
+        "kind": "static-set",
+        "setId": "set-2"
+      },
+      "setIds": [
+        "set-2"
+      ],
+      "annotationIds": []
+    },
+    {
+      "kind": "director",
+      "width": 792,
+      "height": 612,
+      "context": {
+        "kind": "active-transition",
+        "transitionId": "move-1",
+        "count": 0
+      },
+      "setIds": [],
+      "annotationIds": []
+    },
+    {
+      "kind": "director",
+      "width": 792,
+      "height": 612,
+      "context": {
+        "kind": "active-transition",
+        "transitionId": "move-1",
+        "count": 8
+      },
+      "setIds": [],
+      "annotationIds": []
+    },
+    {
+      "kind": "director",
+      "width": 792,
+      "height": 612,
+      "context": {
+        "kind": "active-transition",
+        "transitionId": "move-1",
+        "count": 16
+      },
+      "setIds": [],
+      "annotationIds": []
+    }
+  ],
+  "language": "en-US",
+  "fontAssetHashes": [
+    "18e2e5b23a9bc5e8e636d6c7984b8ac6635aefc1c497ed1c5012f3c637761b91",
+    "e199c2ac3c8bd6c99ec9e44cc3363128d86c94eed54d2f22d5b6ef9ca16bc484",
+    "bfa22d39f50efa1f2b437d4e9ce4f42c6d56a1d69b5f6a03959657a3f764bdb9"
+  ],
+  "warnings": []
+}

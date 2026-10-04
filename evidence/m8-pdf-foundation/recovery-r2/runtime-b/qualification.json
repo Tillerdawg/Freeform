@@ -1,0 +1,28 @@
+{
+  "writer": "pdf-lib@1.17.1 + @pdf-lib/fontkit@1.1.1",
+  "extractor": "pdfjs-dist@5.4.149",
+  "renderer": "10.08.0",
+  "sha256": "900c7918a5ff53e7df4a0b9dc2010080cac3794d3916c491c533465cc651b4ad",
+  "sameRuntimeByteEquality": true,
+  "pageCount": 5,
+  "pageSizePoints": {
+    "width": 792,
+    "height": 612
+  },
+  "language": "en-US",
+  "extractedContains": [
+    [
+      "Café",
+      true
+    ],
+    [
+      "Русский",
+      true
+    ],
+    [
+      "😀",
+      true
+    ]
+  ],
+  "tagging": "Unresolved: pdf-lib output has no authored PDF structure tree; no tagged/fully accessible claim."
+}

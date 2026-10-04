@@ -1,0 +1,70 @@
+{
+  "uriCases": [
+    {
+      "uri": "https: bad uri",
+      "valid": false,
+      "result": "pdfExport.error.documentInvalid.schema"
+    },
+    {
+      "uri": "https://example.com/%ZZ",
+      "valid": false,
+      "result": "pdfExport.error.documentInvalid.schema"
+    },
+    {
+      "uri": "https://[broken",
+      "valid": false,
+      "result": "pdfExport.error.documentInvalid.schema"
+    },
+    {
+      "uri": "relative/path",
+      "valid": false,
+      "result": "pdfExport.error.documentInvalid.schema"
+    },
+    {
+      "uri": "https://example.com/%20?q=a#x",
+      "valid": true,
+      "result": "exported"
+    },
+    {
+      "uri": "urn:freeform:example",
+      "valid": true,
+      "result": "exported"
+    },
+    {
+      "uri": "mailto:user@example.com",
+      "valid": true,
+      "result": "exported"
+    },
+    {
+      "uri": "https://[2001:db8::1]/x",
+      "valid": true,
+      "result": "exported"
+    }
+  ],
+  "portraitMediaBoxes": [
+    {
+      "width": 612,
+      "height": 792
+    },
+    {
+      "width": 612,
+      "height": 792
+    },
+    {
+      "width": 612,
+      "height": 792
+    },
+    {
+      "width": 612,
+      "height": 792
+    },
+    {
+      "width": 612,
+      "height": 792
+    }
+  ],
+  "transitionlessPacketSetRetention": true,
+  "performerDocumentOrder": true,
+  "singleSetRangePageCount": 1,
+  "bundledAssetLoaderExercised": true
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "command": "npm test -- --run src/pdf/pdf-export.test.ts",
+    "exit": 0
+  },
+  {
+    "command": "npm test",
+    "exit": 0
+  },
+  {
+    "command": "npm run test:docs",
+    "exit": 0
+  },
+  {
+    "command": "npm run build",
+    "exit": 0
+  },
+  {
+    "command": "git diff --check",
+    "exit": 0
+  }
+]

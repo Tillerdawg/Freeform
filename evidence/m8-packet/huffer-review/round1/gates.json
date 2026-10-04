@@ -1,0 +1,6 @@
+{
+  "npm test": 0,
+  "npm run test:docs": 0,
+  "npm run build": 0,
+  "git diff --check": 0
+}

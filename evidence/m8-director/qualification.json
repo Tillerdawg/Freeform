@@ -1,0 +1,113 @@
+{
+  "input": "evidence/m8-director/same-runtime-a.pdf",
+  "writer": "pdf-lib@1.17.1 + @pdf-lib/fontkit@1.1.1",
+  "extractorAndCanvasRenderer": "pdfjs-dist@5.4.149 + @napi-rs/canvas@0.1.100",
+  "ghostscriptRenderer": "10.08.0",
+  "sha256": "bf4a9509459e3422ab79328c642e173d77af475dc6b71f82aafddca36b65e22c",
+  "pageCount": 5,
+  "pageSizePoints": [
+    {
+      "width": 792,
+      "height": 612
+    },
+    {
+      "width": 792,
+      "height": 612
+    },
+    {
+      "width": 792,
+      "height": 612
+    },
+    {
+      "width": 792,
+      "height": 612
+    },
+    {
+      "width": 792,
+      "height": 612
+    }
+  ],
+  "language": "en-US",
+  "fixedMetadata": {
+    "Creator": "Freeform",
+    "Producer": "Freeform PDF export",
+    "CreationDate": "D:20000101000000Z",
+    "ModDate": "D:20000101000000Z"
+  },
+  "byteDeterminism": {
+    "hashes": {
+      "same-runtime-a.pdf": "bf4a9509459e3422ab79328c642e173d77af475dc6b71f82aafddca36b65e22c",
+      "same-runtime-b.pdf": "bf4a9509459e3422ab79328c642e173d77af475dc6b71f82aafddca36b65e22c",
+      "fresh-runtime-a.pdf": "bf4a9509459e3422ab79328c642e173d77af475dc6b71f82aafddca36b65e22c",
+      "fresh-runtime-b.pdf": "bf4a9509459e3422ab79328c642e173d77af475dc6b71f82aafddca36b65e22c"
+    },
+    "sameRuntimeIdentical": true,
+    "freshRuntimeIdentical": true,
+    "allFourIdentical": true
+  },
+  "extractedPageOne": "Café Русский é 😀Set 1 — starts at count 0Static setFreeform — Director pagesSet 1 — starts at count 0Page 1 of 510 1020 2030 3040 4050A",
+  "extractedContains": [
+    [
+      "Café",
+      true
+    ],
+    [
+      "é",
+      true
+    ],
+    [
+      "Русский",
+      true
+    ],
+    [
+      "😀",
+      true
+    ]
+  ],
+  "renderedGlyphEvidence": {
+    "ghostscript": "page-1.png through page-N.png",
+    "pdfjsCanvas": "pdfjs-canvas-page-1.png through pdfjs-canvas-page-N.png",
+    "manualReviewRequired": "Inspect retained renderer outputs for visible glyphs; extraction alone is not sufficient."
+  },
+  "fontFiles": [
+    {
+      "path": "src/pdf/assets/noto-emoji-400.ttf",
+      "bytes": 885084,
+      "sha256": "bfa22d39f50efa1f2b437d4e9ce4f42c6d56a1d69b5f6a03959657a3f764bdb9"
+    },
+    {
+      "path": "src/pdf/assets/noto-emoji-400.woff",
+      "bytes": 568256,
+      "sha256": "61c7949ebb9d401f397826415e64525f60298bf2a9c469f9720aa17817877331"
+    },
+    {
+      "path": "src/pdf/assets/noto-sans-cyrillic-400.woff",
+      "bytes": 8992,
+      "sha256": "e199c2ac3c8bd6c99ec9e44cc3363128d86c94eed54d2f22d5b6ef9ca16bc484"
+    },
+    {
+      "path": "src/pdf/assets/noto-sans-latin-400.woff",
+      "bytes": 16688,
+      "sha256": "18e2e5b23a9bc5e8e636d6c7984b8ac6635aefc1c497ed1c5012f3c637761b91"
+    }
+  ],
+  "bundleMetrics": {
+    "builtMainJs": [
+      {
+        "path": "dist/assets/index-D-Nf8h1I.js",
+        "bytes": 147624
+      }
+    ],
+    "bundledPdfExportChunkPresent": false,
+    "qualificationFontAssetBytes": 1479020,
+    "note": "M8.1 does not wire UI-triggered dynamic import; production lazy chunk integration is intentionally deferred to M8.4. These are measured current-build and asset metrics, not a claim that export code is reachable in the application."
+  },
+  "tagging": {
+    "status": "unresolved-capability-blocker",
+    "reason": "No PDF/UA tagging checker is installed in this workspace, and M8.1 prohibits global/system installs. No tagged or fully accessible claim is made.",
+    "rawPdfStructureMarkers": {
+      "hasStructTreeRoot": false,
+      "hasMarkInfo": false
+    }
+  }
+}

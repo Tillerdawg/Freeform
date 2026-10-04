@@ -1,0 +1,41 @@
+{
+  "task": "t_fcfb6173",
+  "head": "3df1916315c43e7b4617bd037b62f76a3d0edc9a",
+  "dirty_tree_is_not_head": true,
+  "git_diff_check_exit": 0,
+  "scope": "decisions/m8-pdf-export-copy.md only; no src/ edits; no commit/push",
+  "parent_review_verified": {
+    "task": "t_701b6f5a",
+    "verdict": "PASS",
+    "verdict_file": "evidence/m8-packet/huffer-review/round2/verdict.txt",
+    "identity_file": "evidence/m8-packet/huffer-review/round2/identity-and-gates.json"
+  },
+  "renderer_source_hashes_reverified_this_session": {
+    "src/pdf/contracts.ts": "b9ff347908c6f8fce5a8e1721afa6e62be6727851a1474c8139e3451d364fd1f",
+    "src/pdf/geometry.ts": "d54e27669c01448b4cfa4db0b0ea1dc9b0ba6b558c163dfc1c8f16afb1365802",
+    "src/pdf/pdf-export.test.ts": "977ebbde9f3662b296f3579f1efe8a26db2039815eadf74da1818f5e6850d51a",
+    "src/pdf/pdf-export.ts": "4100af51eec74c9268410322909942c6b27e641db9d31e1603639d18e181010f",
+    "match_status": "byte-identical to identity-and-gates.json; shasum -a 256 run live against each path in this session"
+  },
+  "copy_doc_after_edit_sha256": "cdfc63e37785e59081d02a85b1dd6bd847ab1ee2d70a2aeff7dc90b5d4d75fa2",
+  "copy_doc_path": "decisions/m8-pdf-export-copy.md",
+  "gate_exit_codes": {
+    "npm run test:docs": 0,
+    "git diff --check": 0
+  },
+  "gate_note": "npm run test/npm run build not rerun: this task edits no src/ file (verified via git status diff above); same exemption basis the round-5 document already recorded, now re-checked this session rather than merely restated.",
+  "changes_made": [
+    "Section 4.2 heading and body extended from director-only to director-and-performer-packet export; added pdfExport.warning.detailRow.packet.static/.packet.transition keys",
+    "Documented why performer-packet overlap-warning rows omit <displayPage>: pageIndex (flat cross-performer position, pdf-export.ts:381) vs localIndex+1 (per-performer printed page restarting at 1, pdf-export.ts:450-453) are not the same number",
+    "Documented that packet transition entries report the transition's authored counts total (pdf-export.ts:259-265), not a director-sampled frame",
+    "Removed the unbound <context> placeholder from pdfExport.error.noteLayoutOverflow (NoteLayoutOverflowError carries no payload anywhere it is thrown: pdf-export.ts:344,404,780; failure() call at :172-174 passes no detail, defaulting to [] at :968-970)",
+    "Bumped document status line from round 5 to round 6 and added a five-point round-6 self-review disposition"
+  ],
+  "unchanged_and_verified_consistent": [
+    "Jazz advisory cumulative comments 286/289/292/295/298 and Huffer comment300 text (§1-§5 control structure, focus rules, Close-not-Cancel)",
+    "Optimus download-ready/anchor-dispatch decision (already reflected in §1.5/§4.1 before this round)",
+    "J's settled Performer.notes placement decision (§0, §4.3 already match t_673976d6 2026-10-03 12:22 verbatim)"
+  ],
+  "no_code_or_readme_edits": true,
+  "no_commit_or_push": true
+}

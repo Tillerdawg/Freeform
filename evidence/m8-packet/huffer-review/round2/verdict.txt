@@ -1,0 +1,21 @@
+PASS — M8.3 performer packet renderer, independent Huffer round-2 review.
+
+Scope: renderer only. No implementation edits, commits, publication or UI acceptance.
+Reviewed HEAD: 3df1916315c43e7b4617bd037b62f76a3d0edc9a; dirty source is not HEAD. Exact source hashes recorded in identity-and-gates.json.
+
+Prior failure resolved: src/pdf/pdf-export.ts:413 now accounts for identity-block consumed space when deciding whether the first entry fits. Regression test at src/pdf/pdf-export.test.ts:363 verifies actual PDF text and two-page manifest.
+Independent repro: node evidence/m8-packet/huffer-review/round2/probe.mjs, exit 0. Uses reviewer-authored round-1 fresh fixtures plus six neighboring boundaries; results.json contains 14 cases and real PDF/text/manifest/hash evidence.
+44-note-line identity now produces two portrait 612x792 pages, rather than writer-failed. Page 1 contains complete identity notes and no entry; page 2 contains coordinate entry and no repeated identity. Footers Page 1 of 2 / Page 2 of 2. Long-identity PDF SHA256 bd00edb781c5e5251aa9f1be00a1ae9ff7dd5a4e555a6f5b999942526b2f1475.
+Neighbor boundaries: 40 note lines yields one page; 41,42,55,56 yield two pages; 57 yields note-layout-overflow. Ghostscript render visually inspected for long-identity pages 1/2 and boundary-56 page 1: no clipping, complete notes, separate footer, first entry safely on second page. Independent Ghostscript txtwrite extraction retained.
+
+Acceptance map:
+Identity with/without notes and once-only placement: multipage fixture, 4 pages, ONCE ONLY appears once, no notes on second performer packet. Long-identity two-page extracted text and visual render confirm corrected boundary.
+Entries/coordinates/count context: multipage and FTL-member fresh fixtures retain selected static entries, float transition context and FTL endpoint coordinates; FTL text contains common 8.000 to 5 over 16 counts. Existing targeted suite 21 tests passes.
+Scoped annotations/hidden layers: scope-overlap and scope-no-overlap fixtures; A-only annotation absent from B pages despite hidden/non-print layer. Overlap fixture yields six own-performer warnings, nonoverlap zero; same warning shape preserved.
+Page numbers: 4-page multiperformer fixture restarts Page 1 of 2 for each performer; identity-only boundary page counts correctly.
+Immutable local export: document JSON unchanged in all 14 success/failure cases.
+Nondestructive errors: long heading => writer-failed; actual oversized identity notes => note-layout-overflow; FTL outsider => document-invalid with pdfExport.error.documentInvalid.ftl. Boundary formerly misclassified now succeeds.
+
+Full independent gates: npm test exit 0 (30 files,262 tests); npm run test:docs exit 0; npm run build exit 0; git diff --check exit 0. Full logs retained as test.log/docs.log/build.log. Source/PDF hashes and gate exit codes in identity-and-gates.json.
+
+Limits unchanged: fixed 190pt entry budget; no tagged-PDF/accessibility claim. Browser/download/UI wiring, README and overall M8 acceptance remain downstream. PASS releases Optimus coordination, not production milestone acceptance.

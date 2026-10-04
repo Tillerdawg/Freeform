@@ -1,0 +1,83 @@
+{
+  "F1": {
+    "ok": true,
+    "firstY": 310,
+    "secondY": 299
+  },
+  "F4": {
+    "ok": true,
+    "authoredLength": 17,
+    "drawnGlyphCount": 17,
+    "hex": "00050005001E000700070016000500050005000B00160002000D0007000B00050005"
+  },
+  "F2_overlapWarnings": [
+    {
+      "code": "note-overlap",
+      "pageIndex": 0,
+      "context": {
+        "kind": "static-set",
+        "setId": "set-1"
+      },
+      "annotationId": "note-overlap",
+      "performerId": "a",
+      "obstacleKind": "dot",
+      "noteBounds": {
+        "x": 36,
+        "y": 102,
+        "width": 11.27,
+        "height": 17
+      },
+      "obstacleBounds": {
+        "x": 32,
+        "y": 98,
+        "width": 8,
+        "height": 8
+      }
+    },
+    {
+      "code": "note-overlap",
+      "pageIndex": 0,
+      "context": {
+        "kind": "static-set",
+        "setId": "set-1"
+      },
+      "annotationId": "note-overlap",
+      "performerId": "a",
+      "obstacleKind": "rank-label",
+      "noteBounds": {
+        "x": 36,
+        "y": 102,
+        "width": 11.27,
+        "height": 17
+      },
+      "obstacleBounds": {
+        "x": 41,
+        "y": 99,
+        "width": 5.1,
+        "height": 5.74
+      }
+    }
+  ],
+  "F3_offPageRank": {
+    "ok": false,
+    "code": "writer-failed"
+  },
+  "F5_independent": {
+    "runAB": [
+      -14,
+      1.7145055188062948e-15,
+      -1.7145055188062948e-15,
+      -14,
+      396,
+      294
+    ],
+    "runEmoji": [
+      -14,
+      1.7145055188062948e-15,
+      -1.7145055188062948e-15,
+      -14,
+      377.954,
+      294
+    ]
+  }
+}

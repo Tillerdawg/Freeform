@@ -1,0 +1,78 @@
+// @vitest-environment jsdom
+// Independent Huffer round-3 probe: idless-target focus restoration under
+// kind=director (Select all/Clear all disabled, not rendered as focus targets)
+// and persistence-module non-interference via structural import + spy audit.
+import { describe, expect, it, vi } from 'vitest';
+import { createCommandStore } from '../../../../src/document/command-store';
+import type { FreeformDocument } from '../../../../src/document/types';
+import { createPdfExportUi } from '../../../../src/pdf/export-ui';
+
+function fixture(): FreeformDocument {
+  return {
+    format: 'freeform', formatVersion: '1.0.0',
+    show: { id: 'huffer-r3', title: 'Huffer R3 probe', totalCounts: 16 },
+    field: { preset: 'NFHS_11_PLAYER', unitsPerYard: 2880, lengthUnits: 288000, widthUnits: 153600, frontHashY: 51200, backHashY: 102400 },
+    settings: { collisionThresholdUnits: 2880 },
+    performers: [
+      { id: 'p1', rankCode: 'A1', displayName: 'Huffer One' },
+      { id: 'p2', rankCode: 'A2', displayName: 'Huffer Two' },
+    ],
+    sets: [
+      { id: 'set-1', name: 'Set 1', startCount: 0, positions: { p1: { x: 0, y: 0 }, p2: { x: 1000, y: 1000 } } },
+      { id: 'set-2', name: 'Set 2', startCount: 16, positions: { p1: { x: 2880, y: 1440 }, p2: { x: 2000, y: 2000 } } },
+    ],
+    transitions: [{ id: 'm1', fromSetId: 'set-1', toSetId: 'set-2', counts: 16, mode: 'float' }],
+    annotations: [],
+  };
+}
+
+describe('Huffer round-3 independent probe', () => {
+  it('select-all focus survives redraw even when director kind briefly disables the target, then re-enabling restores it', async () => {
+    const root = document.createElement('main');
+    document.body.append(root);
+    const ui = createPdfExportUi(createCommandStore(fixture()));
+    root.append(ui.render());
+    root.querySelector<HTMLButtonElement>('#pdf-export-invoke')!.click();
+    root.querySelector<HTMLInputElement>('#pdf-export-packet')!.checked = true;
+    root.querySelector<HTMLInputElement>('#pdf-export-packet')!.dispatchEvent(new Event('change', { bubbles: true }));
+    const selectAll = root.querySelector<HTMLButtonElement>('#pdf-export-performers-select-all')!;
+    selectAll.focus();
+    expect(document.activeElement).toBe(selectAll);
+    // Switch to director: selectAll becomes disabled. Per the approved table,
+    // a redraw while focus is "inside" but the intended target becomes
+    // disabled must fall back to the heading, never silently drop to BODY.
+    root.querySelector<HTMLInputElement>('#pdf-export-director')!.dispatchEvent(new Event('change', { bubbles: true }));
+    // director radio isn't the focused element pre-change in this probe; force an explicit redraw path instead
+    ui.render();
+    await Promise.resolve();
+    expect(document.activeElement).not.toBe(document.body);
+  });
+
+  it('export module never imports or calls any persistence/backup/history/IndexedDB API', async () => {
+    const source = await import('node:fs/promises').then((fs) => fs.readFile(new URL('../../../../src/pdf/export-ui.ts', import.meta.url), 'utf8'));
+    for (const forbidden of ['idb-adapter', 'backup-service', 'version-history-store', 'save-adapter', 'working-copy-store', 'indexedDB', 'localStorage']) {
+      expect(source.includes(forbidden)).toBe(false);
+    }
+  });
+
+  it('a dispatch fault followed by recovery never touches store.apply/undo/redo and store identity is unchanged throughout', async () => {
+    const store = createCommandStore(fixture());
+    const apply = vi.spyOn(store, 'apply');
+    const undo = vi.spyOn(store, 'undo');
+    const redo = vi.spyOn(store, 'redo');
+    const before = store.getState();
+    const root = document.createElement('main');
+    document.body.append(root);
+    root.append(createPdfExportUi(store).render());
+    root.querySelector<HTMLButtonElement>('#pdf-export-invoke')!.click();
+    root.querySelector<HTMLFormElement>('.pdf-export-form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await vi.waitFor(() => expect(root.querySelector('#pdf-export-download')).not.toBeNull(), { timeout: 30_000 });
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(() => { throw new Error('huffer-simulated'); }), revokeObjectURL: vi.fn() });
+    root.querySelector<HTMLButtonElement>('#pdf-export-download')!.click();
+    expect(store.getState()).toBe(before);
+    expect(apply).not.toHaveBeenCalled();
+    expect(undo).not.toHaveBeenCalled();
+    expect(redo).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+});

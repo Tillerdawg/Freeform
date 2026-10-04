@@ -1,0 +1,66 @@
+[
+  {
+    "name": "valid-0",
+    "ok": true,
+    "pages": 5
+  },
+  {
+    "name": "valid-1",
+    "ok": true,
+    "pages": 5
+  },
+  {
+    "name": "duplicate performer ID",
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.schema"
+  },
+  {
+    "name": "malformed performer ID",
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.schema"
+  },
+  {
+    "name": "malformed show ID",
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.schema"
+  },
+  {
+    "name": "invalid field record",
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.schema"
+  },
+  {
+    "name": "empty sets",
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.schema"
+  },
+  {
+    "name": "unknown request kind",
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.schema"
+  },
+  {
+    "name": "missing frames",
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.schema"
+  },
+  {
+    "name": "unknown scope kind",
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.schema"
+  },
+  {
+    "name": "revoke throws",
+    "result": {
+      "ok": true
+    }
+  }
+]

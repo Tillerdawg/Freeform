@@ -1,0 +1,508 @@
+{
+  "version": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/145.0.7632.6",
+    "revision": "@47e20adcc15fc15f01825aa17e570c8f5492ac0f",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+    "jsVersion": "14.5.201.2"
+  },
+  "appUrl": "http://127.0.0.1:4174/",
+  "findings": [
+    {
+      "case": "production-select-all-focus-restored",
+      "focus": {
+        "id": "pdf-export-performers-select-all",
+        "tag": "BUTTON"
+      }
+    },
+    {
+      "case": "production-clear-all-focus-restored",
+      "focus": {
+        "id": "pdf-export-performers-clear-all",
+        "tag": "BUTTON"
+      }
+    },
+    {
+      "case": "actual-app-ftl-member-packet",
+      "filename": "Download Five Person FTL Fixture-performer-packets-full-show.pdf",
+      "selectedId": "a",
+      "selectedRank": "T1"
+    },
+    {
+      "case": "actual-app-ftl-leader-packet",
+      "filename": "Download Five Person FTL Fixture-performer-packets-full-show.pdf",
+      "selectedId": "e",
+      "selectedRank": "T5"
+    },
+    {
+      "case": "actual-app-ftl-ready-for-download-faults",
+      "filename": "Download Five Person FTL Fixture-performer-packets-full-show.pdf"
+    },
+    {
+      "case": "simulated-blob-fault-retains-ready-bytes",
+      "ready": true,
+      "status": "This browser can't prepare a PDF for download right now. Your document is unchanged. Try a different browser or window.",
+      "title": "Five Person FTL Fixture"
+    },
+    {
+      "case": "simulated-url-fault-retains-ready-bytes",
+      "ready": true,
+      "status": "Freeform built your PDF but this browser couldn't start the download from it. Your document is unchanged. Try a different browser or window.",
+      "title": "Five Person FTL Fixture"
+    },
+    {
+      "case": "simulated-anchor-fault-retains-ready-bytes",
+      "ready": true,
+      "status": "Freeform built your PDF but couldn't start the download. Your document is unchanged. Check your browser's download settings and try again.",
+      "title": "Five Person FTL Fixture"
+    },
+    {
+      "case": "fault-recovery-no-document-change",
+      "titleBeforeFaults": "Five Person FTL Fixture",
+      "titleAfterFaults": "Five Person FTL Fixture"
+    },
+    {
+      "case": "actual-app-known-overlap",
+      "warningSummary": "2 possible overlaps in this export"
+    },
+    {
+      "case": "actual-app-zero-overlap-control",
+      "warningSummaryPresent": false
+    }
+  ],
+  "network": [
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:4174/"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:4174/"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.policyUpdated"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:4174/assets/index-D7bgo1ud.css"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:4174/assets/index-D7bgo1ud.css"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:4174/favicon.ico"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:4174/favicon.ico"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:4174/assets/pdf-export-D0jNIDHG.js"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:4174/assets/assets-BjB5mSO8.js"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:4174/assets/pdf-export-D0jNIDHG.js"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:4174/assets/assets-BjB5mSO8.js"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    }
+  ],
+  "consoleCount": 0
+}

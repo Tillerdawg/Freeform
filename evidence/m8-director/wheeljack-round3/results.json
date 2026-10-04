@@ -1,0 +1,109 @@
+[
+  {
+    "name": "all-marks-rotated-symbol",
+    "ok": true,
+    "sha256": "511cd1891318c13c2a380f4fe66b792c2e68c5a18995a9cbb8472bba79eb2c72",
+    "warnings": []
+  },
+  {
+    "name": "mixed-edge-symbol",
+    "ok": true,
+    "sha256": "b44d999b37f1b105b397d2d614d5bca99aeedbdeee24773f9c95fe109e02a05e",
+    "warnings": []
+  },
+  {
+    "name": "multiline-note",
+    "ok": true,
+    "sha256": "811931f98c4c1c05b0e812ec2a54b3c9859709f1f39d36e65ed2b2bcbc7dee77",
+    "warnings": [
+      {
+        "code": "note-overlap",
+        "pageIndex": 1,
+        "context": {
+          "kind": "static-set",
+          "setId": "set-2"
+        },
+        "annotationId": "note",
+        "performerId": "a",
+        "obstacleKind": "dot",
+        "noteBounds": {
+          "x": 336,
+          "y": 302,
+          "width": 54.5,
+          "height": 28
+        },
+        "obstacleBounds": {
+          "x": 332,
+          "y": 323,
+          "width": 8,
+          "height": 8
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 1,
+        "context": {
+          "kind": "static-set",
+          "setId": "set-2"
+        },
+        "annotationId": "note",
+        "performerId": "a",
+        "obstacleKind": "rank-label",
+        "noteBounds": {
+          "x": 336,
+          "y": 302,
+          "width": 54.5,
+          "height": 28
+        },
+        "obstacleBounds": {
+          "x": 341,
+          "y": 324,
+          "width": 5.1,
+          "height": 5.74
+        }
+      }
+    ]
+  },
+  {
+    "name": "whitespace",
+    "ok": true,
+    "sha256": "594953723996f25000bc730ddb28713a6be14c132d4d3c66a29286c272086931",
+    "warnings": []
+  },
+  {
+    "name": "rank-actual-overlap",
+    "ok": true,
+    "sha256": "536086df455caa8f3d34ae021067acaa0635a1f391e1494a90b370919ac3df16",
+    "warnings": [
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "set-1"
+        },
+        "annotationId": "note",
+        "performerId": "a",
+        "obstacleKind": "rank-label",
+        "noteBounds": {
+          "x": 292,
+          "y": 303,
+          "width": 39.71,
+          "height": 17
+        },
+        "obstacleBounds": {
+          "x": 291,
+          "y": 299,
+          "width": 5.1,
+          "height": 5.74
+        }
+      }
+    ]
+  },
+  {
+    "name": "offpage-rank",
+    "ok": false,
+    "code": "writer-failed",
+    "messageKey": "pdfExport.error.writerFailed"
+  }
+]

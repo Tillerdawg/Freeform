@@ -1,0 +1,67 @@
+{
+  "task": "t_fcfb6173",
+  "round": 2,
+  "round_label": "copy-doc round 7 (fixing Huffer's round-1 FAIL on this card)",
+  "responding_to": {
+    "verdict_file": "evidence/m8-ui-copy/huffer-review/verdict.txt",
+    "comment_timestamp": "2026-10-03 21:58",
+    "verdict": "FAIL"
+  },
+  "head": "3df1916315c43e7b4617bd037b62f76a3d0edc9a",
+  "dirty_tree_is_not_head": true,
+  "git_status_before": {
+    "command": "git status --short --untracked-files=all",
+    "line_count": 592,
+    "saved_full_output": "evidence/m8-ui-copy/round2/git-status-before.txt"
+  },
+  "git_status_after_line_count": 592,
+  "git_status_drift": "none (same file count; untracked docs edited in place do not change git status line output)",
+  "gate_exit_codes_this_session": {
+    "npm run test:docs": 0,
+    "git diff --check": 0
+  },
+  "gate_full_logs": "evidence/m8-ui-copy/round2/test-docs.log is not separately retained in this dir; raw output reproduced from live terminal run, final two lines: 'PASS: all named negative fixtures correctly rejected' ... 'PASS: algorithm_edge_tests.py suite ... executed via import'. Command exit code captured directly via $? immediately after the npm run, 0.",
+  "renderer_source_hashes_reverified_this_session": {
+    "src/pdf/contracts.ts": "b9ff347908c6f8fce5a8e1721afa6e62be6727851a1474c8139e3451d364fd1f",
+    "src/pdf/geometry.ts": "d54e27669c01448b4cfa4db0b0ea1dc9b0ba6b558c163dfc1c8f16afb1365802",
+    "src/pdf/pdf-export.test.ts": "977ebbde9f3662b296f3579f1efe8a26db2039815eadf74da1818f5e6850d51a",
+    "src/pdf/pdf-export.ts": "4100af51eec74c9268410322909942c6b27e641db9d31e1603639d18e181010f",
+    "match_status": "byte-identical to evidence/m8-packet/huffer-review/round2/identity-and-gates.json, reverified live this session"
+  },
+  "copy_doc": {
+    "path": "decisions/m8-pdf-export-copy.md",
+    "sha256_before_this_round": "cdfc63e37785e59081d02a85b1dd6bd847ab1ee2d70a2aeff7dc90b5d4d75fa2",
+    "sha256_before_matches": "attempt-1 round-6 post-edit hash recorded in evidence/m8-ui-copy/identity.json (round 6 was never changed again before this round began, confirmed by rehashing at the start of this round before any edit)",
+    "sha256_after_this_round": "9ce5fd77c921552350c8db36d3412e8a9f87d803e7142993b79e76295696b44d",
+    "before_snapshot_file": "evidence/m8-ui-copy/round2/before.md",
+    "full_diff_file": "evidence/m8-ui-copy/round2/diff.patch",
+    "diff_method": "diff -u before.md decisions/m8-pdf-export-copy.md (literal unified diff, no ellipses, no summarization, 120 lines total)"
+  },
+  "design_doc": {
+    "path": "decisions/m8-pdf-export-design.md",
+    "sha256_before_this_round": "not captured (see honest_evidence_gap below)",
+    "honest_evidence_gap": "No standalone pre-edit copy or pre-edit hash of design.md was captured before its single patch call in this round, because the edit was additive-only (one new blockquote paragraph, no existing text removed or altered) and was applied via mcp__patch, whose return payload already includes the tool's own literal before/after diff. That tool-reported diff is saved verbatim (not reconstructed) in evidence/m8-ui-copy/round2/design-md-diff.patch. This is recorded explicitly as a gap relative to the copy-doc's full before/after snapshot discipline, not silently omitted.",
+    "sha256_after_this_round": "892770c41d2efa56b0da6cfe15e9c95d051ff25992fb4165417ae764bee3c5cb",
+    "diff_file": "evidence/m8-ui-copy/round2/design-md-diff.patch",
+    "scope_note": "Single additive blockquote after design.md:161 per task's narrow-cross-reference allowance; no existing normative sentence altered or removed."
+  },
+  "changes_made": [
+    "Section 4.1 rewritten: removed the same-gesture 'direct dispatch' / gesture-expiry-fallback branch entirely; every generation success now produces pdfExport.status.ready unconditionally, with pdfExport.status.downloadStarted firing only on the user's own Download-button activation. Matches the explicit Optimus decision on this card.",
+    "Section 5 live-region bullet list reordered/reworded to match: ready before downloadStarted, 'fallback' language removed since there is no longer an alternative path.",
+    "Section 3 cancel paragraph rewritten to describe the actual selected anchor helper (src/pdf/download.ts: anchor.click() dispatch, no completion/native-picker-cancel signal) instead of a hypothetical anchor-vs-picker choice; the adapter's caller-supplied options.cancelled flag is now described as adapter-level unit-tested semantics with no UI control wired to it yet, not a native/browser signal.",
+    "Section 0 item 1 and open-item 2 rewritten to acknowledge the settled font selection/provenance/license (src/pdf/assets.ts) and the bounded glyph-qualification evidence (evidence/m8-pdf-foundation/recovery-r2/huffer-review/verdict.txt:9,12), explicitly scoped to one fixture across two renderer tools and explicitly separate from Section 7's still-open selectable-text/tagging qualification gate.",
+    "Section 7 intro gained one sentence making the font-selection-vs-selectable-text-qualification separation explicit.",
+    "Open-item 3 rewritten to describe the already-selected src/pdf/download.ts anchor helper rather than an undecided anchor-vs-picker choice.",
+    "Section 4.2: corrected the page-number-coincidence bullet (coincides for every page of the first performer, not only their first page) and the transition-entry bullet ('one authored total count', not 'full authored count list').",
+    "Section 3's noteLayoutOverflow call-site list: added src/pdf/pdf-export.ts:768 (drawNoteBox's direct field-bounds overflow check), previously missing alongside the already-listed :404 and :780.",
+    "Status line bumped round 6 -> round 7; round-7 self-review disposition added; round-6 self-review's incorrect claim that the Optimus decision was 'already reflected' is explicitly retracted in place (not deleted) with a pointer to the round-7 fix.",
+    "decisions/m8-pdf-export-design.md:161 gained one narrowly additive superseding blockquote pointing to this card's Optimus decision as controlling for the PDF-export feature; the original paragraph is unchanged and still normative for other features."
+  ],
+  "no_code_or_readme_edits": true,
+  "no_commit_or_push": true,
+  "files_touched_this_round": [
+    "decisions/m8-pdf-export-copy.md",
+    "decisions/m8-pdf-export-design.md",
+    "evidence/m8-ui-copy/round2/* (new evidence files)"
+  ]
+}

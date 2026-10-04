@@ -1,0 +1,29 @@
+{
+  "head": "3df1916315c43e7b4617bd037b62f76a3d0edc9a",
+  "dirty_tree_is_not_head": true,
+  "source_hashes": {
+    "src/pdf/pdf-export.ts": "4100af51eec74c9268410322909942c6b27e641db9d31e1603639d18e181010f",
+    "src/pdf/pdf-export.test.ts": "977ebbde9f3662b296f3579f1efe8a26db2039815eadf74da1818f5e6850d51a",
+    "src/pdf/contracts.ts": "b9ff347908c6f8fce5a8e1721afa6e62be6727851a1474c8139e3451d364fd1f",
+    "src/pdf/geometry.ts": "d54e27669c01448b4cfa4db0b0ea1dc9b0ba6b558c163dfc1c8f16afb1365802"
+  },
+  "gate_exit_codes": {
+    "probe": 0,
+    "npm test": 0,
+    "npm run test:docs": 0,
+    "npm run build": 0,
+    "git diff --check": 0
+  },
+  "pdf_hashes": {
+    "multipage": "99ca114e66628d98e6f5d857a5bf212a1b2b953f8b37a27c15ee94152e16d50e",
+    "scope-overlap": "8a8a2d4624325f0d80b3ce3b4330bc3cad6aec70b58c49709b4f8a9ae35776b0",
+    "scope-no-overlap": "fb920fdc3a557191d787a8248d185218f04f555006348fcfdbe2318d09156445",
+    "long-identity": "bd00edb781c5e5251aa9f1be00a1ae9ff7dd5a4e555a6f5b999942526b2f1475",
+    "ftl-member": "b4f0482f6bf639eca83d1c19adf46c3befdaff3c7ed80abc59c1482c718d4f1a",
+    "boundary-40": "fe66583a25a62df9d3ac66e26a5fabcd364f845d4f65c6c9e68473cab03eee13",
+    "boundary-41": "68626098b17e712de7d5bebacf7c8db8c8a5719e8480addd9dd864056f9801fa",
+    "boundary-42": "fd7bbcb7fe2acb01ccdefdc18074c3b2d7fd7973aa3d7081ce04f3c7a0299afc",
+    "boundary-55": "b14afa285b447b96c1c6b99df0615f8641fd2a712b8f2d36b906cbbbca8a8474",
+    "boundary-56": "71bfa3425e6173ea170a5c2f9fc0a22d4e0bb6d2a85a2d843ef536a01386c089"
+  }
+}

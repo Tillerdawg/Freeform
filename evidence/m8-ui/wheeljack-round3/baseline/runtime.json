@@ -1,0 +1,21 @@
+{
+  "version": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/145.0.7632.6",
+    "revision": "@47e20adcc15fc15f01825aa17e570c8f5492ac0f",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+    "jsVersion": "14.5.201.2"
+  },
+  "appUrl": "http://127.0.0.1:4174/",
+  "fixture": {
+    "performers": 500,
+    "sets": 250,
+    "transitions": 249,
+    "totalCounts": 10000,
+    "annotationsPerSet": 20,
+    "annotations": 5000
+  },
+  "durationMs": 11790,
+  "filename": "Download M8 normative export baseline-director-full-show.pdf",
+  "status": "Your PDF is ready."
+}

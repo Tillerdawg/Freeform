@@ -1,0 +1,4 @@
+npm_test_exit=0
+npm_test_docs_exit=0
+npm_build_exit=0
+git_diff_check_exit=0

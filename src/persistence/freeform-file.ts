@@ -1,6 +1,7 @@
 import { validateDocumentAnnotations } from '../document/annotations';
 import { isAjvRfc3339DateTime } from '../document/rfc3339';
 import { validateDocumentSetsAndTransitions } from '../document/sets';
+import { isAjvUri } from '../document/uri';
 import type { CommandStore, FreeformDocument } from '../document/types';
 import { validateFtlTransition } from '../timeline/ftl';
 
@@ -272,10 +273,7 @@ function isoDate(value: unknown, label: string): void {
     throw fileError('SCHEMA', `${label} must be an ISO date-time.`);
   }
 }
-// Copied verbatim in meaning from ajv-formats 3.0.1 full `uri` format. A
-// WHATWG URL is a parser/normalizer, not JSON Schema URI format validation.
-const AJV_URI = /^(?:[a-z][a-z0-9+\-.]*:)(?:\/?\/(?:(?:[a-z0-9\-._~!$&'()*+,;=:]|%[0-9a-f]{2})*@)?(?:\[(?:(?:(?:(?:[0-9a-f]{1,4}:){6}|::(?:[0-9a-f]{1,4}:){5}|(?:[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){4}|(?:(?:[0-9a-f]{1,4}:){0,1}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){3}|(?:(?:[0-9a-f]{1,4}:){0,2}[0-9a-f]{1,4})?::(?:[0-9a-f]{1,4}:){2}|(?:(?:[0-9a-f]{1,4}:){0,3}[0-9a-f]{1,4})?::[0-9a-f]{1,4}:|(?:(?:[0-9a-f]{1,4}:){0,4}[0-9a-f]{1,4})?::)(?:[0-9a-f]{1,4}:[0-9a-f]{1,4}|(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?))|(?:(?:[0-9a-f]{1,4}:){0,5}[0-9a-f]{1,4})?::[0-9a-f]{1,4}|(?:(?:[0-9a-f]{1,4}:){0,6}[0-9a-f]{1,4})?::)|[Vv][0-9a-f]+\.[a-z0-9\-._~!$&'()*+,;=:]+)\]|(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)|(?:[a-z0-9\-._~!$&'()*+,;=]|%[0-9a-f]{2})*)(?::\d*)?(?:\/(?:[a-z0-9\-._~!$&'()*+,;=:@]|%[0-9a-f]{2})*)*|\/(?:(?:[a-z0-9\-._~!$&'"()*+,;=:@]|%[0-9a-f]{2})+(?:\/(?:[a-z0-9\-._~!$&'"()*+,;=:@]|%[0-9a-f]{2})*)*)?|(?:[a-z0-9\-._~!$&'"()*+,;=:@]|%[0-9a-f]{2})+(?:\/(?:[a-z0-9\-._~!$&'"()*+,;=:@]|%[0-9a-f]{2})*)*)(?:\?(?:[a-z0-9\-._~!$&'"()*+,;=:@/?]|%[0-9a-f]{2})*)?(?:#(?:[a-z0-9\-._~!$&'"()*+,;=:@/?]|%[0-9a-f]{2})*)?$/i;
-function uri(value: unknown, label: string): void { if (typeof value !== 'string' || !AJV_URI.test(value)) throw fileError('SCHEMA', `${label} must be a URI.`); }
+function uri(value: unknown, label: string): void { if (!isAjvUri(value)) throw fileError('SCHEMA', `${label} must be a URI.`); }
 function unique(values: readonly string[], label: string): void { if (new Set(values).size !== values.length) throw fileError('SEMANTIC', `Duplicate ${label}.`); }
 function requireSemver(value: unknown, label: string): readonly [number, number, number] { if (typeof value !== 'string') throw fileError('INVALID_VERSION', `${label} must be a semantic version.`); const match = /^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)$/.exec(value); if (!match) throw fileError('INVALID_VERSION', `${label} must be a semantic version without prerelease metadata.`); return [Number(match[1]), Number(match[2]), Number(match[3])]; }
 function fileError(code: string, message: string): FreeformFileError { return new FreeformFileError(message, code); }

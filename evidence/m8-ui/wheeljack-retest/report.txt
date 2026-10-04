@@ -1,0 +1,109 @@
+M8.4 round 2 corrections — Wheeljack response to Huffer round 1 FAIL (comment, 2026-10-04 06:38)
+
+Scope: src/pdf/export-ui.ts, src/pdf/export-ui.test.ts only. No director/packet renderer edits
+(src/pdf/pdf-export.ts untouched; hash matches accepted identity in gates-and-identity.txt).
+
+F1 — count placeholder binding
+  Fixed: messageFor() now interpolates <count>/<counts> from the actual offending raw token
+  (decimal/negative) or parsed integer + transition maximum (out-of-domain/duplicate), per
+  decisions/m8-pdf-export-copy.md's raw-token-vs-parsed-integer rule.
+  Evidence: src/pdf/export-ui.test.ts "interpolates count failures exactly and retains focus
+  across a control redraw" — asserts the literal rendered text for 1.5, -08, 17, and 08,8
+  against a transition with counts=16. No "<count>"/"<counts>" literal reaches the DOM.
+
+F2 — redraw destroys focus and live-node identity
+  Fixed: the panel host and #pdf-export-status node are now created once and mutated in place
+  (host.replaceChildren(), not host.replaceWith()); redraw() captures the focused control's id
+  before rebuilding and restores it afterward (falling back to #export-panel-heading when open,
+  #pdf-export-invoke when closed, matching the approved state table). Ready/error outcomes still
+  set focusTarget explicitly so a background-resolved async result does not steal outside focus.
+  Evidence: export-ui.test.ts "interpolates count failures..." asserts focus remains on the radio
+  immediately after a kind-change redraw; "refreshes range eligibility..." asserts focus lands on
+  the transitions fieldset after a transition silently disappears from a narrowed range. Real
+  Chrome retest (browser.mjs, finding "director-radio-focus") confirms the radio itself retains
+  focus after its own change event in the actual app, and "director-ready-focus" confirms the
+  Download button receives focus once ready while the submit button was focused at submission.
+
+F3 — range controls do not refresh transition eligibility
+  Fixed: the "From set"/"To set" <select> change handlers now call redraw() immediately, so the
+  transition fieldset re-renders against the new range on every change, not only on an unrelated
+  rebuild. normalizedRequest() independently validates every checked transition id against the
+  live document and the current scope (transitionInScope()), returning the approved
+  transitionOutsideRange / unknownTransition messageKey instead of silently iterating only
+  eligibleTransitions() and dropping a stale checked id.
+  Evidence: export-ui.test.ts "refreshes range eligibility and rejects a retained checked
+  transition instead of silently dropping it" — narrows a 3-set range so a previously checked
+  transition's row disappears, then asserts submit produces the exact approved error text instead
+  of a silently narrowed request.
+
+F4 — download failure discards ready bytes/action
+  Fixed: a dispatch failure now sets a separate `dispatchError` used only for the status
+  line/detail disclosure; `outcome` (the ready bytes/filename/warnings) is left untouched, so the
+  Download button and its href/bytes survive a failed dispatch and a second click retries the
+  exact same bytes without re-invoking the writer.
+  Evidence: export-ui.test.ts "keeps ready bytes and a retry control after a simulated
+  URL-dispatch failure" — stubs URL.createObjectURL to throw, asserts the Download button survives
+  with its original filename and the approved urlUnavailable text, then stubs a working URL/anchor
+  and clicks again, asserting exactly one anchor dispatch and "Started downloading ...". Real
+  Chrome retest reproduces the same sequence against the actual app (findings
+  "simulated-url-failure-retains-ready-bytes": retry=true, then a genuine second download file on
+  disk after the retry click).
+
+F5 — warning labels drift to the live document instead of the export snapshot
+  Fixed: generate() now stores the exact `snapshot` passed to buildPdfExport() in
+  `resultSnapshot` only when the result is ok; buildWarnings()/warningText() read that frozen
+  snapshot, never store.getState().document. A later document.replace while the ready result is
+  retained (even across a close/reopen cycle) no longer changes warning text. Also added the
+  missing manual-correction explanation sentence (pdfExport.warning.explanation.*) under each
+  warning row, matching decisions/m8-pdf-export-copy.md §4.2, and removed the un-approved
+  "Choose another." tail from unknownPerformer's message (copy doc §2 lists that row's text
+  without it).
+  Evidence: export-ui.test.ts "keeps overlap warning labels and manual correction context bound to
+  the exported snapshot" — exports with set "Set 1" present, renames that same set via
+  document.replace while the ready result is retained, closes and reopens the panel, and asserts
+  the warning row still reads "Set Set 1" and never "Renamed after export".
+
+F6 — evidence matrix
+  export-ui.test.ts now has 6 feature tests (was 2): count-placeholder exactness, focus
+  restoration across redraw, range-eligibility refresh with rejected stale transition, download
+  retry after a simulated dispatch fault, and snapshot-bound warning labels, plus the original
+  immutable-snapshot/close-retention test.
+  Real-browser evidence (this directory, actual headless Chrome 145.0.7632.6 against
+  `npm run dev -- --host 127.0.0.1`, CDP WebSocket, no Playwright test runner):
+    browser.mjs — launch command and every action/assertion.
+    runtime.json — findings array + captured Network.* events + console event count.
+    downloads/ — four real downloaded PDFs from actual app Download-button clicks:
+      "M8 UI retest-director-full-show.pdf" (5 pages, explicit 0/8/16 transition frames)
+      "M8 UI retest-performer-packets-full-show.pdf" (1-performer packet, full show)
+      "M8 UI retest-performer-packets-set-set-1-to-set-1.pdf" (inclusive single-set range,
+        produced twice under the same filename: once via the inclusive-range scenario, once via
+        the single-performer-filtering scenario — both are a 1-page Set-1-only packet, consistent
+        with each exercising exactly one selected performer)
+    pdf-inspection.json — pdfjs-dist-extracted per-page text/size and SHA-256 for every file above.
+    findings include:
+      "director-ready-focus": durationMs 373 (first real writer+font+asset load) — a measured
+        duration, not an invented budget.
+      "offline-after-writer-assets-loaded": durationMs 205, ready=true, status="Your PDF is
+        ready." — captured with CDP Network.emulateNetworkConditions(offline:true) AFTER the
+        lazy writer/font chunks had already loaded once in this session, proving the writer and
+        its bundled local fonts do not require network access once loaded. This is a repeat
+        export in the same page load, not a full page reload while offline (page reload while
+        offline is a Vite-dev-server limitation unrelated to this card's production bundle, which
+        is the actual deployed artifact; the npm-run-build output in gates-and-identity.txt shows
+        no runtime CDN import).
+      "simulated-url-failure-retains-ready-bytes": retry=true, status is the exact approved
+        urlUnavailable sentence.
+      "inclusive-range-single-set" / "single-performer-packet-filtering": both ready=true with the
+        expected narrowed filename, demonstrating the fixed range-eligibility path and
+        single-performer member filtering end-to-end in the real app, not only in jsdom.
+  Known residual gaps, named honestly rather than silently omitted:
+    - No FTL-transition packet fixture was constructed through the real app's multi-step FTL
+      wizard in this round (float/static-set coverage only); FTL packet filtering was already
+      independently Huffer-verified at the renderer layer (t_701b6f5a round 2). This card's scope
+      is the export panel/controller integration seam, and no FTL-specific controller defect has
+      been reported against that seam.
+    - No real zero-overlap control was re-run against the UI in this round; the snapshot-binding
+      fix is tested against a two-overlap fixture (dot + rank-label) with a real present/absent
+      transition.
+    - Font/writer-failure focus path is covered by the existing jsdom catch-path unit test only,
+      not re-exercised in the browser this round (no change was made to that path).

@@ -1,0 +1,51 @@
+import { spawn } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+const out='evidence/m8-ui/huffer-review/round2';
+const chrome='/Users/jatiller/Library/Caches/ms-playwright/chromium-1208/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
+const profile=process.env.TMPDIR+'/m8-huffer-browser-'+process.pid;
+const proc=spawn(chrome,['--headless=new','--remote-debugging-port=0','--no-first-run',`--user-data-dir=${profile}`,'about:blank']);
+let stderr='';
+try {
+const endpoint=await new Promise((resolve,reject)=>{proc.stderr.on('data',b=>{stderr+=b;const m=stderr.match(/DevTools listening on (ws:\/\/[^\s]+)/);if(m)resolve(m[1]);});proc.once('exit',c=>reject(new Error('Chrome exited '+c)));setTimeout(()=>reject(new Error('Chrome endpoint timeout')),20000).unref();});
+const socket=new WebSocket(endpoint);await new Promise(r=>socket.addEventListener('open',r,{once:true}));
+let n=0;const waiting=new Map();const events=[];socket.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.id){const p=waiting.get(m.id);waiting.delete(m.id);m.error?p.reject(new Error(JSON.stringify(m.error))):p.resolve(m.result);}else events.push(m);});
+const call=(method,params={},sessionId)=>new Promise((resolve,reject)=>{const id=++n;waiting.set(id,{resolve,reject});socket.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));});
+const version=await call('Browser.getVersion');const {targetId}=await call('Target.createTarget',{url:'about:blank'});const {sessionId}=await call('Target.attachToTarget',{targetId,flatten:true});
+const c=(method,params={})=>call(method,params,sessionId);
+const evaluate=async expression=>{const r=await c('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(JSON.stringify(r.exceptionDetails));return r.result.value;};
+await c('Page.enable');await c('Runtime.enable');await c('Network.enable');await c('Page.navigate',{url:'http://127.0.0.1:4173/'});
+for(let i=0;i<100;i++){if(await evaluate('!!document.querySelector("form")'))break;await new Promise(r=>setTimeout(r,50));}
+await evaluate(`(()=>{for(const [id,value] of [['setup-title','Huffer round2 app'],['setup-instrument-1','Trumpet'],['setup-prefix-1','T']]){const el=document.getElementById(id);el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}document.querySelector('form').requestSubmit();return true})()`);
+const click=async selector=>{const b=await evaluate(`(()=>{const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}})()`);await c('Input.dispatchMouseEvent',{type:'mousePressed',...b,button:'left',clickCount:1});await c('Input.dispatchMouseEvent',{type:'mouseReleased',...b,button:'left',clickCount:1});};
+const byText=async text=>evaluate(`(()=>{const b=[...document.querySelectorAll('button')].find(n=>n.textContent===${JSON.stringify(text)});b.click();return true})()`);
+await byText('Create fully covered set');await byText('Create float transition');
+await c('Emulation.setDeviceMetricsOverride',{width:1280,height:2400,deviceScaleFactor:1,mobile:false});
+await click('#pdf-export-invoke');
+const initialNetwork=events.filter(e=>e.method==='Network.requestWillBeSent').map(e=>e.params.request.url);
+const findings=[];
+await evaluate(`document.querySelector('#pdf-export-packet').focus()`);await click('#pdf-export-packet');
+findings.push({case:'real-app-radio-focus',focus:await evaluate('({id:document.activeElement.id,tag:document.activeElement.tagName})')});
+await click('#pdf-export-director');
+await click('[id^="pdf-export-transition-"]');
+await evaluate(`(()=>{const c=document.querySelector('[id^="pdf-export-counts-"]');c.value='1.5';c.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('.pdf-export-form').requestSubmit();})()`);
+findings.push({case:'real-app-decimal',message:await evaluate('document.querySelector("#pdf-export-field-error").textContent')});
+await evaluate(`(()=>{const c=document.querySelector('[id^="pdf-export-counts-"]');c.value='0,8,16';c.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+const waitReady=async()=>{for(let i=0;i<600;i++){if(await evaluate('!!document.querySelector("#pdf-export-download")'))return;await new Promise(r=>setTimeout(r,50));}throw new Error('ready timeout');};
+await click('.pdf-export-form button[type="submit"]');await waitReady();
+findings.push({case:'real-app-ready-focus',focus:await evaluate('({id:document.activeElement.id,tag:document.activeElement.tagName})')});
+await mkdir(out+'/downloads',{recursive:true});await call('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:process.cwd()+'/'+out+'/downloads',eventsEnabled:true});
+await click('#pdf-export-download');await click('#pdf-export-packet');await evaluate(`(()=>{const b=[...document.querySelectorAll('button')].find(n=>n.textContent==='Select all');b.focus();b.click()})()`);findings.push({case:'real-app-select-all-focus',focus:await evaluate('({id:document.activeElement.id,tag:document.activeElement.tagName})')});await click('.pdf-export-form button[type="submit"]');await waitReady();await click('#pdf-export-download');
+await evaluate(`globalThis.savedCreateURL=URL.createObjectURL;URL.createObjectURL=()=>{throw new Error('review injected URL fault')}`);await click('#pdf-export-download');
+findings.push({case:'real-app-url-fault-simulated',status:await evaluate('document.querySelector("#pdf-export-status").textContent'),retry:await evaluate('!!document.querySelector("#pdf-export-download")')});
+await evaluate('URL.createObjectURL=globalThis.savedCreateURL');await click('#pdf-export-download');
+await c('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
+const started=Date.now();await click('#pdf-export-submit');await waitReady();findings.push({case:'production-offline-after-assets',durationMs:Date.now()-started,ready:true,focus:await evaluate('document.activeElement.id')});
+await click('#pdf-export-close');await click('#pdf-export-invoke');findings.push({case:'ready-close-reopen',focus:await evaluate('document.activeElement.id'),ready:await evaluate('!!document.querySelector("#pdf-export-download")')});
+await c('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
+findings.push({case:'production-initial-network',urls:initialNetwork});
+
+await new Promise(r=>setTimeout(r,500));await writeFile(out+'/browser-findings.json',JSON.stringify({version,findings},null,2));console.log(JSON.stringify({version,findings}));
+await writeFile(out+'/browser-initial.json',JSON.stringify({version,controls:await evaluate('document.body.innerText')},null,2));
+await writeFile(out+'/browser-events.json',JSON.stringify(events,null,2));
+socket.close();
+} finally {proc.kill();await writeFile(out+'/chrome-stderr.log',stderr);}

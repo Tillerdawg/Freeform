@@ -1,0 +1,28 @@
+VERDICT: FAIL — M8.2 director renderer, round 1
+
+Reviewed dirty tree, not HEAD-only. HEAD 3df1916315c43e7b4617bd037b62f76a3d0edc9a/main. identity.json confirms only contracts.ts/pdf-export.ts/pdf-export.test.ts changed among the 21 accepted foundation identity paths. No implementation edits by Huffer; only independent review evidence authored.
+
+F1 — Multiline text rejected as unsupported glyph.
+src/pdf/pdf-export.ts:104,571-585 preflights raw text including LF before wrappedLines:522-535 can interpret it as layout. Valid note 'First line\nSecond line' and valid show title with identical text both return unsupported-glyph/pdfExport.error.unsupportedGlyph, no bytes. This is not an absent visible glyph. Required: distinguish supported layout controls from visible glyph coverage; render short multiline notes/title/context correctly, classify genuinely unrepresentable note/chrome layout under the approved respective overflow routes, retain failure/no-mutation controls. Add actual extracted/rendered multiline PDF regressions, including CRLF policy.
+
+F2 — Rank-label obstacle bounds lie below rendered glyphs.
+src/pdf/pdf-export.ts:470,549-554 sets y=baseline-full font height. Independent fontkit actual glyph A: unitsPerEm1000, bbox(0,0,638,717). PDF draws A at (291,299), size8; actual ink bounds x291..296.104,y299..304.736. The reported obstacle instead spans y288.1..299. A note at canonical(102400,80400) => PDF x292,y303,height17 intersects A's upper ink yet export warnings=[]; a note at(102400,68400) => y273..290 is well below A but emits rank-label warning. PDFJS text transforms and two-renderer artifacts retained; Ghostscript crop directly inspected showing obscured upper A; below control visibly separate. Required: baseline-aware ascent/descent and actual shaped/font-run metrics that enclose the rendered text at its actual origin; positive intersection at full precision and rounding only reports. Add actual ink-overlap, below-label nonoverlap, touching and dot controls, sorted IDs/bounds/moved-note regression. Do not merely shift expected constants in manifest-only tests.
+
+F3 — Valid rank label silently drawn off-page/clipped.
+src/pdf/pdf-export.ts:459-470 has no text layout bounds check. Schema-valid rankCode='A'.repeat(32), dot at canonical(288000,153600) -> label x761,y483. Export succeeds. Actual page792x612 shows only the leading As at right edge; PDFJS extracts only seven As. Two-renderer offpage-render artifacts retained. Required: preserve fixed field/dot geometry and documented rank placement, and never return success with clipped rank/symbol text. For an unrepresentable non-note layout use approved writer-failed (or obtain explicit reviewed layout policy, not silent relocation/truncation). Test boundary positions/long valid ranks and transformed/mixed-font symbols at edges with parser+render proof.
+
+F4 — Authored whitespace silently changed.
+src/pdf/pdf-export.ts:527-533 splits /\s+/ and rejoins with one space. Valid note '  Keep   spaces  ' becomes 'Keep spaces' in actual extracted PDF. Printed-copy contract requires owned text exactly as authored; no normalization was authorized. Required: preserve leading/repeated/trailing spaces and explicit line boundaries through measured wrapping/drawing, and ensure measurements match the actual shaped runs (measurement currently sums codepoints while drawing uses runs). Retest text fidelity and bounds on Unicode/kerning/multiple-font-run controls.
+
+Commands/evidence:
+node evidence/m8-director/huffer-review/probe.mjs a: exit0.
+Initial probe used rank-overlap anchor y81600 (not actually touching glyph) and 64-character rank (schema-invalid). Corrected reviewer fixtures only to y80400 and 32 characters; final reproducible probe.mjs b exit0. results-b.json is authoritative for these cases; results-a.json retained as provenance, not proof of corrected failures.
+node scripts/qualify-m8-pdf.mjs <rank-actual-overlap|rank-false-overlap|float|offpage-rank>.pdf <render-dir>: exit0. PDFJS5.4.149/canvas0.1.100/Ghostscript10.08.0.
+Fontkit bbox command exit0, rank-metrics.json.
+Focused PDF suite: exit0,15 tests.
+Full npm test: exit0,30 files/256 tests.
+npm run test:docs, npm run build, git diff --check: each exit0. gates.json and gate-0..4.log.
+Independent assertions exit0: checks.json proves all16 actual-PDF print gate cases, unchanged inputs, only allowed source drift, and same/fresh static SHA equality (090106d3ceb7f15a791c2f3421ed1e3ef2d72f750acb38a398b30d3c96ad4545).
+Independent generated static and c0/mid/N float/valid FTL PDFs parsed, exact792x612 MediaBoxes and text/operator inventories retained. Long-note overflow correctly returns note-layout-overflow; dot edge-touch control emits no warning. Existing URI/FTL/download/no-mutation regressions rerun in focused/full suites.
+
+Incomplete acceptance: stopped further exhaustive matrix work after reproduced blockers. Full independent range/no-transition/all-kinds/transformed symbols/ordered overlaps/moved-note/store-state matrix remains required on corrected candidate; implementation's 15-test suite does not establish all stated director criteria. No packet/UI/browser/offline/focus/lazy chunk/tagged-PDF or overall M8 acceptance. Vector chrome arrow is visible but not extracted; its explicit implementer deviation remains to be assessed on successful re-review. Root remains dependency gated. Return SAME CARD to Wheeljack; no duplicate implementation chain.

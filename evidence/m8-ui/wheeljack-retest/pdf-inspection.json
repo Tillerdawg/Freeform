@@ -1,0 +1,72 @@
+[
+  {
+    "file": "M8 UI retest-director-full-show.pdf",
+    "bytes": 619146,
+    "sha256": "f178c9431012fe91577a29cd95a8f48ffb5afbad4ee03a6b903371bcab7a3af3",
+    "pages": [
+      {
+        "size": [
+          792,
+          612
+        ],
+        "text": "M8 UI retestSet 1 — starts at count 0Static setFreeform — Director pagesSet 1 — starts at count 0Page 1 of 510 1020 2030 3040 4050T1T2"
+      },
+      {
+        "size": [
+          792,
+          612
+        ],
+        "text": "M8 UI retestSet 2 — starts at count 16Static setFreeform — Director pagesSet 2 — starts at count 16Page 2 of 510 1020 2030 3040 4050T1T2"
+      },
+      {
+        "size": [
+          792,
+          612
+        ],
+        "text": "M8 UI retestSet 1 Set 2, count 0 of 16TransitionFreeform — Director pagesSet 1 Set 2, count 0 of 16Page 3 of 510 1020 2030 3040 4050T1T2"
+      },
+      {
+        "size": [
+          792,
+          612
+        ],
+        "text": "M8 UI retestSet 1 Set 2, count 8 of 16TransitionFreeform — Director pagesSet 1 Set 2, count 8 of 16Page 4 of 510 1020 2030 3040 4050T1T2"
+      },
+      {
+        "size": [
+          792,
+          612
+        ],
+        "text": "M8 UI retestSet 1 Set 2, count 16 of 16TransitionFreeform — Director pagesSet 1 Set 2, count 16 of 16Page 5 of 510 1020 2030 3040 4050T1T2"
+      }
+    ]
+  },
+  {
+    "file": "M8 UI retest-performer-packets-full-show.pdf",
+    "bytes": 612477,
+    "sha256": "c341c3903ec4646d01962760bf9a69a55df095ea24b71da09625abd70a4a398e",
+    "pages": [
+      {
+        "size": [
+          612,
+          792
+        ],
+        "text": "Show: M8 UI retestPage 1 of 1T1 — T1Set 1 — starts at count 0Coordinate: (142200, 0) FU — 1 Step Outside 50 (Side 1), On Front SidelineT1Set 2 — starts at count 16Coordinate: (142200, 0) FU — 1 Step Outside 50 (Side 1), On Front SidelineT1Set 1 Set 2 — FLOAT, 16 countsCoordinate: (142200, 0) FU — 1 Step Outside 50 (Side 1), On Front SidelineMovement: No movement over 16 countsT1"
+      }
+    ]
+  },
+  {
+    "file": "M8 UI retest-performer-packets-set-set-1-to-set-1.pdf",
+    "bytes": 611427,
+    "sha256": "9ece765ce217a70837139318f4c4c0d4418e064a85ff8f0fd226cf986573d5e5",
+    "pages": [
+      {
+        "size": [
+          612,
+          792
+        ],
+        "text": "Show: M8 UI retestPage 1 of 1T1 — T1Set 1 — starts at count 0Coordinate: (142200, 0) FU — 1 Step Outside 50 (Side 1), On Front SidelineT1"
+      }
+    ]
+  }
+]

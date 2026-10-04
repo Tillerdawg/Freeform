@@ -1,0 +1,1283 @@
+{
+  "version": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/145.0.7632.6",
+    "revision": "@47e20adcc15fc15f01825aa17e570c8f5492ac0f",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+    "jsVersion": "14.5.201.2"
+  },
+  "findings": [
+    {
+      "case": "director-radio-focus",
+      "focus": "pdf-export-director"
+    },
+    {
+      "case": "director-ready-focus",
+      "durationMs": 373,
+      "focus": "pdf-export-download",
+      "download": "Download M8 UI retest-director-full-show.pdf"
+    },
+    {
+      "case": "simulated-url-failure-retains-ready-bytes",
+      "retry": true,
+      "status": "Freeform built your PDF but this browser couldn't start the download from it. Your document is unchanged. Try a different browser or window."
+    },
+    {
+      "case": "offline-after-writer-assets-loaded",
+      "durationMs": 208,
+      "ready": true,
+      "status": "Your PDF is ready."
+    },
+    {
+      "case": "inclusive-range-single-set",
+      "ready": true,
+      "download": "Download M8 UI retest-performer-packets-set-set-1-to-set-1.pdf"
+    },
+    {
+      "case": "single-performer-packet-filtering",
+      "download": "Download M8 UI retest-performer-packets-set-set-1-to-set-1.pdf"
+    }
+  ],
+  "network": [
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.policyUpdated"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/@vite/client"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/main.ts?t=1791110842442"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/main.ts?t=1791110842442"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/styles.css"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/document/command-store.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/editor/setup-wizard.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/platform/features.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/persistence-ui.ts?t=1791110842442"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/@vite/client"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/node_modules/vite/dist/client/env.mjs"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/styles.css"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/document/command-store.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/editor/setup-wizard.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/geometry/nfhs.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/document/annotations.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/document/sets.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/freeform-file.ts"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/platform/features.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/node_modules/vite/dist/client/env.mjs"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.webSocketCreated"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/persistence-ui.ts?t=1791110842442"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/geometry/nfhs.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/document/annotations.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/document/sets.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/freeform-file.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/editor/dot-editor.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/save-adapter.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/ancestry-store.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/autosave-scheduler.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/backup-service.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/command-store-bridge.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/destructive-checkpoint.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/idb-adapter.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/recovery-service.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/version-history-store.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/persistence/working-copy-store.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/export-ui.ts?t=1791110842442"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/timeline/ftl.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/document/rfc3339.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/document/uri.ts"
+    },
+    {
+      "method": "Network.webSocketWillSendHandshakeRequest"
+    },
+    {
+      "method": "Network.webSocketHandshakeResponseReceived"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/editor/dot-editor.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.webSocketFrameReceived"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/save-adapter.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/geometry/coordinate-builder.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/editor/svg-field-editor.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/editor/annotation-editor.ts"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/timeline/timeline-panel.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/editor/roster-editor.ts"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/idb-adapter.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/ancestry-store.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/autosave-scheduler.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/backup-service.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/recovery-service.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/destructive-checkpoint.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/command-store-bridge.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/version-history-store.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/persistence/working-copy-store.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/export-ui.ts?t=1791110842442"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/document/rfc3339.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/document/uri.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/timeline/ftl.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/download.ts?t=1791108847102"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/geometry/coordinate-builder.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/editor/svg-field-editor.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/editor/field-geometry.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/editor/annotation-renderer.ts"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/editor/annotation-editor.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/timeline/timeline-panel.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/download.ts?t=1791108847102"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/editor/roster-editor.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/timeline/float.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/timeline/collision.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/timeline/playback.ts"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/editor/field-geometry.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/editor/annotation-renderer.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/timeline/float.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/timeline/playback.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/timeline/collision.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/favicon.ico"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/favicon.ico"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/pdf-export.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/assets.ts"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/assets.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/pdf-export.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/assets/noto-sans-latin-400.woff?import&inline"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/assets/noto-sans-cyrillic-400.woff?import&inline"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/assets/noto-emoji-400.ttf?import&inline"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/@pdf-lib_fontkit.js?v=e4994407"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/pdf-lib.js?v=af69f892"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/document/export-snapshot-validation.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/contracts.ts"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/src/pdf/geometry.ts"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/assets/noto-sans-latin-400.woff?import&inline"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/assets/noto-sans-cyrillic-400.woff?import&inline"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/document/export-snapshot-validation.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/geometry.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/contracts.ts"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/pdf-lib.js?v=af69f892"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.requestWillBeSent",
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/chunk-TEABJKHQ.js?v=a8530277"
+    },
+    {
+      "method": "Network.requestWillBeSentExtraInfo"
+    },
+    {
+      "method": "Network.responseReceivedExtraInfo"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/chunk-TEABJKHQ.js?v=a8530277"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/src/pdf/assets/noto-emoji-400.ttf?import&inline"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    },
+    {
+      "method": "Network.responseReceived",
+      "url": "http://127.0.0.1:5173/node_modules/.vite/deps/@pdf-lib_fontkit.js?v=e4994407"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.dataReceived"
+    },
+    {
+      "method": "Network.loadingFinished"
+    }
+  ],
+  "consoleCount": 2
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "test",
+    "command": "npm test",
+    "exit": 0
+  },
+  {
+    "name": "docs",
+    "command": "npm run test:docs",
+    "exit": 0
+  },
+  {
+    "name": "build",
+    "command": "npm run build",
+    "exit": 0
+  },
+  {
+    "name": "diff",
+    "command": "git diff --check",
+    "exit": 0
+  },
+  {
+    "name": "extended",
+    "command": "node /Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-pdf-foundation/recovery-r2/huffer-review/extended-probe.mjs",
+    "exit": 0
+  },
+  {
+    "name": "fresh-a",
+    "command": "node /Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-pdf-foundation/recovery-r2/huffer-review/boundary-probe.mjs fresh-a",
+    "exit": 0
+  },
+  {
+    "name": "fresh-b",
+    "command": "node /Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-pdf-foundation/recovery-r2/huffer-review/boundary-probe.mjs fresh-b",
+    "exit": 0
+  },
+  {
+    "name": "qualification",
+    "command": "node scripts/qualify-m8-pdf.mjs /Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-pdf-foundation/recovery-r2/huffer-review/same-runtime-a.pdf /Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-pdf-foundation/recovery-r2/huffer-review",
+    "exit": 0
+  }
+]

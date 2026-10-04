@@ -1,0 +1,22 @@
+{
+  "probe": {
+    "command": "npx vitest run --config evidence/m8-ui/huffer-review/round2/probe.config.mjs",
+    "exit": 1
+  },
+  "test": {
+    "command": "npm test",
+    "exit": 0
+  },
+  "docs": {
+    "command": "npm run test:docs",
+    "exit": 0
+  },
+  "build": {
+    "command": "npm run build",
+    "exit": 0
+  },
+  "diff": {
+    "command": "git diff --check",
+    "exit": 0
+  }
+}

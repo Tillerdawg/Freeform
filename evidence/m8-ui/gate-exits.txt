@@ -1,0 +1,6 @@
+npm test exit=0
+npm run test:docs exit=0
+npm run build exit=0
+git diff --check exit=0
+git status exit=0
+source hash exit=0

@@ -1,0 +1,121 @@
+{
+  "checks": [
+    "fresh runtime static",
+    "fresh runtime static-repeat",
+    "fresh runtime float",
+    "fresh runtime multiline-note",
+    "fresh runtime crlf-note",
+    "fresh runtime whitespace",
+    "fresh runtime long-note",
+    "fresh runtime multiline-title",
+    "fresh runtime long-title",
+    "fresh runtime rank-actual-overlap",
+    "fresh runtime rank-false-overlap",
+    "fresh runtime rank-edge-touch",
+    "fresh runtime offpage-rank",
+    "fresh runtime flags-0",
+    "fresh runtime flags-1",
+    "fresh runtime flags-2",
+    "fresh runtime flags-3",
+    "fresh runtime flags-4",
+    "fresh runtime flags-5",
+    "fresh runtime flags-6",
+    "fresh runtime flags-7",
+    "fresh runtime flags-8",
+    "fresh runtime flags-9",
+    "fresh runtime flags-10",
+    "fresh runtime flags-11",
+    "fresh runtime flags-12",
+    "fresh runtime flags-13",
+    "fresh runtime flags-14",
+    "fresh runtime flags-15",
+    "fresh runtime ftl",
+    "fresh runtime range",
+    "fresh runtime range-reversed",
+    "fresh runtime range-outside",
+    "fresh runtime transitionless-multi",
+    "fresh runtime transitionless-single",
+    "fresh runtime all-marks",
+    "fresh runtime mixed-edge-symbol",
+    "fresh runtime shaped-rank-combining",
+    "fresh runtime shaped-rank-AV",
+    "fresh runtime shaped-rank-ffi",
+    "fresh runtime overlap-before",
+    "fresh runtime overlap-after",
+    "fresh runtime excluded-glyph",
+    "fresh runtime included-glyph",
+    "same runtime static",
+    "multiline-note separate baselines",
+    "crlf-note separate baselines",
+    "multiline-title separate baselines",
+    "long-note classified",
+    "long-title classified",
+    "offpage-rank classified",
+    "included-glyph classified",
+    "range-reversed classified",
+    "range-outside classified",
+    "excluded glyph success",
+    "actual rank overlap",
+    "below and edge controls",
+    "no transitions multi/single",
+    "range pages",
+    "float footer 0",
+    "float footer 1",
+    "float footer 2",
+    "float footer 3",
+    "float footer 4",
+    "range footer 0",
+    "range footer 1",
+    "range footer 2",
+    "range footer 3",
+    "range footer 4",
+    "all-marks footer 0",
+    "all-marks footer 1",
+    "all-marks footer 2",
+    "all-marks footer 3",
+    "scope 0",
+    "scope 1",
+    "scope 2",
+    "scope 3",
+    "only moved warning removed",
+    "overlap-before sorted",
+    "overlap-after sorted",
+    "leading spaces retained",
+    "repeated spaces retained",
+    "no snapshot changes",
+    "source delta allowed"
+  ],
+  "staticSha256": "090106d3ceb7f15a791c2f3421ed1e3ef2d72f750acb38a398b30d3c96ad4545",
+  "count": 84,
+  "mixedFontRotationDefect": {
+    "interiorActualOrigins": [
+      [
+        236,
+        377
+      ],
+      [
+        249.419,
+        377
+      ]
+    ],
+    "interiorExpectedOrigins": [
+      [
+        236,
+        377
+      ],
+      [
+        236,
+        390.419
+      ]
+    ],
+    "edgeActualEmojiOrigin": [
+      800.72998046875,
+      302
+    ],
+    "pageWidth": 792,
+    "exportReportedSuccess": true
+  },
+  "authoringControls": [
+    "Initial long title exceeded schema200; replaced with valid120-character multiline overflow. Combining rank is schema-invalid, not a renderer finding. Initial read-only summary one-liner SyntaxError corrected; renderer probe itself exits0."
+  ]
+}

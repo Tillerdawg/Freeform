@@ -1,0 +1,6 @@
+{
+  "onlyAllowedSourceDrift": true,
+  "allProbeInputsUnchanged": true,
+  "sameFreshStaticHash": true,
+  "all16ActualPdfPrintGates": true
+}

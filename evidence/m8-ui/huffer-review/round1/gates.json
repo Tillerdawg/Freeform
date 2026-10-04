@@ -1,0 +1,27 @@
+[
+  {
+    "command": "npx vitest run --config evidence/m8-ui/huffer-review/round1/probe.config.mjs",
+    "exit": 0,
+    "log": "evidence/m8-ui/huffer-review/round1/probe.log"
+  },
+  {
+    "command": "npm test",
+    "exit": 0,
+    "log": "evidence/m8-ui/huffer-review/round1/tests.log"
+  },
+  {
+    "command": "npm run test:docs",
+    "exit": 0,
+    "log": "evidence/m8-ui/huffer-review/round1/docs.log"
+  },
+  {
+    "command": "npm run build",
+    "exit": 0,
+    "log": "evidence/m8-ui/huffer-review/round1/build.log"
+  },
+  {
+    "command": "git diff --check",
+    "exit": 0,
+    "log": "evidence/m8-ui/huffer-review/round1/diff.log"
+  }
+]

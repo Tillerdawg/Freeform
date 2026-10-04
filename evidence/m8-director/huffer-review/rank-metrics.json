@@ -1,0 +1,17 @@
+{
+  "unitsPerEm": 1000,
+  "fontAscent": 1069,
+  "fontDescent": -293,
+  "glyphBBox": {
+    "minX": 0,
+    "minY": 0,
+    "maxX": 638,
+    "maxY": 717
+  },
+  "drawnGlyphPageBounds": {
+    "x": 291,
+    "y": 299,
+    "width": 5.104,
+    "height": 5.736
+  }
+}

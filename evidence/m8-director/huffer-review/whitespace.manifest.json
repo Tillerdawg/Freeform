@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "m8.2",
+  "contentFingerprint": "b6a614cca5f46156b352b44ed92fb856b9882ccee8699ee4dbb16476b16f88ea",
+  "request": {
+    "kind": "director",
+    "scope": {
+      "kind": "full-show"
+    },
+    "transitionFrames": []
+  },
+  "pages": [
+    {
+      "kind": "director",
+      "width": 792,
+      "height": 612,
+      "context": {
+        "kind": "static-set",
+        "setId": "set-1"
+      },
+      "setIds": [
+        "set-1"
+      ],
+      "annotationIds": [
+        "note"
+      ]
+    },
+    {
+      "kind": "director",
+      "width": 792,
+      "height": 612,
+      "context": {
+        "kind": "static-set",
+        "setId": "set-2"
+      },
+      "setIds": [
+        "set-2"
+      ],
+      "annotationIds": [
+        "note"
+      ]
+    }
+  ],
+  "language": "en-US",
+  "fontAssetHashes": [
+    "18e2e5b23a9bc5e8e636d6c7984b8ac6635aefc1c497ed1c5012f3c637761b91",
+    "e199c2ac3c8bd6c99ec9e44cc3363128d86c94eed54d2f22d5b6ef9ca16bc484",
+    "bfa22d39f50efa1f2b437d4e9ce4f42c6d56a1d69b5f6a03959657a3f764bdb9"
+  ],
+  "warnings": []
+}

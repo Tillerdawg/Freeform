@@ -1,0 +1,43 @@
+M8 UI browser runtime report
+
+Launch command
+  npm run dev -- --host 127.0.0.1
+  URL: http://127.0.0.1:5173/
+
+Browser
+  Chrome/145.0.7632.6 (CDP protocol 1.3)
+  User agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36
+
+Production lazy-load observation
+  npm run preview -- --host 127.0.0.1 --port 4173
+  Fresh production-page initial resources: assets/index-CZwgzlaU.js,
+  assets/index-D7bgo1ud.css, favicon.ico.
+  The fresh initial page had no pdf-export-* writer chunk and no assets-* font
+  chunk request. Production build sizes are preserved in npm-build.log:
+  initial JS 165.33 kB (51.17 kB gzip), pdf-export chunk 1,177.88 kB
+  (516.48 kB gzip), font/assets chunk 1,215.31 kB (689.15 kB gzip).
+  This is measurement, not a product budget assertion.
+
+Real application actions
+  1. Completed first-run setup with show title “M8 Browser Evidence” and one Trumpet performer.
+  2. Used the visible app controls to create a fully covered Set 2 and a 16-count float transition from Set 1 to Set 2.
+  3. Opened Export PDF… through the persistence-shell button.
+  4. Selected Director pages, checked the visible transition row, entered “0, 8, 16”, pressed Export, waited for “Your PDF is ready.”, then pressed the ready Download button in a distinct user gesture.
+  5. Opened the panel again, selected Performer packets and T1, pressed Export, waited for ready, and pressed its distinct ready Download button.
+
+Observed outcomes
+  - Director status: Started downloading M8 Browser Evidence-director-full-show.pdf.
+  - Packet status: Started downloading M8 Browser Evidence-performer-packets-full-show.pdf.
+  - Packet transition controls remained visible and disabled.
+  - Lazy request evidence after the explicit Export action included src/pdf/pdf-export.ts, src/pdf/assets.ts, and the three bundled local font assets. Before Export, the panel itself had loaded only export-ui.ts/download.ts; it did not load the writer/assets module.
+  - Browser downloads were routed with CDP Browser.setDownloadBehavior to evidence/m8-ui/downloads/. Both files exist and were parsed with pdfjs; see pdf-inspection.json.
+
+Object-URL lifetime correction
+  - With the prior same-turn revoke implementation, a browser dispatch reported “Started downloading” but the configured evidence download directory had no PDF.
+  - download.ts now defers revokeObjectURL with setTimeout(..., 0) only after a successful anchor click; failed setup/dispatch still revokes synchronously. Repeating both application downloads produced the two durable PDFs listed above.
+  - This proves browser dispatch and the configured download write. It does not claim native-picker acceptance/cancellation or disk completion in arbitrary browser configurations; anchor dispatch exposes neither signal.
+
+Limits and follow-up verification
+  - This run exercised full-show scope, director transition frames 0/8/16, and a float packet. It did not exercise an FTL packet, overlap warning fixture, or a true browser-offline export after assets are cached.
+  - Native save-dialog cancellation cannot be observed through the anchor implementation. Adapter-level cancelled tests are simulated/caller-cancelled only.
+  - PDFs have selectable text as independently parsed here, but are not tagged and no manual screen-reader assessment was performed.

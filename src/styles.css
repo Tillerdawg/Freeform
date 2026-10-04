@@ -138,6 +138,18 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px s
 .recovery-panel__row, .version-history__row { display: grid; gap: 0.55rem; padding: 0.75rem; border: 1px solid #3b4a5e; border-radius: 0.5rem; }
 .persistence-dialog { position: fixed; z-index: 10; inset: 10vh auto auto 50%; width: min(38rem, calc(100% - 2rem)); transform: translateX(-50%); padding: 1.25rem; border: 1px solid #90bdea; border-radius: 0.75rem; background: #152133; box-shadow: 0 1rem 4rem rgb(0 0 0 / 55%); }
 .persistence-dialog button { margin-right: 0.55rem; margin-top: 0.5rem; }
+.pdf-export-controls { margin-top: 0.5rem; }
+.pdf-export-panel { max-height: 80vh; overflow: auto; }
+.pdf-export-form { display: grid; gap: 0.8rem; }
+.pdf-export-form fieldset { display: grid; gap: 0.45rem; border: 1px solid #3b4a5e; border-radius: 0.5rem; }
+.pdf-export-form legend, .pdf-export-form label { color: #b7c5d7; font-size: 0.85rem; }
+.pdf-export-form p { margin: 0; }
+.pdf-export-choice { display: flex; align-items: center; gap: 0.45rem; }
+.pdf-export-choice input { min-height: auto; width: auto; }
+.pdf-export-error { color: #f1a59c; font-weight: 700; }
+.pdf-export-ready { display: grid; gap: 0.45rem; color: #b9e7ce; font-weight: 700; }
+.pdf-export-warnings { color: #f2d580; font-weight: 400; }
+.pdf-export-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; }
 .inspection-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .inspection-table caption { padding: 0 0 0.75rem; text-align: left; color: #b7c5d7; }
 .inspection-table th, .inspection-table td { padding: 0.55rem; border-top: 1px solid #3b4a5e; text-align: left; vertical-align: top; }

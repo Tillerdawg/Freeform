@@ -13,6 +13,7 @@ import { openPersistenceAdapter, type PersistenceAdapter } from './idb-adapter';
 import { createRecoveryService, type RecoveryCandidate, type RecoveryService } from './recovery-service';
 import { createVersionHistoryStore, type CheckpointRecord, type VersionHistoryStore } from './version-history-store';
 import { readWorkingCopy, writeWorkingCopy, type WriteOutcome } from './working-copy-store';
+import { createPdfExportUi } from '../pdf/export-ui';
 
 export interface PersistenceUi {
   readonly store: CommandStore;
@@ -66,6 +67,9 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
     scheduler?.noteEdit();
     refreshControls();
   });
+  // The export controller is intentionally outside editor redraws. It retains
+  // only immutable export bytes and form drafts, never persistence state.
+  const pdfExport = createPdfExportUi(observed);
 
   function start(): void {
     root.addEventListener('keydown', handleShortcut);
@@ -221,6 +225,7 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
       text('p', 'Ctrl+Y or Ctrl+Shift+Z (Windows/Linux) · Cmd+Shift+Z (Mac): Redoes the last thing you undid. Like Undo, this doesn\'t apply while you\'re typing in a text field — your browser handles redo there.'),
     );
     section.append(shortcuts);
+    section.append(pdfExport.render());
     const dynamic = element('div');
     dynamic.id = 'persistence-dynamic';
     populateDynamicControls(dynamic);

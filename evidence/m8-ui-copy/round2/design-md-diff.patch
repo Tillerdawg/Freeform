@@ -1,0 +1,15 @@
+Verbatim mcp__patch tool-produced diff for decisions/m8-pdf-export-design.md
+(no pre-edit snapshot file was separately saved before this single edit; this
+diff is the tool's own reported before/after at the moment of the edit, not a
+manual reconstruction — captured immediately after the patch call returned).
+
+--- a/decisions/m8-pdf-export-design.md
++++ b/decisions/m8-pdf-export-design.md
+@@ -159,6 +159,8 @@
+ The export panel needs a keyboard-operable `form` with a radio/selectable export kind, full-show/range controls with labelled set selectors, transition-frame opt-in controls, performer multi-select/checklist, submit button, cancel/close control, warning summary linked to warning detail, and a polite status/live region. Form validation must place focus on the first invalid control; an export error must be associated with its control where applicable. Focus order must remain logical when transition options appear. The control must not use color as the only warning signal.
+ 
+ The implementation must call the browser download in the actual submit user gesture path where browser policy requires it. If asynchronous generation causes that gesture to expire, show an explicit "download ready" action that is keyboard-operable; do not claim automatic download succeeded. Test fallback where direct download dispatch throws or browser capabilities are unavailable.
++
++> **Superseded for M8.4 by an explicit Optimus decision recorded on `t_fcfb6173` (2026-10-03):** for the PDF export feature specifically, always show the "download ready" action after every successful generation and dispatch only on a fresh Download-button gesture — never attempt a same-gesture direct dispatch on promise resolution. This removes the above paragraph's implied same-gesture-first/expiry-fallback branching for this feature only; the fallback behavior it describes becomes the only behavior. See `decisions/m8-pdf-export-copy.md` §4.1 for the exact copy and `src/pdf/download.ts` for the implemented anchor-click adapter. This note does not change the paragraph above as a general requirement for other features that may reuse it.
+ 
+ ## Recommended implementation cards (Optimus-owned; do not create duplicates here)

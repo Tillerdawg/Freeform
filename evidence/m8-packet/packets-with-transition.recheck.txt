@@ -1,0 +1,28 @@
+          Show: Café Русский é ������
+          A — Русский é
+          Notes:
+          Stage left on count 8. Watch the hash.
+          Set 1 — starts at count 0
+          Coordinate: (0, 0) FU — On Side 1 0, On Front Sideline
+           A
+          Set 2 — starts at count 16
+          Coordinate: (28800, 14400) FU — On Side 1 10, 8 Steps Behind Front Sideline
+                         A
+          Set 1    Set 2 — FLOAT, 16 counts
+          Coordinate: (28800, 14400) FU — On Side 1 10, 8 Steps Behind Front Sideline
+          Movement: 7.155 to 5 over 16 counts
+                         A
+          Page 1 of 1
+          Show: Café Русский é ������
+          B2 — No Notes Performer
+          Set 1 — starts at count 0
+          Coordinate: (72000, 38400) FU — On Side 1 25, 7 Steps In Front Of Front Hash
+                                               B2
+          Set 2 — starts at count 16
+          Coordinate: (72000, 38400) FU — On Side 1 25, 7 Steps In Front Of Front Hash
+                                               B2
+          Set 1    Set 2 — FLOAT, 16 counts
+          Coordinate: (72000, 38400) FU — On Side 1 25, 7 Steps In Front Of Front Hash
+          Movement: No movement over 16 counts
+                                               B2
+          Page 1 of 1

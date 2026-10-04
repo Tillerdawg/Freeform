@@ -1,0 +1,349 @@
+[
+  {
+    "name": "multipage",
+    "valid": true,
+    "immutable": true,
+    "ok": true,
+    "pages": [
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 1 of 2  A — Alpha  Notes:  ONCE ONLY  Fresh 0 — starts at count 0  Coordinate: (0, 0) FU — On Side 1 0, On Front Sideline  A  Fresh 1 — starts at count 16  Coordinate: (14400, 0) FU — On Side 1 5, On Front Sideline  A  Fresh 2 — starts at count 32  Coordinate: (28800, 0) FU — On Side 1 10, On Front Sideline  A",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 2 of 2  Fresh 3 — starts at count 48  Coordinate: (43200, 0) FU — On Side 1 15, On Front Sideline  A  Fresh 4 — starts at count 64  Coordinate: (57600, 0) FU — On Side 1 20, On Front Sideline  A  Fresh 0   Fresh 1 — FLOAT, 16 counts  Coordinate: (14400, 0) FU — On Side 1 5, On Front Sideline  Movement: 16.000 to 5 over 16 counts  A",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 1 of 2  B — Beta  Fresh 0 — starts at count 0  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 1 — starts at count 16  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 2 — starts at count 32  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 2 of 2  Fresh 3 — starts at count 48  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 4 — starts at count 64  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 0   Fresh 1 — FLOAT, 16 counts  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  Movement: No movement over 16 counts  B",
+        "minTextY": 30
+      }
+    ],
+    "warnings": [],
+    "sha256": "99ca114e66628d98e6f5d857a5bf212a1b2b953f8b37a27c15ee94152e16d50e"
+  },
+  {
+    "name": "scope-overlap",
+    "valid": true,
+    "immutable": true,
+    "ok": true,
+    "pages": [
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 1 of 2  A — Alpha  Notes:  ONCE ONLY  Fresh 0 — starts at count 0  Coordinate: (0, 0) FU — On Side 1 0, On Front Sideline  A  A PRIVATE  Fresh 1 — starts at count 16  Coordinate: (14400, 0) FU — On Side 1 5, On Front Sideline  A  A PRIVATE  Fresh 2 — starts at count 32  Coordinate: (28800, 0) FU — On Side 1 10, On Front Sideline  A  A PRIVATE",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 2 of 2  Fresh 3 — starts at count 48  Coordinate: (43200, 0) FU — On Side 1 15, On Front Sideline  A  A PRIVATE  Fresh 4 — starts at count 64  Coordinate: (57600, 0) FU — On Side 1 20, On Front Sideline  A  A PRIVATE  Fresh 0   Fresh 1 — FLOAT, 16 counts  Coordinate: (14400, 0) FU — On Side 1 5, On Front Sideline  Movement: 16.000 to 5 over 16 counts  A  A PRIVATE",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 1 of 2  B — Beta  Fresh 0 — starts at count 0  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  B PRIVATE  Fresh 1 — starts at count 16  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 2 — starts at count 32  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 2 of 2  Fresh 3 — starts at count 48  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 4 — starts at count 64  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 0   Fresh 1 — FLOAT, 16 counts  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  Movement: No movement over 16 counts  B",
+        "minTextY": 30
+      }
+    ],
+    "warnings": [
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "s0"
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "dot",
+        "noteBounds": {
+          "x": 36,
+          "y": 506,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 32,
+          "y": 502,
+          "width": 8,
+          "height": 8
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "s1"
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "dot",
+        "noteBounds": {
+          "x": 36,
+          "y": 316,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 59,
+          "y": 312,
+          "width": 8,
+          "height": 8
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "s0"
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "rank-label",
+        "noteBounds": {
+          "x": 36,
+          "y": 506,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 41,
+          "y": 503,
+          "width": 5.1,
+          "height": 5.74
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "s1"
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "rank-label",
+        "noteBounds": {
+          "x": 36,
+          "y": 316,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 68,
+          "y": 313,
+          "width": 5.1,
+          "height": 5.74
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 1,
+        "context": {
+          "kind": "active-transition",
+          "transitionId": "float-0",
+          "count": 16
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "dot",
+        "noteBounds": {
+          "x": 36,
+          "y": 174,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 59,
+          "y": 170,
+          "width": 8,
+          "height": 8
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 1,
+        "context": {
+          "kind": "active-transition",
+          "transitionId": "float-0",
+          "count": 16
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "rank-label",
+        "noteBounds": {
+          "x": 36,
+          "y": 174,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 68,
+          "y": 171,
+          "width": 5.1,
+          "height": 5.74
+        }
+      }
+    ],
+    "sha256": "8a8a2d4624325f0d80b3ce3b4330bc3cad6aec70b58c49709b4f8a9ae35776b0"
+  },
+  {
+    "name": "scope-no-overlap",
+    "valid": true,
+    "immutable": true,
+    "ok": true,
+    "pages": [
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 1 of 2  A — Alpha  Notes:  ONCE ONLY  Fresh 0 — starts at count 0  Coordinate: (0, 0) FU — On Side 1 0, On Front Sideline  A  A PRIVATE  Fresh 1 — starts at count 16  Coordinate: (14400, 0) FU — On Side 1 5, On Front Sideline  A  A PRIVATE  Fresh 2 — starts at count 32  Coordinate: (28800, 0) FU — On Side 1 10, On Front Sideline  A  A PRIVATE",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 2 of 2  Fresh 3 — starts at count 48  Coordinate: (43200, 0) FU — On Side 1 15, On Front Sideline  A  A PRIVATE  Fresh 4 — starts at count 64  Coordinate: (57600, 0) FU — On Side 1 20, On Front Sideline  A  A PRIVATE  Fresh 0   Fresh 1 — FLOAT, 16 counts  Coordinate: (14400, 0) FU — On Side 1 5, On Front Sideline  Movement: 16.000 to 5 over 16 counts  A  A PRIVATE",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 1 of 2  B — Beta  Fresh 0 — starts at count 0  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  B PRIVATE  Fresh 1 — starts at count 16  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 2 — starts at count 32  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B",
+        "minTextY": 30
+      },
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Fresh packet review  Page 2 of 2  Fresh 3 — starts at count 48  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 4 — starts at count 64  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  B  Fresh 0   Fresh 1 — FLOAT, 16 counts  Coordinate: (144000, 76800) FU — On 50, 14.25 Steps Behind Front Hash  Movement: No movement over 16 counts  B",
+        "minTextY": 30
+      }
+    ],
+    "warnings": [],
+    "sha256": "fb920fdc3a557191d787a8248d185218f04f555006348fcfdbe2318d09156445"
+  },
+  {
+    "name": "long-identity",
+    "valid": true,
+    "immutable": true,
+    "ok": false,
+    "code": "writer-failed",
+    "messageKey": "pdfExport.error.writerFailed",
+    "detail": []
+  },
+  {
+    "name": "ftl-member",
+    "valid": true,
+    "immutable": true,
+    "ok": true,
+    "pages": [
+      {
+        "size": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Positive turning FTL  Page 1 of 1  T5 — E  Set 1 — starts at count 0  Coordinate: (144000, 51200) FU — On 50, On Front Hash  T5  Set 2 — starts at count 16  Coordinate: (129600, 36800) FU — On Side 1 45, 8 Steps In Front Of Front Hash  T5  Set 1   Set 2 — FTL, 16 counts  Coordinate: (129600, 36800) FU — On Side 1 45, 8 Steps In Front Of Front Hash  Movement: FTL common 8.000 to 5 over 16 counts  T5",
+        "minTextY": 30
+      }
+    ],
+    "warnings": [],
+    "sha256": "b4f0482f6bf639eca83d1c19adf46c3befdaff3c7ed80abc59c1482c718d4f1a"
+  },
+  {
+    "name": "ftl-outsider",
+    "valid": "FtlValidationError: FTL_MEMBER_COVERAGE: FTL formation must include every active performer exactly once.",
+    "immutable": true,
+    "ok": false,
+    "code": "document-invalid",
+    "messageKey": "pdfExport.error.documentInvalid.ftl",
+    "detail": []
+  },
+  {
+    "name": "chrome-overflow",
+    "valid": true,
+    "immutable": true,
+    "ok": false,
+    "code": "writer-failed",
+    "messageKey": "pdfExport.error.writerFailed",
+    "detail": []
+  },
+  {
+    "name": "note-overflow",
+    "valid": true,
+    "immutable": true,
+    "ok": false,
+    "code": "note-layout-overflow",
+    "messageKey": "pdfExport.error.noteLayoutOverflow",
+    "detail": []
+  }
+]

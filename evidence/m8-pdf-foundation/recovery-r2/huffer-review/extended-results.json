@@ -1,0 +1,199 @@
+[
+  {
+    "name": "valid complete example",
+    "canonical": "accepted",
+    "result": {
+      "ok": true,
+      "pages": 2
+    }
+  },
+  {
+    "name": "invalid $schema https: bad uri",
+    "canonical": {
+      "name": "FreeformFileError",
+      "code": "SCHEMA"
+    },
+    "result": {
+      "ok": false,
+      "code": "document-invalid",
+      "messageKey": "pdfExport.error.documentInvalid.schema",
+      "detail": []
+    }
+  },
+  {
+    "name": "invalid $schema https://example.com/%ZZ",
+    "canonical": {
+      "name": "FreeformFileError",
+      "code": "SCHEMA"
+    },
+    "result": {
+      "ok": false,
+      "code": "document-invalid",
+      "messageKey": "pdfExport.error.documentInvalid.schema",
+      "detail": []
+    }
+  },
+  {
+    "name": "invalid $schema https://[broken",
+    "canonical": {
+      "name": "FreeformFileError",
+      "code": "SCHEMA"
+    },
+    "result": {
+      "ok": false,
+      "code": "document-invalid",
+      "messageKey": "pdfExport.error.documentInvalid.schema",
+      "detail": []
+    }
+  },
+  {
+    "name": "ftl-end-mismatch",
+    "canonical": {
+      "name": "FtlValidationError",
+      "code": "FTL_END_MISMATCH"
+    },
+    "result": {
+      "ok": false,
+      "code": "document-invalid",
+      "messageKey": "pdfExport.error.documentInvalid.ftl",
+      "detail": []
+    }
+  },
+  {
+    "name": "ftl-offset-order",
+    "canonical": {
+      "name": "FtlValidationError",
+      "code": "FTL_OFFSET_ORDER"
+    },
+    "result": {
+      "ok": false,
+      "code": "document-invalid",
+      "messageKey": "pdfExport.error.documentInvalid.ftl",
+      "detail": []
+    }
+  },
+  {
+    "name": "insufficient-ftl-path",
+    "canonical": {
+      "name": "FtlValidationError",
+      "code": "INSUFFICIENT_FTL_PATH"
+    },
+    "result": {
+      "ok": false,
+      "code": "document-invalid",
+      "messageKey": "pdfExport.error.documentInvalid.ftl",
+      "detail": []
+    }
+  },
+  {
+    "name": "valid URI urn:freeform:example",
+    "canonical": "accepted",
+    "result": {
+      "ok": true,
+      "pages": 2
+    }
+  },
+  {
+    "name": "valid URI https://[2001:db8::1]/x",
+    "canonical": "accepted",
+    "result": {
+      "ok": true,
+      "pages": 2
+    }
+  },
+  {
+    "name": "stale missing member",
+    "canonical": {
+      "name": "FtlValidationError",
+      "code": "FTL_MISSING_MEMBER"
+    },
+    "result": {
+      "ok": false,
+      "code": "document-invalid",
+      "messageKey": "pdfExport.error.documentInvalid.ftl",
+      "detail": []
+    }
+  },
+  {
+    "name": "structural missing ftl",
+    "canonical": {
+      "name": "FreeformFileError",
+      "code": "SCHEMA"
+    },
+    "result": {
+      "ok": false,
+      "code": "document-invalid",
+      "messageKey": "pdfExport.error.documentInvalid.schema",
+      "detail": []
+    }
+  },
+  {
+    "name": "valid ftl-path-non-horizontal",
+    "canonical": "accepted",
+    "result": {
+      "ok": true,
+      "pages": 2
+    }
+  },
+  {
+    "name": "valid ftl-path-multi-point",
+    "canonical": "accepted",
+    "result": {
+      "ok": true,
+      "pages": 2
+    }
+  },
+  {
+    "name": "download append",
+    "result": {
+      "ok": false,
+      "code": "download-dispatch-failed"
+    },
+    "calls": [
+      "create",
+      "append",
+      "remove",
+      "revoke"
+    ]
+  },
+  {
+    "name": "download click",
+    "result": {
+      "ok": false,
+      "code": "download-dispatch-failed"
+    },
+    "calls": [
+      "create",
+      "append",
+      "click",
+      "remove",
+      "revoke"
+    ]
+  },
+  {
+    "name": "download remove",
+    "result": {
+      "ok": true
+    },
+    "calls": [
+      "create",
+      "append",
+      "click",
+      "remove",
+      "revoke"
+    ]
+  },
+  {
+    "name": "download revoke",
+    "result": {
+      "ok": true
+    },
+    "calls": [
+      "create",
+      "append",
+      "click",
+      "remove",
+      "revoke"
+    ]
+  }
+]

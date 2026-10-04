@@ -1,0 +1,68 @@
+[
+  {
+    "name": "Huffer round2 app-director-full-show.pdf",
+    "sha256": "60ea16cf644159c716b88852a3ae463b8bff0633492b449f11d8f50514c62fbd",
+    "pages": [
+      {
+        "view": [
+          0,
+          0,
+          792,
+          612
+        ],
+        "text": "Huffer round2 app  Set 1 — starts at count 0  Static set  Freeform — Director pages  Set 1 — starts at count 0  Page 1 of 5  10   10 20   20 30   30 40   40 50  T1"
+      },
+      {
+        "view": [
+          0,
+          0,
+          792,
+          612
+        ],
+        "text": "Huffer round2 app  Set 2 — starts at count 16  Static set  Freeform — Director pages  Set 2 — starts at count 16  Page 2 of 5  10   10 20   20 30   30 40   40 50  T1"
+      },
+      {
+        "view": [
+          0,
+          0,
+          792,
+          612
+        ],
+        "text": "Huffer round2 app  Set 1   Set 2, count 0 of 16  Transition  Freeform — Director pages  Set 1   Set 2, count 0 of 16  Page 3 of 5  10   10 20   20 30   30 40   40 50  T1"
+      },
+      {
+        "view": [
+          0,
+          0,
+          792,
+          612
+        ],
+        "text": "Huffer round2 app  Set 1   Set 2, count 8 of 16  Transition  Freeform — Director pages  Set 1   Set 2, count 8 of 16  Page 4 of 5  10   10 20   20 30   30 40   40 50  T1"
+      },
+      {
+        "view": [
+          0,
+          0,
+          792,
+          612
+        ],
+        "text": "Huffer round2 app  Set 1   Set 2, count 16 of 16  Transition  Freeform — Director pages  Set 1   Set 2, count 16 of 16  Page 5 of 5  10   10 20   20 30   30 40   40 50  T1"
+      }
+    ]
+  },
+  {
+    "name": "Huffer round2 app-performer-packets-full-show.pdf",
+    "sha256": "358e5761eb065c60559dda69368dc5c38fc2bc143f43c16e056be8fc5eab4ac1",
+    "pages": [
+      {
+        "view": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Huffer round2 app  Page 1 of 1  T1 — T1  Set 1 — starts at count 0  Coordinate: (144000, 0) FU — On 50, On Front Sideline  T1  Set 2 — starts at count 16  Coordinate: (144000, 0) FU — On 50, On Front Sideline  T1  Set 1   Set 2 — FLOAT, 16 counts  Coordinate: (144000, 0) FU — On 50, On Front Sideline  Movement: No movement over 16 counts  T1"
+      }
+    ]
+  }
+]

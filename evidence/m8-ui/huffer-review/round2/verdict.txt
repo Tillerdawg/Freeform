@@ -1,0 +1,106 @@
+VERDICT: FAIL — M8.4 round 2, t_2b35b811
+Reviewer: Huffer. No implementation edits, commits, pushes, or publication.
+Reviewed dirty content on main, HEAD 3df1916315c43e7b4617bd037b62f76a3d0edc9a.
+HEAD is not the delivered source identity. Full dirty/untracked path hashes: source-identity.json.
+
+Verification plan: comment363 maps AC1-7 and prior F1-F6 to independent evidence.
+
+Blocking findings:
+R2-F2 — incomplete focus restoration (AC1/AC4, prior F2).
+  src/pdf/export-ui.ts:69-77 only captures an active element having a nonempty id,
+  then returns without any fallback when target is missing. Select all/Clear all
+  are built at :207-211 without IDs; warning and technical-details summaries likewise
+  have no stable target. Activating Select all while focused on it rebuilds that
+  button and leaves BODY focused. The next keyboard step therefore loses position.
+  Independent real production Chrome145 run: browser-findings.json,
+  real-app-select-all-focus -> {id:"",tag:"BODY"}. Independent DOM diagnostic also
+  reproduces summary -> BODY on ui.render(). Radio and ready focus now pass.
+  Required correction: restore the same enabled logical control for every inside
+  target, including Select all/Clear all and disclosure summaries; when truly absent
+  or disabled, use the approved heading fallback, never BODY. Preserve outside/closed
+  no-steal behavior, ready-before-warning priority and persistent status identity.
+  Retest keyboard activation of both selection buttons, both summary types, disabled/
+  removed target, and actual shell mount/redraw, not only named radio controls.
+
+R2-F6 — prior required integration/persistence/baseline evidence is still missing
+  (AC2/AC3/AC6, prior F6). Wheeljack report.txt:99-109 explicitly defers real-app FTL
+  and zero-overlap coverage, and claims an existing catch-path unit test that is not
+  in the six src/pdf/export-ui.test.ts tests. Fresh reviewer simulated writer-failure
+  probe passes, but does not establish browser font/writer/validation failures or
+  attributable full persistence state preservation.
+  Neither the new six tests nor browser runtime demonstrates IndexedDB/history/backup/
+  explicit-handle preservation with attributable spies distinguishing timer/edit writes.
+  No normative representative 500-performer/250-set/249-float/10,000-count/20-annotations-
+  per-set export usability duration is supplied; a one-performer two-set duration is
+  not that baseline. This requests export usability measurements, not M12 editor
+  benchmark thresholds or a new invented PDF time budget.
+  Required correction: finish the original mandatory matrix, without substituting
+  renderer-only acceptance: actual app-control FTL member/outsider packet filtering,
+  known overlap and zero controls with frozen-warning identity, pending edit/close/
+  reopen and stale supersession, validation/font/writer and Blob/URL/anchor fault
+  controls at real seams, and attributable persistence/no-mutation assertions across
+  success and errors. Retain actual fixtures, commands, actions/assertions, PDFs/text/
+  hashes/page sizes and console/network logs. No shipped public debug hooks. Label
+  simulated faults as such. Do not claim F6 fixed while explicitly deferring it.
+
+Independent positives / prior finding disposition:
+F1: fixed. Concrete 1.5,-08,17,08/8 copy and first-invalid count focus pass fresh probes.
+F2: partially fixed. Stable host/status identity, radio restoration, ready focus,
+    error status focus, retained ready reopen, outside/closed no-steal positive controls
+    pass; idless targets remain broken as above.
+F3: fixed in exercised case. Narrowed range immediately removes ineligible row and
+    rejects retained explicit frame request rather than silently dropping it.
+F4: fixed. Simulated URL failure retains action/bytes; fresh diagnostic retries without
+    writer rerun and preserves exact store object. Real Chrome fault+recovery passes.
+F5: fixed in exercised case. Pending document replacement followed by close/reopen
+    keeps original Set 0 warning context while live edit remains; no outside-focus theft.
+F6: partial, not complete. Production lazy and offline controls independently reproduced.
+
+AC-level outcome:
+AC1 partial: count/range copy passed; selection-button focus fails.
+AC2 partial: frozen snapshot/store identity positive controls pass; full attributable
+    persistence/history/backup/explicit-handle fault matrix unproved.
+AC3 partial: lazy chunks and offline repeat passed; normative baseline export measurement missing.
+AC4 partial: named-target lifecycle passed; idless target restoration fails; broad matrix incomplete.
+AC5 exercised URL failure/retry and actual downloads pass; full Blob/anchor matrix incomplete.
+AC6 actual director+packet artifacts pass text/first-page visual inspection; FTL/overlap/
+    zero/failure/persistence browser matrix incomplete.
+AC7 full gates pass independently; current dirty-source hashes retained, no commit authorized.
+
+Executed checks and evidence:
+  npm test -> exit0,31 files/268 tests (test.log).
+  npm run test:docs -> exit0 (docs.log).
+  npm run build -> exit0 (build.log).
+  git diff --check -> exit0 (diff.log); separately preserved gates.json.
+  npx vitest run --config evidence/m8-ui/huffer-review/round2/probe.config.mjs
+    -> final exit0,8 diagnostic tests (probe-retest.log). Two passing diagnostics
+       intentionally assert reproduced bad BODY focus; they are not acceptance tests.
+    Initial probe exit1 (probe.log) arose from reviewer synchronous focus setup queuing
+    prior redraw microtasks; amended reviewer probe to await redraw and focus submit
+    as actual user interaction does. Production code untouched; initial log preserved.
+  node evidence/m8-ui/huffer-review/round2/browser.mjs -> exit0 (browser.log).
+    Chrome/145.0.7632.6, revision @47e20adcc15fc15f01825aa17e570c8f5492ac0f.
+    Production app http://127.0.0.1:4173/ served by existing preview; Chrome exact launch
+    arguments and isolated scratch profile in browser.mjs. Fixture created through
+    app wizard/buttons: one T1 performer,two sets,one16-count float; director0/8/16.
+    Initial requests: index JS/CSS only; PDF writer/font chunks load after explicit Export.
+    Offline CDP Network.emulateNetworkConditions after writer/assets loaded -> ready
+    in204ms, no new automatic download. Same page load, not offline page reload.
+    Retained-ready close/reopen focuses Download. Actual radio/decimal/ready/URL-retry
+    findings retained. Native picker cancellation remains unobservable with anchor.
+    Full raw browser events retained in browser-events.json, including runtime/network.
+  node evidence/m8-ui/huffer-review/round2/inspect.mjs -> exit0.
+    Two independently downloaded actual application PDFs, all-page PDFJS text/MediaBox
+    and SHA256 in pdf-inspection.json:
+      director:60ea16cf644159c716b88852a3ae463b8bff0633492b449f11d8f50514c62fbd
+      packet:358e5761eb065c60559dda69368dc5c38fc2bc143f43c16e056be8fc5eab4ac1
+    Director5pages792x612,0/8/16 frames; packet1page612x792,rank/name,coordinates,
+    FLOAT16-count stationary movement and local footer all present.
+    Ghostscript png16m -r90 -dFirstPage=1 -dLastPage=1 -> exit0 for each actual download;
+    independently viewed director.png and performer-packets.png. Full field/title/
+    footer and packet identity/entries/coordinates readable, no observed clipping.
+
+Scope/limits: PDFs untagged; no manual screen-reader or cross-browser/platform acceptance
+claimed. No native-picker cancellation/disk-completion signal claimed. No implementation
+repairs. Return same card to Wheeljack; root t_673976d6 remains gated. No duplicate review
+child or expanded M10-M12 work.

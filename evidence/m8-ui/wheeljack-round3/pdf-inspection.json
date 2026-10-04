@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Five Person FTL Fixture-performer-packets-full-show.pdf",
+    "sha256": "2212646f32babc4fb4ab5cfccdc04b5a5f29fd5551ea9f86237ac9ec72831c44",
+    "pages": [
+      {
+        "view": [
+          0,
+          0,
+          612,
+          792
+        ],
+        "text": "Show: Five Person FTL Fixture  Page 1 of 1  T5 — E  Notes:  FTL leader  Set 1 — starts at count 0  Coordinate: (144000, 51200) FU — On 50, On Front Hash  T5  Set 2 (FTL derived) — starts at count 16  Coordinate: (115200, 51200) FU — On Side 1 40, On Front Hash  T5  Set 1   Set 2 (FTL derived) — FTL, 16 counts  Coordinate: (115200, 51200) FU — On Side 1 40, On Front Hash  Movement: FTL common 8.000 to 5 over 16 counts  T5  Leader: hold energy through  count 16."
+      }
+    ]
+  }
+]

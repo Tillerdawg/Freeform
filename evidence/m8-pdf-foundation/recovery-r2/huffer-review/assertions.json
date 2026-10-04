@@ -1,0 +1,10 @@
+{
+  "uriRegexIdenticalToOriginalPersistence": true,
+  "extendedCases": 17,
+  "historicalBoundaryCasesPerProcess": 11,
+  "sourceIdentityRechecked": true,
+  "qualifiedFiveLetterPages": true,
+  "allUnicodeTokensExtracted": true,
+  "allFourFreshGeneratedPdfHashesEqual": true,
+  "noProductionFoundationStorePersistenceImports": true
+}

@@ -1,0 +1,24 @@
+{
+  "source_hashes": {
+    "src/pdf/pdf-export.ts": "4100af51eec74c9268410322909942c6b27e641db9d31e1603639d18e181010f",
+    "src/pdf/pdf-export.test.ts": "977ebbde9f3662b296f3579f1efe8a26db2039815eadf74da1818f5e6850d51a",
+    "src/pdf/contracts.ts": "b9ff347908c6f8fce5a8e1721afa6e62be6727851a1474c8139e3451d364fd1f",
+    "src/pdf/geometry.ts": "d54e27669c01448b4cfa4db0b0ea1dc9b0ba6b558c163dfc1c8f16afb1365802"
+  },
+  "matches_parent": true,
+  "copy_sha256": "cdfc63e37785e59081d02a85b1dd6bd847ab1ee2d70a2aeff7dc90b5d4d75fa2",
+  "gates": [
+    {
+      "command": "npm run test:docs",
+      "exit": 0,
+      "stdout": "PASS: genuine Draft 2020-12 schema validation (Ajv subprocess) of the positive fixture\nPASS: schema contract + semantic fixture validation\nPASS: 5 performers, 2 sets, 1 16-count FTL; each moves 28800 FU (10 yd, 8.0-to-5)\nPASS: canonical NFHS constants and derived FTL endpoints match fixture\nPASS: annotation fixture covers set-1/set-2, transition, and show scopes\nPASS: collision override audit shape and canonical-pair semantic rejection\nPASS: step-size band classification (worked vectors, boundaries, stationary, regression)\nPASS: coordinate horizontal-component edge cases (on-line, splitting, near-miss)\nPASS: general FTL arc-length evaluation, coverage rejection, and 1-FU tolerance\n\nfixture                                              result\n----------------------------------------------------------------------------------------------------\nftl-path-multi-point.freeform                        [ACCEPTED OK] ACCEPTED\nftl-path-non-horizontal.freeform                     [ACCEPTED OK] ACCEPTED\n\nPASS: all named positive FTL fixtures correctly accepted\n\nfixture                            checked by result\n----------------------------------------------------------------------------------------------------\nmalformed-id.freeform              schema     [REJECTED OK] schema validation failed: [{\"instancePath\": \"/performers/0/id\", \"schemaPath\": \"#/$defs/id/pattern\", \nout-of-bounds-dot.freeform         schema     [REJECTED OK] schema validation failed: [{\"instancePath\": \"/sets/0/positions/a/x\", \"schemaPath\": \"#/$defs/dot/prop\nmissing-ftl-data.freeform          schema     [REJECTED OK] schema validation failed: [{\"instancePath\": \"/transitions/0\", \"schemaPath\": \"#/properties/transition\nunsupported-major-version.freeform semantic   [REJECTED OK] unsupported major/format version: '2.0.0' (this validator only accepts 1.0.0)\nduplicate-transition-id.freeform   semantic   [REJECTED OK] duplicate transition IDs\ninsufficient-ftl-path.freeform     semantic   [REJECTED OK] ftl-1: INSUFFICIENT_FTL_PATH -- path covers [0,44000] FU but offsets+distance require [0,57600] FU\nftl-end-mismatch.freeform          semantic   [REJECTED OK] ftl-1: FTL_END_MISMATCH -- a expectedEndPositions disagrees with derived end by more than 1 FU\nftl-offset-order.freeform          semantic   [REJECTED OK] ftl-1: FTL_OFFSET_ORDER -- offsets are not monotonic in leader-then-follower order\nftl-path-multi-point.freeform      semantic   [REJECTED OK] ftl-1: INSUFFICIENT_FTL_PATH -- path covers [0,50400] FU but offsets+distance require [0,57600] FU\nftl-path-non-horizontal-insufficient-coverage.freeform semantic   [REJECTED OK] ftl-1: INSUFFICIENT_FTL_PATH -- path covers [0,43200] FU but offsets+distance require [0,57600] FU\nannotation-unknown-set-scope.freeform semantic   [REJECTED OK] annotation bad-set-scope: UNKNOWN_ANNOTATION_SET_SCOPE 'set-404'\nannotation-unknown-transition-scope.freeform semantic   [REJECTED OK] annotation bad-transition-scope: UNKNOWN_ANNOTATION_TRANSITION_SCOPE 'transition-404'\nannotation-invalid-scope.freeform  schema     [REJECTED OK] schema validation failed: [{\"instancePath\": \"/annotations/0\", \"schemaPath\": \"#/oneOf/0/required\", \"k\n\nPASS: all named negative fixtures correctly rejected\nPASS: exact coordinate grammar (Side 1, Side 2, 50, splitting, inside/outside, all landmark ties)\nPASS: deterministic FTL projection tie-break (leader and formation-order prior offset)\nPASS: collision sampling numeric vector (base t=k/8; adaptive t=j/24; one-yard warning)\nPASS: prose, pseudocode, worked vectors, and executable documentation tests agree\nPASS: algorithm_edge_tests.py suite (coordinate grammar, FTL projection tie-break, collision sampling, spec/grammar agreement) executed via import\n",
+      "stderr": "npm notice run freeform@0.1.0 test:docs\nnpm notice run node scripts/run-docs-validation.mjs\n"
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

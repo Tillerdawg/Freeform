@@ -1,0 +1,53 @@
+{
+  "extractor": "pdfjs-dist@5.4.149",
+  "artifacts": [
+    {
+      "file": "evidence/m8-ui/downloads/M8 Browser Evidence-director-full-show.pdf",
+      "sha256": "abfd8b147889c74f159f735cce294f848e673d7f7639244045926e1ebd488202",
+      "pages": 5,
+      "sizes": [
+        {
+          "width": 792,
+          "height": 612
+        },
+        {
+          "width": 792,
+          "height": 612
+        },
+        {
+          "width": 792,
+          "height": 612
+        },
+        {
+          "width": 792,
+          "height": 612
+        },
+        {
+          "width": 792,
+          "height": 612
+        }
+      ],
+      "text": [
+        "M8 Browser EvidenceSet 1 — starts at count 0Static setFreeform — Director pagesSet 1 — starts at count 0Page 1 of 510 1020 2030 3040 4050T1",
+        "M8 Browser EvidenceSet 2 — starts at count 16Static setFreeform — Director pagesSet 2 — starts at count 16Page 2 of 510 1020 2030 3040 4050T1",
+        "M8 Browser EvidenceSet 1 Set 2, count 0 of 16TransitionFreeform — Director pagesSet 1 Set 2, count 0 of 16Page 3 of 510 1020 2030 3040 4050T1",
+        "M8 Browser EvidenceSet 1 Set 2, count 8 of 16TransitionFreeform — Director pagesSet 1 Set 2, count 8 of 16Page 4 of 510 1020 2030 3040 4050T1",
+        "M8 Browser EvidenceSet 1 Set 2, count 16 of 16TransitionFreeform — Director pagesSet 1 Set 2, count 16 of 16Page 5 of 510 1020 2030 3040 4050T1"
+      ]
+    },
+    {
+      "file": "evidence/m8-ui/downloads/M8 Browser Evidence-performer-packets-full-show.pdf",
+      "sha256": "4912c675992e83b980ce91cb0153f346d5db659fb36c337407d6c14a634bf037",
+      "pages": 1,
+      "sizes": [
+        {
+          "width": 612,
+          "height": 792
+        }
+      ],
+      "text": [
+        "Show: M8 Browser EvidencePage 1 of 1T1 — T1Set 1 — starts at count 0Coordinate: (144000, 0) FU — On 50, On Front SidelineT1Set 2 — starts at count 16Coordinate: (144000, 0) FU — On 50, On Front SidelineT1Set 1 Set 2 — FLOAT, 16 countsCoordinate: (144000, 0) FU — On 50, On Front SidelineMovement: No movement over 16 countsT1"
+      ]
+    }
+  ]
+}

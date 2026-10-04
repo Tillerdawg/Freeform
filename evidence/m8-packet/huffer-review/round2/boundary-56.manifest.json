@@ -1,0 +1,55 @@
+{
+  "manifest": {
+    "schemaVersion": "m8.2",
+    "contentFingerprint": "b194651cba09731a8b0186b4bfc40cceaeb7afe83d5eb8b3c9b602139e250ba0",
+    "request": {
+      "kind": "performer-packet",
+      "performerIds": [
+        "a"
+      ],
+      "scope": {
+        "kind": "inclusive-set-range",
+        "firstSetId": "s0",
+        "lastSetId": "s0"
+      }
+    },
+    "pages": [
+      {
+        "kind": "performer-packet",
+        "width": 612,
+        "height": 792,
+        "performerId": "a",
+        "setIds": [],
+        "annotationIds": [],
+        "packetEntries": []
+      },
+      {
+        "kind": "performer-packet",
+        "width": 612,
+        "height": 792,
+        "performerId": "a",
+        "setIds": [
+          "s0"
+        ],
+        "annotationIds": [],
+        "packetEntries": [
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s0"
+            },
+            "annotationIds": []
+          }
+        ]
+      }
+    ],
+    "language": "en-US",
+    "fontAssetHashes": [
+      "18e2e5b23a9bc5e8e636d6c7984b8ac6635aefc1c497ed1c5012f3c637761b91",
+      "e199c2ac3c8bd6c99ec9e44cc3363128d86c94eed54d2f22d5b6ef9ca16bc484",
+      "bfa22d39f50efa1f2b437d4e9ce4f42c6d56a1d69b5f6a03959657a3f764bdb9"
+    ],
+    "warnings": []
+  },
+  "warnings": []
+}

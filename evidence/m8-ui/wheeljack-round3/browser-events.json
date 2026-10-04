@@ -1,0 +1,3499 @@
+[
+  {
+    "method": "Target.attachedToTarget",
+    "params": {
+      "sessionId": "BEBA7C081ED5083C91457843FA2646CA",
+      "targetInfo": {
+        "targetId": "582C49F104F69EE7B2F0FDC8DF89C243",
+        "type": "page",
+        "title": "about:blank",
+        "url": "about:blank",
+        "attached": true,
+        "canAccessOpener": false,
+        "browserContextId": "BC7F9F3EF16DD8CF063CBC787F49207B"
+      },
+      "waitingForDebugger": false
+    }
+  },
+  {
+    "method": "Runtime.executionContextCreated",
+    "params": {
+      "context": {
+        "id": 1,
+        "origin": "://",
+        "name": "",
+        "uniqueId": "8211376473863839262.-3662663217549033500",
+        "auxData": {
+          "isDefault": true,
+          "type": "default",
+          "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+        }
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.frameResized",
+    "params": {},
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.frameStartedNavigating",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "url": "http://127.0.0.1:4174/",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "navigationType": "differentDocument"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.frameStartedLoading",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "documentURL": "http://127.0.0.1:4174/",
+      "request": {
+        "url": "http://127.0.0.1:4174/",
+        "method": "GET",
+        "headers": {
+          "Accept-Language": "en-US,en;q=0.9",
+          "Upgrade-Insecure-Requests": "1",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+          "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"macOS\""
+        },
+        "mixedContentType": "none",
+        "initialPriority": "VeryHigh",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 81948.776756,
+      "wallTime": 1791119187.674079,
+      "initiator": {
+        "type": "other"
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Document",
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "hasUserGesture": false
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "timestamp": 81948.779461,
+      "type": "Document",
+      "response": {
+        "url": "http://127.0.0.1:4174/",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
+          "Content-Type": "text/html",
+          "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+          "Etag": "W/\"1cf-Dqcmam0xpTSxBsj+X/1PFZ/khlM\"",
+          "Keep-Alive": "timeout=5",
+          "Transfer-Encoding": "chunked",
+          "Vary": "Origin"
+        },
+        "mimeType": "text/html",
+        "charset": "",
+        "connectionReused": true,
+        "connectionId": 73,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 4174,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 238,
+        "timing": {
+          "requestTime": 81948.7775,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.114,
+          "sendEnd": 0.152,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 1.069,
+          "receiveHeadersEnd": 1.111
+        },
+        "responseTime": 1791119187675.884,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:4174",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      },
+      "connectTiming": {
+        "requestTime": 81948.7775
+      },
+      "siteHasCookieInOtherPartition": false
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "blockedCookies": [],
+      "headers": {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Type": "text/html",
+        "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+        "Etag": "W/\"1cf-Dqcmam0xpTSxBsj+X/1PFZ/khlM\"",
+        "Keep-Alive": "timeout=5",
+        "Transfer-Encoding": "chunked",
+        "Vary": "Origin"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nVary: Origin\r\nContent-Type: text/html\r\nCache-Control: no-cache\r\nEtag: W/\"1cf-Dqcmam0xpTSxBsj+X/1PFZ/khlM\"\r\nDate: Sun, 04 Oct 2026 13:06:27 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\nTransfer-Encoding: chunked\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Runtime.executionContextsCleared",
+    "params": {},
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Runtime.executionContextsCleared",
+    "params": {},
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.frameNavigated",
+    "params": {
+      "frame": {
+        "id": "582C49F104F69EE7B2F0FDC8DF89C243",
+        "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+        "url": "http://127.0.0.1:4174/",
+        "domainAndRegistry": "",
+        "securityOrigin": "http://127.0.0.1:4174",
+        "securityOriginDetails": {
+          "isLocalhost": true
+        },
+        "mimeType": "text/html",
+        "adFrameStatus": {
+          "adFrameType": "none"
+        },
+        "secureContextType": "SecureLocalhost",
+        "crossOriginIsolatedContextType": "NotIsolated",
+        "gatedAPIFeatures": []
+      },
+      "type": "Navigation"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.policyUpdated",
+    "params": {},
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "timestamp": 81948.78348,
+      "dataLength": 463,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "50218.2",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "documentURL": "http://127.0.0.1:4174/",
+      "request": {
+        "url": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+        "method": "GET",
+        "headers": {
+          "Origin": "http://127.0.0.1:4174",
+          "sec-ch-ua-platform": "\"macOS\"",
+          "Referer": "http://127.0.0.1:4174/",
+          "Accept-Language": "en-US,en;q=0.9",
+          "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 81948.783665,
+      "wallTime": 1791119187.681003,
+      "initiator": {
+        "type": "parser",
+        "url": "http://127.0.0.1:4174/",
+        "lineNumber": 7,
+        "columnNumber": 70
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Script",
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "hasUserGesture": false,
+      "renderBlockingBehavior": "NonBlocking"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "50218.3",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "documentURL": "http://127.0.0.1:4174/",
+      "request": {
+        "url": "http://127.0.0.1:4174/assets/index-D7bgo1ud.css",
+        "method": "GET",
+        "headers": {
+          "Origin": "http://127.0.0.1:4174",
+          "sec-ch-ua-platform": "\"macOS\"",
+          "Referer": "http://127.0.0.1:4174/",
+          "Accept-Language": "en-US,en;q=0.9",
+          "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "VeryHigh",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 81948.783796,
+      "wallTime": 1791119187.68112,
+      "initiator": {
+        "type": "parser",
+        "url": "http://127.0.0.1:4174/",
+        "lineNumber": 8,
+        "columnNumber": 73
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Stylesheet",
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "hasUserGesture": false,
+      "renderBlockingBehavior": "Blocking"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Runtime.executionContextCreated",
+    "params": {
+      "context": {
+        "id": 2,
+        "origin": "http://127.0.0.1:4174",
+        "name": "",
+        "uniqueId": "228749867237766656.-8641970771954713499",
+        "auxData": {
+          "isDefault": true,
+          "type": "default",
+          "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+        }
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "timestamp": 81948.77873,
+      "encodedDataLength": 713
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "50218.3",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "timestamp": 81948.787417,
+      "type": "Stylesheet",
+      "response": {
+        "url": "http://127.0.0.1:4174/assets/index-D7bgo1ud.css",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Transfer-Encoding": "chunked",
+          "Cache-Control": "no-cache",
+          "Content-Encoding": "gzip",
+          "ETag": "W/\"7855-1791119166004\"",
+          "Connection": "keep-alive",
+          "Access-Control-Allow-Origin": "http://127.0.0.1:4174",
+          "Keep-Alive": "timeout=5",
+          "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+          "Content-Type": "text/css",
+          "Vary": "Origin",
+          "Last-Modified": "Sun, 04 Oct 2026 13:06:06 GMT"
+        },
+        "mimeType": "text/css",
+        "charset": "",
+        "connectionReused": false,
+        "connectionId": 89,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 4174,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 346,
+        "timing": {
+          "requestTime": 81948.784846,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": 0.036,
+          "dnsEnd": 0.041,
+          "connectStart": 0.048,
+          "connectEnd": 0.417,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.447,
+          "sendEnd": 0.472,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 2.271,
+          "receiveHeadersEnd": 2.3
+        },
+        "responseTime": 1791119187684.432,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.3",
+      "timestamp": 81948.787435,
+      "dataLength": 7855,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.3",
+      "timestamp": 81948.787613,
+      "dataLength": 0,
+      "encodedDataLength": 2197
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "50218.3",
+      "timestamp": 81948.787262,
+      "encodedDataLength": 2543
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "50218.2",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:4174",
+        "Origin": "http://127.0.0.1:4174",
+        "Referer": "http://127.0.0.1:4174/",
+        "Sec-Fetch-Dest": "script",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      },
+      "connectTiming": {
+        "requestTime": 81948.784741
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "privateNetworkRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "50218.3",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "text/css,*/*;q=0.1",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:4174",
+        "Origin": "http://127.0.0.1:4174",
+        "Referer": "http://127.0.0.1:4174/",
+        "Sec-Fetch-Dest": "style",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      },
+      "connectTiming": {
+        "requestTime": 81948.784846
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "privateNetworkRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "50218.3",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "http://127.0.0.1:4174",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Type": "text/css",
+        "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+        "ETag": "W/\"7855-1791119166004\"",
+        "Keep-Alive": "timeout=5",
+        "Last-Modified": "Sun, 04 Oct 2026 13:06:06 GMT",
+        "Transfer-Encoding": "chunked",
+        "Vary": "Origin"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://127.0.0.1:4174\r\nVary: Origin\r\nContent-Type: text/css\r\nLast-Modified: Sun, 04 Oct 2026 13:06:06 GMT\r\nETag: W/\"7855-1791119166004\"\r\nCache-Control: no-cache\r\nContent-Encoding: gzip\r\nDate: Sun, 04 Oct 2026 13:06:27 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\nTransfer-Encoding: chunked\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "50218.2",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "http://127.0.0.1:4174",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Type": "text/javascript",
+        "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+        "ETag": "W/\"167687-1791119166004\"",
+        "Keep-Alive": "timeout=5",
+        "Last-Modified": "Sun, 04 Oct 2026 13:06:06 GMT",
+        "Transfer-Encoding": "chunked",
+        "Vary": "Origin"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://127.0.0.1:4174\r\nVary: Origin\r\nContent-Type: text/javascript\r\nLast-Modified: Sun, 04 Oct 2026 13:06:06 GMT\r\nETag: W/\"167687-1791119166004\"\r\nCache-Control: no-cache\r\nContent-Encoding: gzip\r\nDate: Sun, 04 Oct 2026 13:06:27 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\nTransfer-Encoding: chunked\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "50218.2",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "timestamp": 81948.79369,
+      "type": "Script",
+      "response": {
+        "url": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Transfer-Encoding": "chunked",
+          "Cache-Control": "no-cache",
+          "Content-Encoding": "gzip",
+          "ETag": "W/\"167687-1791119166004\"",
+          "Connection": "keep-alive",
+          "Access-Control-Allow-Origin": "http://127.0.0.1:4174",
+          "Keep-Alive": "timeout=5",
+          "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+          "Content-Type": "text/javascript",
+          "Vary": "Origin",
+          "Last-Modified": "Sun, 04 Oct 2026 13:06:06 GMT"
+        },
+        "mimeType": "text/javascript",
+        "charset": "",
+        "connectionReused": true,
+        "connectionId": 73,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 4174,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 355,
+        "timing": {
+          "requestTime": 81948.784741,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.266,
+          "sendEnd": 0.292,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 2.952,
+          "receiveHeadersEnd": 2.997
+        },
+        "responseTime": 1791119187685.008,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.2",
+      "timestamp": 81948.793713,
+      "dataLength": 105811,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.2",
+      "timestamp": 81948.793715,
+      "dataLength": 61876,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.2",
+      "timestamp": 81948.793771,
+      "dataLength": 0,
+      "encodedDataLength": 51794
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "50218.2",
+      "timestamp": 81948.791232,
+      "encodedDataLength": 52149
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.domContentEventFired",
+    "params": {
+      "timestamp": 81948.796682
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.loadEventFired",
+    "params": {
+      "timestamp": 81948.973091
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.frameStoppedLoading",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "50218.6",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "documentURL": "http://127.0.0.1:4174/",
+      "request": {
+        "url": "http://127.0.0.1:4174/favicon.ico",
+        "method": "GET",
+        "headers": {
+          "sec-ch-ua-platform": "\"macOS\"",
+          "Referer": "http://127.0.0.1:4174/",
+          "Accept-Language": "en-US,en;q=0.9",
+          "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 81948.973965,
+      "wallTime": 1791119187.871296,
+      "initiator": {
+        "type": "other"
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Other",
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "hasUserGesture": false
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "50218.6",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:4174",
+        "Referer": "http://127.0.0.1:4174/",
+        "Sec-Fetch-Dest": "image",
+        "Sec-Fetch-Mode": "no-cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      },
+      "connectTiming": {
+        "requestTime": 81948.974132
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "privateNetworkRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "50218.6",
+      "blockedCookies": [],
+      "headers": {
+        "Connection": "keep-alive",
+        "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+        "Keep-Alive": "timeout=5",
+        "Transfer-Encoding": "chunked",
+        "Vary": "Origin"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 404,
+      "headersText": "HTTP/1.1 404 Not Found\r\nVary: Origin\r\nDate: Sun, 04 Oct 2026 13:06:27 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\nTransfer-Encoding: chunked\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "50218.6",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "timestamp": 81948.98178,
+      "type": "Other",
+      "response": {
+        "url": "http://127.0.0.1:4174/favicon.ico",
+        "status": 404,
+        "statusText": "Not Found",
+        "headers": {
+          "Transfer-Encoding": "chunked",
+          "Keep-Alive": "timeout=5",
+          "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+          "Vary": "Origin",
+          "Connection": "keep-alive"
+        },
+        "mimeType": "text/plain",
+        "charset": "",
+        "connectionReused": true,
+        "connectionId": 73,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 4174,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 152,
+        "timing": {
+          "requestTime": 81948.974132,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.083,
+          "sendEnd": 0.122,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 0.44,
+          "receiveHeadersEnd": 0.469
+        },
+        "responseTime": 1791119187871.887,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "50218.6",
+      "timestamp": 81948.974683,
+      "encodedDataLength": 157
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.setChildNodes",
+    "params": {
+      "parentId": 5,
+      "nodes": [
+        {
+          "nodeId": 6,
+          "parentId": 5,
+          "backendNodeId": 13,
+          "nodeType": 1,
+          "nodeName": "MAIN",
+          "localName": "main",
+          "nodeValue": "",
+          "childNodeCount": 1,
+          "attributes": [
+            "id",
+            "app",
+            "aria-live",
+            "polite",
+            "data-support",
+            "true"
+          ]
+        },
+        {
+          "nodeId": 7,
+          "parentId": 5,
+          "backendNodeId": 14,
+          "nodeType": 1,
+          "nodeName": "INPUT",
+          "localName": "input",
+          "nodeValue": "",
+          "childNodeCount": 0,
+          "children": [],
+          "attributes": [
+            "type",
+            "file",
+            "accept",
+            ".freeform,application/json",
+            "hidden",
+            ""
+          ],
+          "shadowRoots": [
+            {
+              "nodeId": 8,
+              "backendNodeId": 15,
+              "nodeType": 11,
+              "nodeName": "#document-fragment",
+              "localName": "",
+              "nodeValue": "",
+              "childNodeCount": 2,
+              "shadowRootType": "user-agent"
+            }
+          ]
+        }
+      ]
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 5,
+      "nodeId": 7
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 5,
+      "previousNodeId": 6,
+      "node": {
+        "nodeId": 9,
+        "backendNodeId": 16,
+        "nodeType": 1,
+        "nodeName": "SECTION",
+        "localName": "section",
+        "nodeValue": "",
+        "childNodeCount": 5,
+        "attributes": [
+          "class",
+          "persistence-dialog",
+          "role",
+          "dialog",
+          "aria-modal",
+          "true"
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 5,
+      "nodeId": 9
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeCountUpdated",
+    "params": {
+      "nodeId": 6,
+      "childNodeCount": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeCountUpdated",
+    "params": {
+      "nodeId": 6,
+      "childNodeCount": 1
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "50218.7",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "documentURL": "http://127.0.0.1:4174/",
+      "request": {
+        "url": "http://127.0.0.1:4174/assets/pdf-export-D0jNIDHG.js",
+        "method": "GET",
+        "headers": {
+          "Origin": "http://127.0.0.1:4174",
+          "sec-ch-ua-platform": "\"macOS\"",
+          "Referer": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+          "Accept-Language": "en-US,en;q=0.9",
+          "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 81949.095937,
+      "wallTime": 1791119187.993434,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+              "lineNumber": 0,
+              "columnNumber": 139783
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+              "lineNumber": 0,
+              "columnNumber": 128183
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Script",
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "hasUserGesture": true,
+      "renderBlockingBehavior": "NonBlocking"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSent",
+    "params": {
+      "requestId": "50218.8",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "documentURL": "http://127.0.0.1:4174/",
+      "request": {
+        "url": "http://127.0.0.1:4174/assets/assets-BjB5mSO8.js",
+        "method": "GET",
+        "headers": {
+          "Origin": "http://127.0.0.1:4174",
+          "sec-ch-ua-platform": "\"macOS\"",
+          "Referer": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+          "Accept-Language": "en-US,en;q=0.9",
+          "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "mixedContentType": "none",
+        "initialPriority": "High",
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "isSameSite": true
+      },
+      "timestamp": 81949.096183,
+      "wallTime": 1791119187.993507,
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+              "lineNumber": 0,
+              "columnNumber": 139829
+            },
+            {
+              "functionName": "",
+              "scriptId": "6",
+              "url": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+              "lineNumber": 0,
+              "columnNumber": 128183
+            }
+          ]
+        }
+      },
+      "redirectHasExtraInfo": false,
+      "type": "Script",
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "hasUserGesture": true,
+      "renderBlockingBehavior": "NonBlocking"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "50218.7",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:4174",
+        "Origin": "http://127.0.0.1:4174",
+        "Referer": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+        "Sec-Fetch-Dest": "script",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      },
+      "connectTiming": {
+        "requestTime": 81949.096298
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "privateNetworkRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.requestWillBeSentExtraInfo",
+    "params": {
+      "requestId": "50218.8",
+      "associatedCookies": [],
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Host": "127.0.0.1:4174",
+        "Origin": "http://127.0.0.1:4174",
+        "Referer": "http://127.0.0.1:4174/assets/index-C9ErzTRk.js",
+        "Sec-Fetch-Dest": "script",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"145\", \"Not:A-Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"macOS\""
+      },
+      "connectTiming": {
+        "requestTime": 81949.096394
+      },
+      "clientSecurityState": {
+        "initiatorIsSecureContext": true,
+        "initiatorIPAddressSpace": "Loopback",
+        "privateNetworkRequestPolicy": "PermissionBlock"
+      },
+      "siteHasCookieInOtherPartition": false
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "50218.8",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "http://127.0.0.1:4174",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Type": "text/javascript",
+        "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+        "ETag": "W/\"1215310-1791119166008\"",
+        "Keep-Alive": "timeout=5",
+        "Last-Modified": "Sun, 04 Oct 2026 13:06:06 GMT",
+        "Transfer-Encoding": "chunked",
+        "Vary": "Origin"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://127.0.0.1:4174\r\nVary: Origin\r\nContent-Type: text/javascript\r\nLast-Modified: Sun, 04 Oct 2026 13:06:06 GMT\r\nETag: W/\"1215310-1791119166008\"\r\nCache-Control: no-cache\r\nContent-Encoding: gzip\r\nDate: Sun, 04 Oct 2026 13:06:27 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\nTransfer-Encoding: chunked\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceivedExtraInfo",
+    "params": {
+      "requestId": "50218.7",
+      "blockedCookies": [],
+      "headers": {
+        "Access-Control-Allow-Origin": "http://127.0.0.1:4174",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Encoding": "gzip",
+        "Content-Type": "text/javascript",
+        "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+        "ETag": "W/\"1177877-1791119166008\"",
+        "Keep-Alive": "timeout=5",
+        "Last-Modified": "Sun, 04 Oct 2026 13:06:06 GMT",
+        "Transfer-Encoding": "chunked",
+        "Vary": "Origin"
+      },
+      "resourceIPAddressSpace": "Loopback",
+      "statusCode": 200,
+      "headersText": "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://127.0.0.1:4174\r\nVary: Origin\r\nContent-Type: text/javascript\r\nLast-Modified: Sun, 04 Oct 2026 13:06:06 GMT\r\nETag: W/\"1177877-1791119166008\"\r\nCache-Control: no-cache\r\nContent-Encoding: gzip\r\nDate: Sun, 04 Oct 2026 13:06:27 GMT\r\nConnection: keep-alive\r\nKeep-Alive: timeout=5\r\nTransfer-Encoding: chunked\r\n\r\n",
+      "cookiePartitionKey": {
+        "topLevelSite": "http://127.0.0.1",
+        "hasCrossSiteAncestor": false
+      },
+      "cookiePartitionKeyOpaque": false,
+      "exemptedCookies": []
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "50218.7",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "timestamp": 81949.150511,
+      "type": "Script",
+      "response": {
+        "url": "http://127.0.0.1:4174/assets/pdf-export-D0jNIDHG.js",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Transfer-Encoding": "chunked",
+          "Cache-Control": "no-cache",
+          "Content-Encoding": "gzip",
+          "ETag": "W/\"1177877-1791119166008\"",
+          "Connection": "keep-alive",
+          "Access-Control-Allow-Origin": "http://127.0.0.1:4174",
+          "Keep-Alive": "timeout=5",
+          "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+          "Content-Type": "text/javascript",
+          "Vary": "Origin",
+          "Last-Modified": "Sun, 04 Oct 2026 13:06:06 GMT"
+        },
+        "mimeType": "text/javascript",
+        "charset": "",
+        "connectionReused": true,
+        "connectionId": 73,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 4174,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 356,
+        "timing": {
+          "requestTime": 81949.096298,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.152,
+          "sendEnd": 0.179,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 2.436,
+          "receiveHeadersEnd": 2.468
+        },
+        "responseTime": 1791119187996.049,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150527,
+      "dataLength": 49050,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150528,
+      "dataLength": 16973,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150529,
+      "dataLength": 35539,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150529,
+      "dataLength": 52216,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150529,
+      "dataLength": 14018,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.15053,
+      "dataLength": 8127,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150535,
+      "dataLength": 45359,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150535,
+      "dataLength": 26092,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150536,
+      "dataLength": 5482,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150537,
+      "dataLength": 18270,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150537,
+      "dataLength": 24679,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150538,
+      "dataLength": 18819,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150538,
+      "dataLength": 4328,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150539,
+      "dataLength": 23160,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150539,
+      "dataLength": 21992,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.15054,
+      "dataLength": 15729,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.15054,
+      "dataLength": 30152,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150541,
+      "dataLength": 65536,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150541,
+      "dataLength": 30481,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150542,
+      "dataLength": 59023,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150542,
+      "dataLength": 850,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150543,
+      "dataLength": 24056,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150543,
+      "dataLength": 2429,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150544,
+      "dataLength": 59843,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150544,
+      "dataLength": 30037,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150545,
+      "dataLength": 33133,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150545,
+      "dataLength": 10359,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150545,
+      "dataLength": 37031,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150546,
+      "dataLength": 27925,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150546,
+      "dataLength": 21894,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150547,
+      "dataLength": 22154,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150547,
+      "dataLength": 9650,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150548,
+      "dataLength": 12242,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150548,
+      "dataLength": 21844,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150549,
+      "dataLength": 15889,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150549,
+      "dataLength": 5945,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.15055,
+      "dataLength": 48161,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.15055,
+      "dataLength": 6417,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150551,
+      "dataLength": 50524,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150551,
+      "dataLength": 19654,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150552,
+      "dataLength": 47077,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150552,
+      "dataLength": 56761,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.150553,
+      "dataLength": 48977,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.151414,
+      "dataLength": 0,
+      "encodedDataLength": 516855
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "50218.7",
+      "timestamp": 81949.119835,
+      "encodedDataLength": 517216
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.responseReceived",
+    "params": {
+      "requestId": "50218.8",
+      "loaderId": "D703A2FF525BBC39F11534D1D1E9575C",
+      "timestamp": 81949.151613,
+      "type": "Script",
+      "response": {
+        "url": "http://127.0.0.1:4174/assets/assets-BjB5mSO8.js",
+        "status": 200,
+        "statusText": "OK",
+        "headers": {
+          "Transfer-Encoding": "chunked",
+          "Cache-Control": "no-cache",
+          "Content-Encoding": "gzip",
+          "ETag": "W/\"1215310-1791119166008\"",
+          "Connection": "keep-alive",
+          "Access-Control-Allow-Origin": "http://127.0.0.1:4174",
+          "Keep-Alive": "timeout=5",
+          "Date": "Sun, 04 Oct 2026 13:06:27 GMT",
+          "Content-Type": "text/javascript",
+          "Vary": "Origin",
+          "Last-Modified": "Sun, 04 Oct 2026 13:06:06 GMT"
+        },
+        "mimeType": "text/javascript",
+        "charset": "",
+        "connectionReused": true,
+        "connectionId": 89,
+        "remoteIPAddress": "127.0.0.1",
+        "remotePort": 4174,
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "fromPrefetchCache": false,
+        "encodedDataLength": 356,
+        "timing": {
+          "requestTime": 81949.096394,
+          "proxyStart": -1,
+          "proxyEnd": -1,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1,
+          "sendStart": 0.098,
+          "sendEnd": 0.114,
+          "pushStart": 0,
+          "pushEnd": 0,
+          "receiveHeadersStart": 2.004,
+          "receiveHeadersEnd": 2.031
+        },
+        "responseTime": 1791119187995.713,
+        "protocol": "http/1.1",
+        "alternateProtocolUsage": "unspecifiedReason",
+        "securityState": "secure"
+      },
+      "hasExtraInfo": true,
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.15162,
+      "dataLength": 21772,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.15162,
+      "dataLength": 43052,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151621,
+      "dataLength": 13973,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151621,
+      "dataLength": 28018,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151622,
+      "dataLength": 9366,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151622,
+      "dataLength": 17242,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151623,
+      "dataLength": 28424,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151623,
+      "dataLength": 27855,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151624,
+      "dataLength": 2917,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151624,
+      "dataLength": 23838,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151625,
+      "dataLength": 23621,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151625,
+      "dataLength": 2551,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151626,
+      "dataLength": 27446,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151626,
+      "dataLength": 27141,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151627,
+      "dataLength": 16234,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151627,
+      "dataLength": 9854,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151628,
+      "dataLength": 27145,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151628,
+      "dataLength": 27916,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151629,
+      "dataLength": 9749,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151629,
+      "dataLength": 17332,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151629,
+      "dataLength": 27163,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.15163,
+      "dataLength": 3950,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.15163,
+      "dataLength": 23119,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151631,
+      "dataLength": 26558,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151631,
+      "dataLength": 25684,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151632,
+      "dataLength": 3226,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151632,
+      "dataLength": 28579,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151633,
+      "dataLength": 22329,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151633,
+      "dataLength": 6889,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151634,
+      "dataLength": 36408,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151634,
+      "dataLength": 16322,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151635,
+      "dataLength": 11011,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151635,
+      "dataLength": 38345,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151636,
+      "dataLength": 26765,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151636,
+      "dataLength": 12379,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151637,
+      "dataLength": 15975,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151637,
+      "dataLength": 26593,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151638,
+      "dataLength": 13858,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151638,
+      "dataLength": 19990,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151639,
+      "dataLength": 26616,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151639,
+      "dataLength": 26234,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151639,
+      "dataLength": 26873,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.15164,
+      "dataLength": 27824,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.15164,
+      "dataLength": 18467,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151641,
+      "dataLength": 9472,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151642,
+      "dataLength": 26489,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151643,
+      "dataLength": 13522,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151644,
+      "dataLength": 15176,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151644,
+      "dataLength": 26598,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151645,
+      "dataLength": 26137,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151645,
+      "dataLength": 5627,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151646,
+      "dataLength": 20735,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151646,
+      "dataLength": 27504,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151647,
+      "dataLength": 1217,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151647,
+      "dataLength": 37502,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151648,
+      "dataLength": 23984,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151648,
+      "dataLength": 60450,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151649,
+      "dataLength": 4294,
+      "encodedDataLength": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.dataReceived",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.151709,
+      "dataLength": 0,
+      "encodedDataLength": 689623
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Network.loadingFinished",
+    "params": {
+      "requestId": "50218.8",
+      "timestamp": 81949.124338,
+      "encodedDataLength": 689984
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "url": "blob:http://127.0.0.1:4174/3ebef592-fcba-45ab-9540-747033127771",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "url": "blob:http://127.0.0.1:4174/3ebef592-fcba-45ab-9540-747033127771",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 5,
+      "previousNodeId": 6,
+      "node": {
+        "nodeId": 10,
+        "backendNodeId": 212,
+        "nodeType": 1,
+        "nodeName": "A",
+        "localName": "a",
+        "nodeValue": "",
+        "childNodeCount": 0,
+        "attributes": [
+          "href",
+          "blob:http://127.0.0.1:4174/3ebef592-fcba-45ab-9540-747033127771",
+          "download",
+          "Five Person FTL Fixture-performer-packets-full-show.pdf",
+          "style",
+          "display: none;"
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 5,
+      "nodeId": 10
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "completed"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "d5ea304e-e29e-4bb8-a94b-248a650cf484",
+      "totalBytes": 612585,
+      "receivedBytes": 612585,
+      "state": "completed",
+      "filePath": "/Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-ui/wheeljack-round3/downloads/Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "Page.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "url": "blob:http://127.0.0.1:4174/4d22559c-edf9-4c6f-a9e3-9cf5c182c96c",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "url": "blob:http://127.0.0.1:4174/4d22559c-edf9-4c6f-a9e3-9cf5c182c96c",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 5,
+      "previousNodeId": 6,
+      "node": {
+        "nodeId": 11,
+        "backendNodeId": 291,
+        "nodeType": 1,
+        "nodeName": "A",
+        "localName": "a",
+        "nodeValue": "",
+        "childNodeCount": 0,
+        "attributes": [
+          "href",
+          "blob:http://127.0.0.1:4174/4d22559c-edf9-4c6f-a9e3-9cf5c182c96c",
+          "download",
+          "Five Person FTL Fixture-performer-packets-full-show.pdf",
+          "style",
+          "display: none;"
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 5,
+      "nodeId": 11
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "completed"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "01fbe5fa-d98f-40ff-9c50-9458eefac35c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "completed",
+      "filePath": "/Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-ui/wheeljack-round3/downloads/Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "Page.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "url": "blob:http://127.0.0.1:4174/8f371075-07de-41fe-b6ed-84488b888206",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "url": "blob:http://127.0.0.1:4174/8f371075-07de-41fe-b6ed-84488b888206",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 5,
+      "previousNodeId": 6,
+      "node": {
+        "nodeId": 12,
+        "backendNodeId": 322,
+        "nodeType": 1,
+        "nodeName": "A",
+        "localName": "a",
+        "nodeValue": "",
+        "childNodeCount": 0,
+        "attributes": [
+          "href",
+          "blob:http://127.0.0.1:4174/8f371075-07de-41fe-b6ed-84488b888206",
+          "download",
+          "Five Person FTL Fixture-performer-packets-full-show.pdf",
+          "style",
+          "display: none;"
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 5,
+      "nodeId": 12
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "completed"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "335ee68e-025e-42eb-a225-e2f7db0f9d9b",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "completed",
+      "filePath": "/Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-ui/wheeljack-round3/downloads/Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "Page.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "url": "blob:http://127.0.0.1:4174/b28041a8-0d44-415e-88d2-83c0b151f78d",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "url": "blob:http://127.0.0.1:4174/b28041a8-0d44-415e-88d2-83c0b151f78d",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 5,
+      "previousNodeId": 6,
+      "node": {
+        "nodeId": 13,
+        "backendNodeId": 353,
+        "nodeType": 1,
+        "nodeName": "A",
+        "localName": "a",
+        "nodeValue": "",
+        "childNodeCount": 0,
+        "attributes": [
+          "href",
+          "blob:http://127.0.0.1:4174/b28041a8-0d44-415e-88d2-83c0b151f78d",
+          "download",
+          "Five Person FTL Fixture-performer-packets-full-show.pdf",
+          "style",
+          "display: none;"
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 5,
+      "nodeId": 13
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "completed"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "ceca1c84-13e1-42fc-9609-88d981f10e30",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "completed",
+      "filePath": "/Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-ui/wheeljack-round3/downloads/Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 5,
+      "previousNodeId": 6,
+      "node": {
+        "nodeId": 14,
+        "backendNodeId": 369,
+        "nodeType": 1,
+        "nodeName": "A",
+        "localName": "a",
+        "nodeValue": "",
+        "childNodeCount": 0,
+        "attributes": [
+          "href",
+          "blob:http://127.0.0.1:4174/7530aa3c-cb79-4284-92ad-feb6cf6cadef",
+          "download",
+          "Five Person FTL Fixture-performer-packets-full-show.pdf",
+          "style",
+          "display: none;"
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 5,
+      "nodeId": 14
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "url": "blob:http://127.0.0.1:4174/89fa0037-7e92-48eb-bc8f-0add0d73525d",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadWillBegin",
+    "params": {
+      "frameId": "582C49F104F69EE7B2F0FDC8DF89C243",
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "url": "blob:http://127.0.0.1:4174/89fa0037-7e92-48eb-bc8f-0add0d73525d",
+      "suggestedFilename": "Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 0,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 5,
+      "previousNodeId": 6,
+      "node": {
+        "nodeId": 15,
+        "backendNodeId": 385,
+        "nodeType": 1,
+        "nodeName": "A",
+        "localName": "a",
+        "nodeValue": "",
+        "childNodeCount": 0,
+        "attributes": [
+          "href",
+          "blob:http://127.0.0.1:4174/89fa0037-7e92-48eb-bc8f-0add0d73525d",
+          "download",
+          "Five Person FTL Fixture-performer-packets-full-show.pdf",
+          "style",
+          "display: none;"
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 5,
+      "nodeId": 15
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "inProgress"
+    }
+  },
+  {
+    "method": "Page.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "completed"
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "Browser.downloadProgress",
+    "params": {
+      "guid": "b6f556fb-77f5-47c5-b5ad-bd2ff6df629c",
+      "totalBytes": 612902,
+      "receivedBytes": 612902,
+      "state": "completed",
+      "filePath": "/Users/jatiller/Sync/Dropbox_Replacement/AI_Projects/Freeform/evidence/m8-ui/wheeljack-round3/downloads/Five Person FTL Fixture-performer-packets-full-show.pdf"
+    }
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 5,
+      "previousNodeId": 6,
+      "node": {
+        "nodeId": 16,
+        "backendNodeId": 403,
+        "nodeType": 1,
+        "nodeName": "INPUT",
+        "localName": "input",
+        "nodeValue": "",
+        "childNodeCount": 0,
+        "children": [],
+        "attributes": [
+          "type",
+          "file",
+          "accept",
+          ".freeform,application/json",
+          "hidden",
+          ""
+        ],
+        "shadowRoots": [
+          {
+            "nodeId": 17,
+            "backendNodeId": 404,
+            "nodeType": 11,
+            "nodeName": "#document-fragment",
+            "localName": "",
+            "nodeValue": "",
+            "childNodeCount": 2,
+            "shadowRootType": "user-agent"
+          }
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.setChildNodes",
+    "params": {
+      "parentId": 22,
+      "nodes": [
+        {
+          "nodeId": 23,
+          "parentId": 22,
+          "backendNodeId": 13,
+          "nodeType": 1,
+          "nodeName": "MAIN",
+          "localName": "main",
+          "nodeValue": "",
+          "childNodeCount": 1,
+          "attributes": [
+            "id",
+            "app",
+            "aria-live",
+            "polite",
+            "data-support",
+            "true"
+          ]
+        },
+        {
+          "nodeId": 24,
+          "parentId": 22,
+          "backendNodeId": 403,
+          "nodeType": 1,
+          "nodeName": "INPUT",
+          "localName": "input",
+          "nodeValue": "",
+          "childNodeCount": 0,
+          "children": [],
+          "attributes": [
+            "type",
+            "file",
+            "accept",
+            ".freeform,application/json",
+            "hidden",
+            ""
+          ],
+          "shadowRoots": [
+            {
+              "nodeId": 25,
+              "backendNodeId": 404,
+              "nodeType": 11,
+              "nodeName": "#document-fragment",
+              "localName": "",
+              "nodeValue": "",
+              "childNodeCount": 2,
+              "shadowRootType": "user-agent"
+            }
+          ]
+        }
+      ]
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 22,
+      "nodeId": 24
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeCountUpdated",
+    "params": {
+      "nodeId": 23,
+      "childNodeCount": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeCountUpdated",
+    "params": {
+      "nodeId": 23,
+      "childNodeCount": 1
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeInserted",
+    "params": {
+      "parentNodeId": 22,
+      "previousNodeId": 23,
+      "node": {
+        "nodeId": 26,
+        "backendNodeId": 530,
+        "nodeType": 1,
+        "nodeName": "INPUT",
+        "localName": "input",
+        "nodeValue": "",
+        "childNodeCount": 0,
+        "children": [],
+        "attributes": [
+          "type",
+          "file",
+          "accept",
+          ".freeform,application/json",
+          "hidden",
+          ""
+        ],
+        "shadowRoots": [
+          {
+            "nodeId": 27,
+            "backendNodeId": 531,
+            "nodeType": 11,
+            "nodeName": "#document-fragment",
+            "localName": "",
+            "nodeValue": "",
+            "childNodeCount": 2,
+            "shadowRootType": "user-agent"
+          }
+        ]
+      }
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.setChildNodes",
+    "params": {
+      "parentId": 32,
+      "nodes": [
+        {
+          "nodeId": 33,
+          "parentId": 32,
+          "backendNodeId": 13,
+          "nodeType": 1,
+          "nodeName": "MAIN",
+          "localName": "main",
+          "nodeValue": "",
+          "childNodeCount": 1,
+          "attributes": [
+            "id",
+            "app",
+            "aria-live",
+            "polite",
+            "data-support",
+            "true"
+          ]
+        },
+        {
+          "nodeId": 34,
+          "parentId": 32,
+          "backendNodeId": 530,
+          "nodeType": 1,
+          "nodeName": "INPUT",
+          "localName": "input",
+          "nodeValue": "",
+          "childNodeCount": 0,
+          "children": [],
+          "attributes": [
+            "type",
+            "file",
+            "accept",
+            ".freeform,application/json",
+            "hidden",
+            ""
+          ],
+          "shadowRoots": [
+            {
+              "nodeId": 35,
+              "backendNodeId": 531,
+              "nodeType": 11,
+              "nodeName": "#document-fragment",
+              "localName": "",
+              "nodeValue": "",
+              "childNodeCount": 2,
+              "shadowRootType": "user-agent"
+            }
+          ]
+        }
+      ]
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeRemoved",
+    "params": {
+      "parentNodeId": 32,
+      "nodeId": 34
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeCountUpdated",
+    "params": {
+      "nodeId": 33,
+      "childNodeCount": 0
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  },
+  {
+    "method": "DOM.childNodeCountUpdated",
+    "params": {
+      "nodeId": 33,
+      "childNodeCount": 1
+    },
+    "sessionId": "BEBA7C081ED5083C91457843FA2646CA"
+  }
+]

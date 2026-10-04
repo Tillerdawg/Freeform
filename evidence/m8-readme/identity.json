@@ -1,0 +1,13 @@
+{
+  "task": "t_de3f0d79",
+  "base_head": "3df1916315c43e7b4617bd037b62f76a3d0edc9a",
+  "current_head": "3df1916315c43e7b4617bd037b62f76a3d0edc9a",
+  "branch": "main",
+  "before_sha256": "f17075d73b0b2fa6879e5b88f9de1f90b9e98c3c0f6e27743fba37c542fc14ca",
+  "after_sha256": "3c53134e93b829da9a0367f7303a1a76bc4d8506b6d0a562693e214fd73c9b30",
+  "test_docs_exit": 0,
+  "git_diff_check_exit": 0,
+  "scope": "README.md only",
+  "round": 2,
+  "round2_fix": "README.md:126 corrected per huffer review comment (t_de3f0d79): removed the stale 'M8 is not implemented' cross-reference on the print/performer-packet visibility flags, which contradicted the Status/MVP sections two paragraphs earlier. Flag label text (Mark for future director output / Mark for future performer packet output) left unchanged since it mirrors the live src/editor/annotation-editor.ts UI copy verbatim; only the explanatory sentence was corrected and pointed at the new PDF export section."
+}

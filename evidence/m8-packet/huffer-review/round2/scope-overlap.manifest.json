@@ -1,0 +1,472 @@
+{
+  "manifest": {
+    "schemaVersion": "m8.2",
+    "contentFingerprint": "dfb2086bbf0bb601a3cc41df3da8bd717371173ed5195539ecb7253f50da51c8",
+    "request": {
+      "kind": "performer-packet",
+      "performerIds": [
+        "b",
+        "a"
+      ],
+      "scope": {
+        "kind": "full-show"
+      }
+    },
+    "pages": [
+      {
+        "kind": "performer-packet",
+        "width": 612,
+        "height": 792,
+        "performerId": "a",
+        "setIds": [
+          "s0",
+          "s1",
+          "s2"
+        ],
+        "annotationIds": [
+          "a-show",
+          "a-show",
+          "a-show"
+        ],
+        "packetEntries": [
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s0"
+            },
+            "annotationIds": [
+              "a-show"
+            ]
+          },
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s1"
+            },
+            "annotationIds": [
+              "a-show"
+            ]
+          },
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s2"
+            },
+            "annotationIds": [
+              "a-show"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "performer-packet",
+        "width": 612,
+        "height": 792,
+        "performerId": "a",
+        "setIds": [
+          "s3",
+          "s4"
+        ],
+        "annotationIds": [
+          "a-show",
+          "a-show",
+          "a-show"
+        ],
+        "packetEntries": [
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s3"
+            },
+            "annotationIds": [
+              "a-show"
+            ]
+          },
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s4"
+            },
+            "annotationIds": [
+              "a-show"
+            ]
+          },
+          {
+            "context": {
+              "kind": "active-transition",
+              "transitionId": "float-0",
+              "count": 16
+            },
+            "annotationIds": [
+              "a-show"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "performer-packet",
+        "width": 612,
+        "height": 792,
+        "performerId": "b",
+        "setIds": [
+          "s0",
+          "s1",
+          "s2"
+        ],
+        "annotationIds": [
+          "b-only"
+        ],
+        "packetEntries": [
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s0"
+            },
+            "annotationIds": [
+              "b-only"
+            ]
+          },
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s1"
+            },
+            "annotationIds": []
+          },
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s2"
+            },
+            "annotationIds": []
+          }
+        ]
+      },
+      {
+        "kind": "performer-packet",
+        "width": 612,
+        "height": 792,
+        "performerId": "b",
+        "setIds": [
+          "s3",
+          "s4"
+        ],
+        "annotationIds": [],
+        "packetEntries": [
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s3"
+            },
+            "annotationIds": []
+          },
+          {
+            "context": {
+              "kind": "static-set",
+              "setId": "s4"
+            },
+            "annotationIds": []
+          },
+          {
+            "context": {
+              "kind": "active-transition",
+              "transitionId": "float-0",
+              "count": 16
+            },
+            "annotationIds": []
+          }
+        ]
+      }
+    ],
+    "language": "en-US",
+    "fontAssetHashes": [
+      "18e2e5b23a9bc5e8e636d6c7984b8ac6635aefc1c497ed1c5012f3c637761b91",
+      "e199c2ac3c8bd6c99ec9e44cc3363128d86c94eed54d2f22d5b6ef9ca16bc484",
+      "bfa22d39f50efa1f2b437d4e9ce4f42c6d56a1d69b5f6a03959657a3f764bdb9"
+    ],
+    "warnings": [
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "s0"
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "dot",
+        "noteBounds": {
+          "x": 36,
+          "y": 506,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 32,
+          "y": 502,
+          "width": 8,
+          "height": 8
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "s1"
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "dot",
+        "noteBounds": {
+          "x": 36,
+          "y": 316,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 59,
+          "y": 312,
+          "width": 8,
+          "height": 8
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "s0"
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "rank-label",
+        "noteBounds": {
+          "x": 36,
+          "y": 506,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 41,
+          "y": 503,
+          "width": 5.1,
+          "height": 5.74
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 0,
+        "context": {
+          "kind": "static-set",
+          "setId": "s1"
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "rank-label",
+        "noteBounds": {
+          "x": 36,
+          "y": 316,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 68,
+          "y": 313,
+          "width": 5.1,
+          "height": 5.74
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 1,
+        "context": {
+          "kind": "active-transition",
+          "transitionId": "float-0",
+          "count": 16
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "dot",
+        "noteBounds": {
+          "x": 36,
+          "y": 174,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 59,
+          "y": 170,
+          "width": 8,
+          "height": 8
+        }
+      },
+      {
+        "code": "note-overlap",
+        "pageIndex": 1,
+        "context": {
+          "kind": "active-transition",
+          "transitionId": "float-0",
+          "count": 16
+        },
+        "annotationId": "a-show",
+        "performerId": "a",
+        "obstacleKind": "rank-label",
+        "noteBounds": {
+          "x": 36,
+          "y": 174,
+          "width": 44.53,
+          "height": 16
+        },
+        "obstacleBounds": {
+          "x": 68,
+          "y": 171,
+          "width": 5.1,
+          "height": 5.74
+        }
+      }
+    ]
+  },
+  "warnings": [
+    {
+      "code": "note-overlap",
+      "pageIndex": 0,
+      "context": {
+        "kind": "static-set",
+        "setId": "s0"
+      },
+      "annotationId": "a-show",
+      "performerId": "a",
+      "obstacleKind": "dot",
+      "noteBounds": {
+        "x": 36,
+        "y": 506,
+        "width": 44.53,
+        "height": 16
+      },
+      "obstacleBounds": {
+        "x": 32,
+        "y": 502,
+        "width": 8,
+        "height": 8
+      }
+    },
+    {
+      "code": "note-overlap",
+      "pageIndex": 0,
+      "context": {
+        "kind": "static-set",
+        "setId": "s1"
+      },
+      "annotationId": "a-show",
+      "performerId": "a",
+      "obstacleKind": "dot",
+      "noteBounds": {
+        "x": 36,
+        "y": 316,
+        "width": 44.53,
+        "height": 16
+      },
+      "obstacleBounds": {
+        "x": 59,
+        "y": 312,
+        "width": 8,
+        "height": 8
+      }
+    },
+    {
+      "code": "note-overlap",
+      "pageIndex": 0,
+      "context": {
+        "kind": "static-set",
+        "setId": "s0"
+      },
+      "annotationId": "a-show",
+      "performerId": "a",
+      "obstacleKind": "rank-label",
+      "noteBounds": {
+        "x": 36,
+        "y": 506,
+        "width": 44.53,
+        "height": 16
+      },
+      "obstacleBounds": {
+        "x": 41,
+        "y": 503,
+        "width": 5.1,
+        "height": 5.74
+      }
+    },
+    {
+      "code": "note-overlap",
+      "pageIndex": 0,
+      "context": {
+        "kind": "static-set",
+        "setId": "s1"
+      },
+      "annotationId": "a-show",
+      "performerId": "a",
+      "obstacleKind": "rank-label",
+      "noteBounds": {
+        "x": 36,
+        "y": 316,
+        "width": 44.53,
+        "height": 16
+      },
+      "obstacleBounds": {
+        "x": 68,
+        "y": 313,
+        "width": 5.1,
+        "height": 5.74
+      }
+    },
+    {
+      "code": "note-overlap",
+      "pageIndex": 1,
+      "context": {
+        "kind": "active-transition",
+        "transitionId": "float-0",
+        "count": 16
+      },
+      "annotationId": "a-show",
+      "performerId": "a",
+      "obstacleKind": "dot",
+      "noteBounds": {
+        "x": 36,
+        "y": 174,
+        "width": 44.53,
+        "height": 16
+      },
+      "obstacleBounds": {
+        "x": 59,
+        "y": 170,
+        "width": 8,
+        "height": 8
+      }
+    },
+    {
+      "code": "note-overlap",
+      "pageIndex": 1,
+      "context": {
+        "kind": "active-transition",
+        "transitionId": "float-0",
+        "count": 16
+      },
+      "annotationId": "a-show",
+      "performerId": "a",
+      "obstacleKind": "rank-label",
+      "noteBounds": {
+        "x": 36,
+        "y": 174,
+        "width": 44.53,
+        "height": 16
+      },
+      "obstacleBounds": {
+        "x": 68,
+        "y": 171,
+        "width": 5.1,
+        "height": 5.74
+      }
+    }
+  ]
+}
