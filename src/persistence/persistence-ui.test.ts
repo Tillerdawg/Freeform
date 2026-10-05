@@ -5,6 +5,8 @@ import { createCommandStore } from '../document/command-store';
 import { createEmptyDocument } from '../editor/setup-wizard';
 import { decodeDocument, encodeDocument } from './freeform-file';
 import { createPersistenceUi } from './persistence-ui';
+import { openPersistenceAdapter } from './idb-adapter';
+import { writeWorkingCopy } from './working-copy-store';
 
 const report = {
   supported: true,
@@ -167,6 +169,64 @@ describe('createPersistenceUi', () => {
     observer.disconnect();
     ui.dispose();
     open.mockRestore();
+  });
+
+  it('warns accurately about recovery replacement: undoable this session, not a durable backup claim', async () => {
+    const candidateId = 'recovery-copy-test-candidate';
+    localStorage.setItem('freeform-known-document-ids', JSON.stringify([candidateId]));
+    const adapter = await openPersistenceAdapter();
+    const base = createEmptyDocument();
+    const candidateDocument = {
+      ...base,
+      show: { id: candidateId, title: 'Recovered Show', totalCounts: 0 },
+      performers: [{ id: 'p1', rankCode: 'T1', displayName: 'One' }],
+      sets: [{ id: 'set-1', name: 'Opener', startCount: 0, positions: { p1: { x: 0, y: 0 } } }],
+    };
+    await writeWorkingCopy(adapter, candidateId, 1, candidateDocument, Date.now());
+    adapter.close();
+
+    const root = document.createElement('main');
+    document.body.append(root);
+    const originalDocument = createEmptyDocument();
+    const ui = createPersistenceUi(root, createCommandStore(originalDocument), report);
+    ui.start();
+    await vi.waitFor(() => expect(root.querySelector('.recovery-panel')).not.toBeNull());
+
+    const findButton = (text: string) =>
+      Array.from(root.querySelectorAll<HTMLButtonElement>('.recovery-panel__row button')).find((b) => b.textContent === text)!;
+    findButton('Replace current with this').click();
+
+    const dialog = document.querySelector<HTMLElement>('.persistence-dialog')!;
+    const warningText = dialog.textContent ?? '';
+    // The warning must not claim the replacement is permanently unrecoverable:
+    // document.replace is a normal undo-history entry (command-store.ts),
+    // so Ctrl+Z/Cmd+Z restores the prior document within this session.
+    expect(warningText).not.toContain("can't be undone");
+    expect(warningText).toContain('Ctrl+Z');
+    expect(warningText).toContain('Cmd+Z');
+    // It also must not promise durable/file-level recovery after a restart —
+    // only that in-session undo works.
+    expect(warningText).not.toMatch(/restart|backup file|automatically restored/i);
+
+    const dialogButton = (text: string) =>
+      Array.from(dialog.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent === text)!;
+
+    // Cancelling must leave the document and history untouched.
+    dialogButton('Cancel').click();
+    expect(document.querySelector('.persistence-dialog')).toBeNull();
+    expect(ui.store.getState().document.show.id).toBe(originalDocument.show.id);
+    expect(ui.store.getUndoCommands()).toEqual([]);
+
+    // Replacing, then actually exercising the undo shortcut the warning
+    // promises, must restore the exact original document.
+    findButton('Replace current with this').click();
+    const secondDialog = document.querySelector<HTMLElement>('.persistence-dialog')!;
+    Array.from(secondDialog.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent === 'Replace')!.click();
+    await vi.waitFor(() => expect(ui.store.getState().document.show.id).toBe(candidateId));
+
+    const restored = ui.store.undo();
+    expect(restored?.document.show.id).toBe(originalDocument.show.id);
+    ui.dispose();
   });
 });
 

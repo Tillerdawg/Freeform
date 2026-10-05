@@ -76,6 +76,8 @@ const PACKET = Object.freeze({
   noteLeading: 10,
   notePadding: 3,
   noteMaxWidth: 120,
+  annotationStrokeWidth: 1.25,
+  symbolSize: 14,
 });
 
 interface FontkitGlyph {
@@ -505,12 +507,45 @@ function drawPacketEntry(
   const rankBounds = measuredInkBounds(performer.rankCode, point.x + PACKET.rankOffsetX, point.y + PACKET.rankBaselineOffsetY, PACKET.rankSize, fonts);
   assertBoundsOnPage(rankBounds, page.getWidth(), page.getHeight());
   drawText(page, performer.rankCode, point.x + PACKET.rankOffsetX, point.y + PACKET.rankBaselineOffsetY, PACKET.rankSize, fonts);
-  const notes = entry.annotationIds.flatMap((id) => {
-    const annotation = document.annotations.find((candidate) => candidate.id === id);
-    return annotation?.kind === 'label' || annotation?.kind === 'performerNote' ? [annotation] : [];
-  });
-  return notes.flatMap((annotation) => {
-    const note = drawPacketNote(page, annotation, document, diagram, fonts);
+  // PacketEntry.annotationIds is the ordered result of the shared selector.
+  // Render every selected kind instead of treating manifest membership as proof
+  // that its mark made it into the PDF.
+  const symbols = new Map((document.symbols ?? []).map((symbol) => [symbol.id, symbol]));
+  const notes: NoteBox[] = [];
+  for (const annotationId of entry.annotationIds) {
+    const annotation = document.annotations.find((candidate) => candidate.id === annotationId);
+    if (!annotation) throw new Error(`Packet annotation ${annotationId} is missing.`);
+    switch (annotation.kind) {
+      case 'freehand':
+        annotation.strokes.forEach((stroke) => drawPolyline(page, stroke, document, false, diagram, PACKET.annotationStrokeWidth));
+        break;
+      case 'arrow':
+        drawPolyline(page, annotation.points, document, true, diagram, PACKET.annotationStrokeWidth);
+        break;
+      case 'symbol': {
+        const glyph = symbols.get(annotation.symbolId)?.glyph;
+        if (!glyph) throw new Error(`Unknown symbol ${annotation.symbolId}.`);
+        const point = fieldPoint(annotation.anchor, document.field, diagram);
+        const rotation = annotation.rotationDegrees ?? 0;
+        const symbolBounds = rotateBounds(
+          measuredInkBounds(glyph, point.x, point.y, PACKET.symbolSize * (annotation.scale ?? 1), fonts),
+          point.x,
+          point.y,
+          rotation,
+        );
+        // Field-edge glyphs may extend beyond the diagram border, but never
+        // beyond the portrait page where their ink would be clipped.
+        assertBoundsOnPage(symbolBounds, page.getWidth(), page.getHeight());
+        drawText(page, glyph, point.x, point.y, PACKET.symbolSize * (annotation.scale ?? 1), fonts, { rotate: rotation });
+        break;
+      }
+      case 'label':
+      case 'performerNote':
+        notes.push(drawPacketNote(page, annotation, document, diagram, fonts));
+        break;
+    }
+  }
+  return notes.flatMap((note) => {
     const obstacles = [{ kind: 'dot' as const, bounds: dotBounds }, { kind: 'rank-label' as const, bounds: rankBounds }];
     return obstacles.flatMap((obstacle) => positiveIntersection(note.bounds, obstacle.bounds)
       ? [{ code: 'note-overlap' as const, pageIndex, context: entry.context, annotationId: note.annotationId, performerId: performer.id, obstacleKind: obstacle.kind, noteBounds: roundedBounds(note.bounds), obstacleBounds: roundedBounds(obstacle.bounds) }]
@@ -746,17 +781,24 @@ function drawAnnotations(page: PDFPage, document: FreeformDocument, context: Pdf
   return notes;
 }
 
-function drawPolyline(page: PDFPage, points: readonly Dot[], document: FreeformDocument, arrow: boolean): void {
+function drawPolyline(
+  page: PDFPage,
+  points: readonly Dot[],
+  document: FreeformDocument,
+  arrow: boolean,
+  rect: PdfBounds = DIRECTOR_FIELD_RECT,
+  thickness = DIRECTOR.annotationStrokeWidth,
+): void {
   for (let index = 1; index < points.length; index += 1) {
-    const start = fieldPoint(points[index - 1]!, document.field);
-    const end = fieldPoint(points[index]!, document.field);
-    page.drawLine({ start, end, thickness: DIRECTOR.annotationStrokeWidth, color: rgb(0.1, 0.1, 0.1) });
+    const start = fieldPoint(points[index - 1]!, document.field, rect);
+    const end = fieldPoint(points[index]!, document.field, rect);
+    page.drawLine({ start, end, thickness, color: rgb(0.1, 0.1, 0.1) });
   }
   if (!arrow) return;
-  const start = fieldPoint(points.at(-2)!, document.field);
-  const end = fieldPoint(points.at(-1)!, document.field);
+  const start = fieldPoint(points.at(-2)!, document.field, rect);
+  const end = fieldPoint(points.at(-1)!, document.field, rect);
   const angle = Math.atan2(end.y - start.y, end.x - start.x);
-  for (const delta of [-Math.PI / 6, Math.PI / 6]) page.drawLine({ start: end, end: { x: end.x - 8 * Math.cos(angle + delta), y: end.y - 8 * Math.sin(angle + delta) }, thickness: DIRECTOR.annotationStrokeWidth, color: rgb(0.1, 0.1, 0.1) });
+  for (const delta of [-Math.PI / 6, Math.PI / 6]) page.drawLine({ start: end, end: { x: end.x - 8 * Math.cos(angle + delta), y: end.y - 8 * Math.sin(angle + delta) }, thickness, color: rgb(0.1, 0.1, 0.1) });
 }
 
 function drawNoteBox(page: PDFPage, annotation: Extract<Annotation, { kind: 'label' | 'performerNote' }>, document: FreeformDocument, fonts: readonly LoadedFont[]): NoteBox {
@@ -925,6 +967,7 @@ function textCandidatesForExport(document: FreeformDocument, pages: readonly Ren
         for (const annotationId of entry.annotationIds) {
           const annotation = document.annotations.find(({ id }) => id === annotationId);
           if (annotation?.kind === 'label' || annotation?.kind === 'performerNote') candidates.push(annotation.text);
+          if (annotation?.kind === 'symbol') candidates.push(document.symbols?.find(({ id }) => id === annotation.symbolId)?.glyph ?? annotation.symbolId);
         }
       }
     }

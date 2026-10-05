@@ -320,6 +320,85 @@ describe('M8.1 pure PDF foundation', () => {
     expect(bText).toContain('Page 1 of 1');
   });
 
+  it('renders every selected packet mark kind with canonical diagram geometry and symbol transforms', async () => {
+    const base = makeDocument();
+    const document: FreeformDocument = {
+      ...base,
+      performers: [...base.performers, { id: 'b', rankCode: 'B', displayName: 'Other Performer' }],
+      sets: base.sets.map((set) => ({ ...set, positions: { ...set.positions, b: { x: 144000, y: 76800 } } })),
+      // Packet selection deliberately ignores editor/print/layer flags. The
+      // selected annotations must render despite every one of those gates here.
+      layers: [{ id: 'packet-layer', name: 'Packet', visible: false, print: false, locked: false }],
+      symbols: [{ id: 'mixed', name: 'Mixed font glyph', glyph: 'A😀' }],
+      annotations: [
+        { id: 'a-freehand', kind: 'freehand', layerId: 'packet-layer', performerId: 'a', scope: { kind: 'set', setId: 'set-1' }, visibility: { editor: false, print: false, performerPacket: true }, strokes: [[{ x: 0, y: 0 }, { x: 72000, y: 38400 }, { x: 144000, y: 76800 }]] },
+        { id: 'a-arrow', kind: 'arrow', layerId: 'packet-layer', performerId: 'a', scope: { kind: 'transition', transitionId: 'move-1' }, visibility: { editor: false, print: false, performerPacket: true }, points: [{ x: 72000, y: 30000 }, { x: 216000, y: 120000 }] },
+        { id: 'a-symbol', kind: 'symbol', layerId: 'packet-layer', performerId: 'a', scope: { kind: 'show' }, visibility: { editor: false, print: false, performerPacket: true }, symbolId: 'mixed', anchor: { x: 288000, y: 153600 }, rotationDegrees: 90, scale: 1.5 },
+        { id: 'b-hidden-from-a', kind: 'freehand', layerId: 'packet-layer', performerId: 'b', scope: { kind: 'show' }, visibility: { editor: true, print: true, performerPacket: true }, strokes: [[{ x: 0, y: 153600 }, { x: 288000, y: 0 }]] },
+        { id: 'a-not-flagged', kind: 'arrow', layerId: 'packet-layer', performerId: 'a', scope: { kind: 'show' }, visibility: { editor: true, print: true, performerPacket: false }, points: [{ x: 0, y: 0 }, { x: 288000, y: 153600 }] },
+      ],
+    };
+    const request = { kind: 'performer-packet', performerIds: ['a'], scope: { kind: 'full-show' } } as const;
+    const sourceBefore = structuredClone(document);
+    const withoutMarks = await buildPdfExport({ ...document, annotations: [] }, request, assets);
+    const result = await buildPdfExport(document, request, assets);
+    expect(withoutMarks.ok, JSON.stringify(withoutMarks)).toBe(true);
+    expect(result.ok, JSON.stringify(result)).toBe(true);
+    if (!withoutMarks.ok || !result.ok) return;
+    expect(result.bytes).not.toEqual(withoutMarks.bytes);
+    expect(result.manifest.pages[0]?.packetEntries).toEqual([
+      { context: { kind: 'static-set', setId: 'set-1' }, annotationIds: ['a-freehand', 'a-symbol'] },
+      { context: { kind: 'static-set', setId: 'set-2' }, annotationIds: ['a-symbol'] },
+      { context: { kind: 'active-transition', transitionId: 'move-1', count: 16 }, annotationIds: ['a-arrow', 'a-symbol'] },
+    ]);
+    expect(result.manifest.pages.flatMap((page) => page.annotationIds)).not.toContain('b-hidden-from-a');
+    expect(result.manifest.pages.flatMap((page) => page.annotationIds)).not.toContain('a-not-flagged');
+
+    const { getDocument, OPS } = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const markedPdf = await getDocument({ data: new Uint8Array(result.bytes) }).promise;
+    const controlPdf = await getDocument({ data: new Uint8Array(withoutMarks.bytes) }).promise;
+    const markedPage = await markedPdf.getPage(1);
+    const controlPage = await controlPdf.getPage(1);
+    const markedOperators = await markedPage.getOperatorList();
+    const controlOperators = await controlPage.getOperatorList();
+    expect(markedOperators.fnArray.filter((operator) => operator === OPS.constructPath).length)
+      .toBeGreaterThan(controlOperators.fnArray.filter((operator) => operator === OPS.constructPath).length);
+    const text = (await markedPage.getTextContent()).items.map((item) => 'str' in item ? item.str : '').join('');
+    expect(text).toContain('😀');
+
+    for (const markId of ['a-freehand', 'a-arrow', 'a-symbol'] as const) {
+      const singleMark = await buildPdfExport({
+        ...document,
+        annotations: document.annotations.filter((annotation) => annotation.id === markId),
+      }, request, assets);
+      expect(singleMark.ok, markId).toBe(true);
+      if (!singleMark.ok) continue;
+      expect(singleMark.bytes, markId).not.toEqual(withoutMarks.bytes);
+      expect(singleMark.manifest.pages.flatMap((page) => page.annotationIds), markId).toContain(markId);
+      const singlePage = await (await getDocument({ data: new Uint8Array(singleMark.bytes) }).promise).getPage(1);
+      if (markId !== 'a-symbol') {
+        const operators = await singlePage.getOperatorList();
+        expect(operators.fnArray.filter((operator) => operator === OPS.constructPath).length, markId)
+          .toBeGreaterThan(controlOperators.fnArray.filter((operator) => operator === OPS.constructPath).length);
+      } else {
+        const items = (await singlePage.getTextContent()).items.filter((item): item is Extract<typeof item, { str: string }> => 'str' in item);
+        const symbolA = items.find(({ str, transform }) => str === 'A' && Math.abs(transform[1]) > 1);
+        const symbolEmoji = items.find(({ str, transform }) => str === '😀' && Math.abs(transform[1]) > 1);
+        expect(symbolA).toBeDefined();
+        expect(symbolEmoji).toBeDefined();
+        expect(symbolEmoji!.transform[4]).toBeCloseTo(symbolA!.transform[4], 2);
+        expect(symbolEmoji!.transform[5]).toBeGreaterThan(symbolA!.transform[5]);
+      }
+    }
+    const unsupportedSymbol = await buildPdfExport({
+      ...document,
+      symbols: [{ ...document.symbols![0]!, glyph: '\u{10ffff}' }],
+      annotations: document.annotations.filter((annotation) => annotation.id === 'a-symbol'),
+    }, request, assets);
+    expect(unsupportedSymbol).toMatchObject({ ok: false, code: 'unsupported-glyph', messageKey: 'pdfExport.error.unsupportedGlyph' });
+    expect(document).toEqual(sourceBefore);
+  });
+
   it('paginates packet entries, reports own-note overlaps, and classifies packet chrome versus note layout failures', async () => {
     const base = makeDocument();
     const document: FreeformDocument = {

@@ -538,7 +538,7 @@ export function createPersistenceUi(root: HTMLElement, store: CommandStore, repo
   }
 
   function showRecoveryReplace(candidate: RecoveryCandidate): void {
-    const dialog = dialogElement('Replace your current document?', `This replaces everything currently open with the local backup of "${candidate.title}" from ${formatTime(candidate.timestamp)}. Anything you have open right now that isn't already saved will be lost. This can't be undone.`);
+    const dialog = dialogElement('Replace your current document?', `This replaces everything currently open with the local backup of "${candidate.title}" from ${formatTime(candidate.timestamp)}. Anything you have open right now that isn't already saved will be replaced. You can undo this with Ctrl+Z (Windows/Linux) or Cmd+Z (Mac) while this session stays open, but that undo history is gone once you close or reload Freeform.`);
     dialog.append(button('Cancel', () => dialog.remove()), button('Replace', () => {
       dialog.remove();
       void (async () => {
